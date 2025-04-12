@@ -32,7 +32,20 @@ $polozka = $_GET["polozka"];
 if (!is_dir('Fotky')){
 	mkdir ('Fotky');
 	chmod ('Fotky', 0777);
-	}	
+	}
+
+if (isset($_SESSION['uzivatel'])) {
+    $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
+}
+$adresarSlozkyFotekTempUzivatele = "Fotky/temp/".$prihlasenId;
+
+    
+if (!is_dir($adresarSlozkyFotekTempUzivatele)){
+     mkdir ($adresarSlozkyFotekTempUzivatele, 0777, true);
+     chmod ($adresarSlozkyFotekTempUzivatele, 0777);
+}
+
+
 
 if ($polozka == "nova"){
 
@@ -55,7 +68,20 @@ $adresaslozkykvytvoreni = "Fotky/".$polozka;
     	mkdir ($adresaslozkykvytvoreni);
     	chmod ($adresaslozkykvytvoreni, 0777);
     	}
+
+$nalezeneUlozeneFotky = glob($adresaslozkykvytvoreni . '/*');
+
+foreach ($nalezeneUlozeneFotky as $fotka) {
+    copy($fotka, $adresarSlozkyFotekTempUzivatele . "/" . basename($fotka));
+
+}
+
 ?>
+
+<script>
+    const sessionIDUzivatele = <?php echo json_encode($prihlasenId); ?>;
+</script>
+
 
 <script>
 		function dotazkmazani(){
@@ -146,9 +172,10 @@ function uploadFile(file) {
   // Získáme GET parametr "polozka" z aktuální URL, pokud existuje
   let params = new URLSearchParams(window.location.search);
   let polozka = params.get('polozka') || '';
+  let prihlasen = params.get('sessionIDUzivatele') || '';
   
   // Připojíme parametr "polozka" do URL
-  let url = 'upload.php?polozka=' + encodeURIComponent(polozka);
+  let url = 'upload.php?prihlasen=' + encodeURIComponent(sessionIDUzivatele);
   
   let formData = new FormData();
   formData.append('file', file);
@@ -281,7 +308,7 @@ if (isset($_SESSION['uzivatel'])) {
 if (isset($_REQUEST["uloz"])) {
 
 	
-		Uloz($polozka, $connection);
+		Uloz($polozka, $connection, $prihlasenId);
 		?><script>window.alert("Uloženo!");</script>
 		<?php
 		ZobrazeniFormulare ($prihlasenId, $prihlasenOpravneni, $polozka, $connection);
@@ -725,10 +752,10 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
 #echo "</table>";
 #echo "<table>";
 #echo "<tr>";
-$slozkapolozky = dir("Fotky/$polozka");
+$slozkapolozky = dir("Fotky/temp/".$prihlasenId);
 while($fotkavypis=$slozkapolozky->read()) { 
 	if ($fotkavypis=="." || $fotkavypis=="..") continue; 
-	echo "<td><img src=\"Fotky/$polozka/$fotkavypis\" style=\"max-width: 180px\"></td>";
+	echo "<td><img src=\"Fotky/temp/$prihlasenId/$fotkavypis\" style=\"max-width: 180px\"></td>";
 
 } 
 $slozkapolozky->close(); 
