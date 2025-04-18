@@ -221,30 +221,6 @@ if (isset($_SESSION['uzivatel'])) {
 
 }
 
-$adresarSlozkyFotekTempUzivatele = "Fotky/temp/".$prihlasenId;
-
-function vymazaniTempFotek($adresarSlozkyFotekTempUzivatele) {
-    if (!is_dir($adresarSlozkyFotekTempUzivatele)) {
-        return false;
-    }
-    $fotkyKVymazani = scandir($adresarSlozkyFotekTempUzivatele);
-    foreach ($fotkyKVymazani as $file) {
-        if ($file == '.' || $file == '..') {
-            continue;
-        }
-        $filePath = $adresarSlozkyFotekTempUzivatele . DIRECTORY_SEPARATOR . $file;
-        // Pokud je položka složka, rekurzivně smažeme její obsah a pak samotnou složku
-        if (is_dir($filePath)) {
-            vymazaniTempFotek($filePath);
-            rmdir($filePath);
-        } else {
-            unlink($filePath);
-        }
-    }
-    return true;
-}
-
-vymazaniTempFotek($adresarSlozkyFotekTempUzivatele);
 
 
 ?>

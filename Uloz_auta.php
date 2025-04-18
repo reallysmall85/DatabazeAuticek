@@ -44,18 +44,18 @@ function Uloz ($radekAuta, $connection, $prihlasenId){
     WHERE id = '$radekAuta'
 ");
 
-$adresarTempFotek = "Fotky/temp/".$prihlasenId;
-$adresaslozkykvytvoreni = "Fotky/".$radekAuta;
+$adresarTempFotek = "Fotky/temp/".$radekAuta."/";
+$adresaslozkykvytvoreni = "Fotky/".$radekAuta."/";
 
 if (!is_dir($adresaslozkykvytvoreni)){
 mkdir ($adresaslozkykvytvoreni);
 chmod ($adresaslozkykvytvoreni, 0777);
 }
 
-$nalezeneFotky = glob($adresarTempFotek . '/*');
+$nalezeneFotky = glob($adresarTempFotek . '*');
 
 foreach ($nalezeneFotky as $fotka) {
-	copy($fotka, $adresaslozkykvytvoreni . "/" . basename($fotka));
+	copy($fotka, $adresaslozkykvytvoreni . basename($fotka));
 }
 	
 

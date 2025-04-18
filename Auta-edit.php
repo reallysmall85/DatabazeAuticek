@@ -26,24 +26,6 @@ mysqli_set_charset($connection, "utf8");
 	<title>Položka</title>
 	
 <?php
-$polozka = $_GET["polozka"];
-
-
-if (!is_dir('Fotky')){
-	mkdir ('Fotky');
-	chmod ('Fotky', 0777);
-	}
-
-if (isset($_SESSION['uzivatel'])) {
-    $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
-}
-$adresarSlozkyFotekTempUzivatele = "Fotky/temp/".$prihlasenId;
-
-    
-if (!is_dir($adresarSlozkyFotekTempUzivatele)){
-     mkdir ($adresarSlozkyFotekTempUzivatele, 0777, true);
-     chmod ($adresarSlozkyFotekTempUzivatele, 0777);
-}
 
 
 
@@ -62,17 +44,64 @@ if ($polozka == "nova"){
 
 }
 
-$adresaslozkykvytvoreni = "Fotky/".$polozka;
+
+if (isset($_SESSION['uzivatel'])) {
+    $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
+}
+
+
+
+$polozka = $_GET["polozka"];
+$polozkaKontrola = 'p_' . $_GET["polozka"];
+$adresarSlozkyFotekTempPolozky = "Fotky/temp/".$polozka."/";
+
+if (!isset($_SESSION[$polozkaKontrola])) {
+    // Toto se provede jen při prvním načtení stránky
+    $_SESSION[$polozkaKontrola] = true;
+
+function vymazaniTempFotek($adresarSlozkyFotekTempPolozky) {
+    if (!is_dir($adresarSlozkyFotekTempPolozky)) {
+        return false;
+    }
+    $fotkyKVymazani = scandir($adresarSlozkyFotekTempPolozky);
+    foreach ($fotkyKVymazani as $file) {
+        if ($file == '.' || $file == '..') {
+            continue;
+        }
+        $filePath = $adresarSlozkyFotekTempPolozky . DIRECTORY_SEPARATOR . $file;
+        // Pokud je položka složka, rekurzivně smažeme její obsah a pak samotnou složku
+        if (is_dir($filePath)) {
+            vymazaniTempFotek($filePath);
+            rmdir($filePath);
+        } else {
+            unlink($filePath);
+        }
+    }
+    return true;
+}
+
+vymazaniTempFotek($adresarSlozkyFotekTempPolozky);
+
+}
+
+    
+if (!is_dir($adresarSlozkyFotekTempPolozky)){
+     mkdir ($adresarSlozkyFotekTempPolozky, 0777, true);
+     chmod ($adresarSlozkyFotekTempPolozky, 0777);
+}
+
+
+$adresaslozkykvytvoreni = "Fotky/".$polozka."/";
 
     	if (!is_dir($adresaslozkykvytvoreni)){
     	mkdir ($adresaslozkykvytvoreni);
     	chmod ($adresaslozkykvytvoreni, 0777);
     	}
 
-$nalezeneUlozeneFotky = glob($adresaslozkykvytvoreni . '/*');
+$nalezeneUlozeneFotky = glob($adresaslozkykvytvoreni . '*');
 
 foreach ($nalezeneUlozeneFotky as $fotka) {
-    copy($fotka, $adresarSlozkyFotekTempUzivatele . "/" . basename($fotka));
+    copy($fotka, $adresarSlozkyFotekTempPolozky . basename($fotka));
 
 }
 
@@ -175,7 +204,7 @@ function uploadFile(file) {
   let prihlasen = params.get('sessionIDUzivatele') || '';
   
   // Připojíme parametr "polozka" do URL
-  let url = 'upload.php?prihlasen=' + encodeURIComponent(sessionIDUzivatele);
+  let url = 'upload.php?polozka=' + encodeURIComponent(polozka);
   
   let formData = new FormData();
   formData.append('file', file);
@@ -212,6 +241,20 @@ document.getElementById("fileElem").addEventListener("change", function() {
 });
 
 
+const textareas = document.querySelectorAll("textarea");
+
+  textareas.forEach(function(textarea) {
+    const savedValue = sessionStorage.getItem(textarea.name);
+    if (savedValue !== null) {
+      textarea.value = savedValue;
+    }
+  });
+
+  textareas.forEach(function(textarea) {
+    textarea.addEventListener("input", function() {
+        sessionStorage.setItem(textarea.name, textarea.value);
+    });
+  });
 
 });
 
@@ -752,10 +795,10 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
 #echo "</table>";
 #echo "<table>";
 #echo "<tr>";
-$slozkapolozky = dir("Fotky/temp/".$prihlasenId);
+$slozkapolozky = dir("Fotky/temp/".$polozka);
 while($fotkavypis=$slozkapolozky->read()) { 
 	if ($fotkavypis=="." || $fotkavypis=="..") continue; 
-	echo "<td><img src=\"Fotky/temp/$prihlasenId/$fotkavypis\" style=\"max-width: 180px\"></td>";
+	echo "<td><img src=\"Fotky/temp/$polozka/$fotkavypis\" style=\"max-width: 180px\"></td>";
 
 } 
 $slozkapolozky->close(); 

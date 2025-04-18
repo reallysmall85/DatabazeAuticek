@@ -1,14 +1,14 @@
 <?php
 
-if(isset($_GET["prihlasen"])){
-    $prihlasenId = $_GET["prihlasen"];
+if(isset($_GET["polozka"])){
+    $polozka = $_GET["polozka"];
 }
 
 if(isset($_FILES['file'])) {
     $errors = [];
     $file_name = $_FILES['file']['name'];
     $file_tmp  = $_FILES['file']['tmp_name'];
-    $uploadDirectory = "Fotky/temp/".$prihlasenId."/";
+    $uploadDirectory = "Fotky/temp/".$polozka."/";
         
     if(move_uploaded_file($file_tmp, $uploadDirectory . $file_name)) {
         echo "Soubor byl úspěšně nahrán.";
