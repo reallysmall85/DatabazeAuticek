@@ -24,8 +24,9 @@ mysqli_set_charset($connection, "utf8");
 	<meta name="author" content="martin"/>
 	<meta name="keywords" content="uvod"/>
 	<title>Položka</title>
-	
 <?php
+    $polozka = $_GET["polozka"];
+
 
 
 
@@ -51,8 +52,8 @@ if (isset($_SESSION['uzivatel'])) {
 
 
 
-$polozka = $_GET["polozka"];
-$polozkaKontrola = 'p_' . $_GET["polozka"];
+
+$polozkaKontrola = 'p_'.$polozka;
 $adresarSlozkyFotekTempPolozky = "Fotky/temp/".$polozka."/";
 
 if (!isset($_SESSION[$polozkaKontrola])) {
@@ -81,7 +82,10 @@ function vymazaniTempFotek($adresarSlozkyFotekTempPolozky) {
 }
 
 vymazaniTempFotek($adresarSlozkyFotekTempPolozky);
-
+// a zároveň smažeme v localStorage JSON pro tuhle položku
+echo "<script>
+localStorage.removeItem('formData_". addslashes($polozka) ."');
+</script>";
 }
 
     
@@ -239,21 +243,69 @@ document.getElementById("fileElem").addEventListener("change", function() {
     console.log("Žádný soubor nebyl vybrán.");
   }
 });
+    const form = document.querySelector('form[name="formularauta"]');
+    if (!form) return;
 
+  // 1) Klíč pro localStorage
+  const polozka = new URLSearchParams(window.location.search).get('polozka') || '';
+  const storageKey = 'formData_' + polozka;
+  // 2) Načteme existující data (nebo prázdný objekt)
+  let formData = JSON.parse(localStorage.getItem(storageKey) || '{}');
 
-const textareas = document.querySelectorAll("textarea");
+  // Pomocné funkce
+  function markUnsaved(textarea) {
+    textarea.classList.add('unsaved');
+  }
+  function saveField(name, value) {
+    formData[name] = value;
+    localStorage.setItem(storageKey, JSON.stringify(formData));
+  }
+  function updateTextarea(name, value) {
+    const ta = document.querySelector(`textarea[name="${name}"]`);
+    if (!ta) return;
+    ta.value = value;
+    markUnsaved(ta);
+    saveField(name, value);
+  }
 
-  textareas.forEach(function(textarea) {
-    const savedValue = sessionStorage.getItem(textarea.name);
-    if (savedValue !== null) {
-      textarea.value = savedValue;
+  // 3) Pro každé textarea:
+  document.querySelectorAll("textarea[name]").forEach(ta => {
+    // a) pokud máme v localStorage uloženou hodnotu, naplníme ji
+    if (formData.hasOwnProperty(ta.name)) {
+      ta.value = formData[ta.name];
+      markUnsaved(ta);
     }
+    // b) při psaní se hned ukládá a barví červeně
+    ta.addEventListener("input", () => {
+      markUnsaved(ta);
+      saveField(ta.name, ta.value);
+    });
   });
 
-  textareas.forEach(function(textarea) {
-    textarea.addEventListener("input", function() {
-        sessionStorage.setItem(textarea.name, textarea.value);
+  // 4) Zachytíme i kliknutí na všechna tlačítka "načíst ->"
+  document.querySelectorAll('input[type="button"][value="načíst ->"]').forEach(btn => {
+    btn.addEventListener("click", function() {
+      const oncl = btn.getAttribute("onclick") || "";
+      // vyparsujeme z inline-onclick cílové a zdrojové jméno políčka
+      const m = oncl.match(
+        /document\.formularauta\.([a-zA-Z0-9_]+)\.value=document\.formularauta\.([a-zA-Z0-9_]+)\.value/
+      );
+      if (m) {
+        const [, destName, srcName] = m;
+        const val = this.form[srcName].value;
+        updateTextarea(destName, val);
+      }
     });
+  });
+
+  form.addEventListener('submit', function() {
+    // 1) vymažeme data z localStorage
+    localStorage.removeItem(storageKey);
+    // 2) odebereme červené označení ze všech textarea
+    form.querySelectorAll('textarea.unsaved').forEach(ta => {
+      ta.classList.remove('unsaved');
+    });
+    // formulář se normálně odešle na server…
   });
 
 });
@@ -302,6 +354,10 @@ const textareas = document.querySelectorAll("textarea");
             cursor: pointer;
             border-radius: 5px;
             margin-top: 10px;
+        }
+
+        textarea.unsaved {
+            color: red;
         }
 
         
@@ -552,13 +608,13 @@ echo "</tr>";
 # ----------- ZÁVOD ---------------			
 echo "<tr class=\"barevnost2\">";
 echo "<td>Závod:</td>";
-echo "<td><select name=\"selectzavod\" onchange=\"document.formularauta.inputzavod.value=document.formularauta.selectzavod.value;\">";
+echo "<td><select name=\"selectzavod\">";
     echo "<option value=\"\">---vyber si položku---</option>";
     while ($nalezHledaniZavody = mysqli_fetch_array($hodnotaHledaniZavody)) {
         echo "<option value=\"" . $nalezHledaniZavody["zavod"] . "\">" . $nalezHledaniZavody["zavod"] . "</option>";
     }
 echo "</select></td>";
-echo "<td></td>";
+echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputzavod.value=document.formularauta.selectzavod.value;\"></td>";
 if (isset($_REQUEST["inputzavod"]) && $_REQUEST["inputzavod"]) {
     echo "<td><textarea name=\"inputzavod\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputzavod"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["zavod"]) {
@@ -571,13 +627,13 @@ echo "</tr>";
 # ----------- SERIE ---------------			
 echo "<tr class=\"barevnost1\">";
 echo "<td>Série:</td>";
-echo "<td><select name=\"selectserie\" onchange=\"document.formularauta.inputserie.value=document.formularauta.selectserie.value;\">";
+echo "<td><select name=\"selectserie\">";
     echo "<option value=\"\">---vyber si položku---</option>";
     while ($nalezHledaniSerie = mysqli_fetch_array($hodnotaHledaniSerie)) {
         echo "<option value=\"" . $nalezHledaniSerie["serie"] . "\">" . $nalezHledaniSerie["serie"] . "</option>";
     }
 echo "</select></td>";
-echo "<td></td>";
+echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputserie.value=document.formularauta.selectserie.value;\"></td>";
 if (isset($_REQUEST["inputserie"]) && $_REQUEST["inputserie"]) {
     echo "<td><textarea name=\"inputserie\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputserie"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["serie"]) {
@@ -673,13 +729,14 @@ echo "</tr>";
 $rok = StrFTime("%Y", Time());			
 echo "<tr class=\"barevnost2\">";
 echo "<td>Rok:</td>";
-echo "<td><select name=\"selectroku\" onchange=\"document.formularauta.inputroku.value=document.formularauta.selectroku.value;\">";
+echo "<td><select name=\"selectroku\">";
     echo "<option value=\"\">---vyber si položku---</option>";
     for($rokfor = 1970; $rokfor <= $rok; $rokfor++){
         echo "<option value=\"" .$rokfor ."\">".$rokfor."</option>";
     }
 echo "</select></td>";
-echo "<td></td>";
+echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputroku.value=document.formularauta.selectroku.value;\"></td>";
+
 if (isset($_REQUEST["inputroku"]) && $_REQUEST["inputroku"]) {
     echo "<td><textarea name=\"inputroku\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputroku"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["rok"]) {
@@ -762,12 +819,12 @@ echo "</tr>";
 # ----------- MÁME / NEMÁME ---------------
 echo "<tr class=\"barevnost2\">";
 echo "<td>Máme / Nemáme:</td>";
-echo "<td><select name=\"selectmame\" onchange=\"document.formularauta.inputmame.value=document.formularauta.selectmame.value;\">";
+echo "<td><select name=\"selectmame\">";
     echo "<option value=\"\">---vyber si položku---</option>";
     echo "<option value=\"ANO\">ANO</option>";
     echo "<option value=\"NE\">NE</option>";
 echo "</select></td>";
-echo "<td></td>";
+echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputmame.value=document.formularauta.selectmame.value;\"></td>";
 if (isset($_REQUEST["inputmame"]) && $_REQUEST["inputmame"]) {
     echo "<td><textarea name=\"inputmame\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputmame"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["mame"]) {
