@@ -406,6 +406,22 @@ if (isset($_SESSION['uzivatel'])) {
 <?php
 if (isset($_REQUEST["uloz"])) {
 
+    $adresarSlozkyFotekTempPolozky = "Fotky/temp/".$polozka."/";
+
+
+    foreach ($_POST as $name => $value) {
+        $upraveny = str_replace('_', '.', $name);
+        if (strpos($upraveny, 'hidden-') === 0 && $value === 'smazano') {
+            // získáme čisté jméno souboru
+            $filename = substr($upraveny, strlen('hidden-'));
+            $fullpath = $adresarSlozkyFotekTempPolozky . $filename;
+            // pokud existuje, smažeme
+            if (is_file($fullpath)) {
+                unlink($fullpath);
+            }
+        }
+    }
+
 	
 		Uloz($polozka, $connection, $prihlasenId);
 		?><script>window.alert("Uloženo!");</script>
@@ -848,15 +864,151 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
   <input type=\"file\" id=\"fileElem\" multiple accept=\"*\" style=\"display:none\">
   <label class=\"button\" for=\"fileElem\">Vyberte soubor ze složky</label>
 </div></td>";
-#echo "</tr>";
-#echo "</table>";
-#echo "<table>";
-#echo "<tr>";
 $slozkapolozky = dir("Fotky/temp/".$polozka);
 while($fotkavypis=$slozkapolozky->read()) { 
 	if ($fotkavypis=="." || $fotkavypis=="..") continue; 
-	echo "<td><img src=\"Fotky/temp/$polozka/$fotkavypis\" style=\"max-width: 180px\"></td>";
-
+	    $fotkavypisbeztecky = str_replace('.','_', $fotkavypis);
+	    
+	    if (isset($_REQUEST["hidden-".$fotkavypisbeztecky]) && $_REQUEST["hidden-".$fotkavypisbeztecky] == "smazano") {
+	        
+	    echo "<td><div style='position: relative; display: inline-block;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px; opacity: 0.3\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>smazano</textarea>";
+        echo "<input
+       type='button'
+       name='tlacitkoReload-".$fotkavypisbeztecky."'
+       value='&#x21BB;'
+       style='
+         position: absolute;
+         top: 5px;
+         right: 5px;
+         width: 20px;
+         height: 20px;
+         background-color: blue;
+         color: white;
+         border: none;
+         font-size: 16px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         cursor: pointer;'
+                  onmouseover=\"this.style.backgroundColor='darkblue';\" onmouseout=\"this.style.backgroundColor='blue';\" 
+                  onclick=\"
+                (function(){
+                  var ta = document.formularauta.elements['hidden-".$fotkavypisbeztecky."'];
+                  ta.value = 'ok';
+                  ta.dispatchEvent(new Event('input'));
+                  var obrazek = document.formularauta.elements['obrazek-".$fotkavypisbeztecky."'];
+                  obrazek.style.opacity = 1;
+                  var tlacitkoX = document.formularauta.elements['tlacitkoX-".$fotkavypisbeztecky."'];
+                  tlacitkoX.style.display = 'flex';
+                  this.style.display = 'none';
+                })();
+              \"
+            >";
+            echo "<input
+       type='button'
+       name='tlacitkoX-".$fotkavypisbeztecky."'
+       value='×'
+       style='
+         position: absolute;
+         top: 5px;
+         right: 5px;
+         width: 20px;
+         height: 20px;
+         background-color: red;
+         color: white;
+         border: none;
+         font-size: 16px;
+         display: none;
+         align-items: center;
+         justify-content: center;
+         cursor: pointer;'
+                  onmouseover=\"this.style.backgroundColor='darkred';\" onmouseout=\"this.style.backgroundColor='red';\" 
+                  onclick=\"
+                (function(){
+                  var ta = document.formularauta.elements['hidden-".$fotkavypisbeztecky."'];
+                  ta.value = 'smazano';
+                  ta.dispatchEvent(new Event('input'));
+                  var obrazek = document.formularauta.elements['obrazek-".$fotkavypisbeztecky."'];
+                  obrazek.style.opacity = 0.3;
+                  var tlacitkoReload = document.formularauta.elements['tlacitkoReload-".$fotkavypisbeztecky."'];
+                  tlacitkoReload.style.display = 'flex';
+                  this.style.display = 'none';
+                })();
+              \"
+            >";
+          echo "</div></td>";
+	        
+	    }
+	    else {
+	        
+	       echo "<td><div style='position: relative; display: inline-block;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>ok</textarea>";
+        echo "<input
+       type='button'
+       name='tlacitkoReload-".$fotkavypisbeztecky."'
+       value='&#x21BB;'
+       style='
+         position: absolute;
+         top: 5px;
+         right: 5px;
+         width: 20px;
+         height: 20px;
+         background-color: blue;
+         color: white;
+         border: none;
+         font-size: 16px;
+         display: none;
+         align-items: center;
+         justify-content: center;
+         cursor: pointer;'
+                  onmouseover=\"this.style.backgroundColor='darkblue';\" onmouseout=\"this.style.backgroundColor='blue';\" 
+                  onclick=\"
+                (function(){
+                  var ta = document.formularauta.elements['hidden-".$fotkavypisbeztecky."'];
+                  ta.value = 'ok';
+                  ta.dispatchEvent(new Event('input'));
+                  var obrazek = document.formularauta.elements['obrazek-".$fotkavypisbeztecky."'];
+                  obrazek.style.opacity = 1;
+                  var tlacitkoX = document.formularauta.elements['tlacitkoX-".$fotkavypisbeztecky."'];
+                  tlacitkoX.style.display = 'flex';
+                  this.style.display = 'none';
+                })();
+              \"
+            >";
+            echo "<input
+       type='button'
+       name='tlacitkoX-".$fotkavypisbeztecky."'
+       value='×'
+       style='
+         position: absolute;
+         top: 5px;
+         right: 5px;
+         width: 20px;
+         height: 20px;
+         background-color: red;
+         color: white;
+         border: none;
+         font-size: 16px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         cursor: pointer;'
+                  onmouseover=\"this.style.backgroundColor='darkred';\" onmouseout=\"this.style.backgroundColor='red';\" 
+                  onclick=\"
+                (function(){
+                  var ta = document.formularauta.elements['hidden-".$fotkavypisbeztecky."'];
+                  ta.value = 'smazano';
+                  ta.dispatchEvent(new Event('input'));
+                  var obrazek = document.formularauta.elements['obrazek-".$fotkavypisbeztecky."'];
+                  obrazek.style.opacity = 0.3;
+                  var tlacitkoReload = document.formularauta.elements['tlacitkoReload-".$fotkavypisbeztecky."'];
+                  tlacitkoReload.style.display = 'flex';
+                  this.style.display = 'none';
+                })();
+              \"
+            >";
+          echo "</div></td>";
+	    }
+	
 } 
 $slozkapolozky->close(); 
 echo "</tr>";

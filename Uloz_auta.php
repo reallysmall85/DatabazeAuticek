@@ -52,9 +52,15 @@ mkdir ($adresaslozkykvytvoreni);
 chmod ($adresaslozkykvytvoreni, 0777);
 }
 
-$nalezeneFotky = glob($adresarTempFotek . '*');
+$nalezeneFotkyTemp = glob($adresarTempFotek . '*');
+$nalezeneFotkyStavajici = glob($adresaslozkykvytvoreni . '*');
 
-foreach ($nalezeneFotky as $fotka) {
+foreach ($nalezeneFotkyStavajici as $fotkaStavajici){
+	unlink($fotkaStavajici);
+}
+
+
+foreach ($nalezeneFotkyTemp as $fotka) {
 	copy($fotka, $adresaslozkykvytvoreni . basename($fotka));
 }
 	

@@ -6,7 +6,7 @@ if(isset($_GET["polozka"])){
 
 if(isset($_FILES['file'])) {
     $errors = [];
-    $file_name = $_FILES['file']['name'];
+    $file_name = "img-".$_FILES['file']['name'];
     $file_tmp  = $_FILES['file']['tmp_name'];
     $uploadDirectory = "Fotky/temp/".$polozka."/";
         
