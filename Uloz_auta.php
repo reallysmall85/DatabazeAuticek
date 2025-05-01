@@ -82,7 +82,7 @@ foreach ($nalezeneFotkyTemp as $fotka) {
 	mysqli_query($connection, "INSERT INTO autafirmy (id) values ('$kodnovefirmy1')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy"]."' WHERE id='$kodnovefirmy1'");
 	}
-	if ($existenceFirmy2 == "neexistuje" and $_REQUEST["inputfirmy2"] != ""){
+	if ($existenceFirmy2 == "neexistuje" and $_REQUEST["inputfirmy2"] != "" and $_REQUEST["inputfirmy"] != $_REQUEST["inputfirmy2"]){
 	$kodnovefirmy2 = Time() +2;
 	mysqli_query($connection, "INSERT INTO autafirmy (id) values ('$kodnovefirmy2')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy2"]."' WHERE id='$kodnovefirmy2'");

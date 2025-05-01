@@ -87,7 +87,7 @@ if (isset($dupQueryPart)) {
         }
     }
     $baseQuery = "FROM auta $where";
-    $query = "SELECT * " . $baseQuery . " ORDER BY id";
+    $query = "SELECT * " . $baseQuery . " ORDER BY firma";
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
 }
 
@@ -209,6 +209,15 @@ $result = mysqli_query($connection, $query);
 }
     
     </script>
+    <script>
+  document.addEventListener('visibilitychange', () => {
+    // když se uživatel přepne *na* tento panel
+    if (document.visibilityState === 'visible') {
+      // např. znovu načíst
+      location.reload();
+    }
+  });
+</script>
 </head>
 <body>
 <?php include("phpqrcode/qrlib.php");
@@ -232,9 +241,12 @@ if (isset($_SESSION['uzivatel'])) {
 <br>
 <?php
 if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
-    echo "<input type='button' value='NOVÁ POLOŽKA' style='background-color: orange; color: white; border: none; padding: 10px 20px; cursor: pointer;'
+    echo "<input type='button' value='NOVÁ POLOŽKA' style='background-color: orange; color: white; border: none; padding: 10px 20px; cursor: pointer; box-sizing: border-box;'
                   onmouseover=\"this.style.backgroundColor='darkorange';\" onmouseout=\"this.style.backgroundColor='orange';\" 
                   onclick=\"window.open('Auta-edit.php?polozka=nova', '_blank');\">";
+    echo "<input type='button' value='IMPORT' style='background-color: darkviolet; color: white; border: none; padding: 10px 20px; margin-left: 5px; cursor: pointer; box-sizing: border-box;'
+                  onmouseover=\"this.style.backgroundColor='purple';\" onmouseout=\"this.style.backgroundColor='darkviolet';\" 
+                  onclick=\"window.open('Auta-import.php', '_blank');\">";
     #echo "<a href=\"Auta-edit.php?polozka=nova\" target=\"_blank\">Nová položka</a>";
 }
 ?>

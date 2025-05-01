@@ -23,9 +23,15 @@ mysqli_set_charset($connection, "utf8");
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="author" content="martin"/>
 	<meta name="keywords" content="uvod"/>
-	<title>Položka</title>
+	
 <?php
     $polozka = $_GET["polozka"];
+    $hledaniNazvuPolozky = mysqli_query($connection, "SELECT * FROM auta WHERE id='$polozka'");
+    $nalezenyNazevPolozky = mysqli_fetch_array($hledaniNazvuPolozky);
+   
+    
+
+
 
 
 
@@ -43,6 +49,13 @@ if ($polozka == "nova"){
        header("Location: Auta-edit.php?polozka=" . $polozka);
         exit();
 
+}
+if ($nalezenyNazevPolozky['nazev'] == ""){
+    echo "<title>Edit: ".$polozka."</title>";
+
+}
+else {
+    echo "<title>Edit: ".$nalezenyNazevPolozky['nazev']."</title>";
 }
 
 
@@ -250,7 +263,8 @@ document.getElementById("fileElem").addEventListener("change", function() {
   const polozka = new URLSearchParams(window.location.search).get('polozka') || '';
   const storageKey = 'formData_' + polozka;
   // 2) Načteme existující data (nebo prázdný objekt)
-  let formData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+  const formData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
 
   // Pomocné funkce
   function markUnsaved(textarea) {
@@ -268,7 +282,7 @@ document.getElementById("fileElem").addEventListener("change", function() {
     saveField(name, value);
   }
 
-  // 3) Pro každé textarea:
+  // 3a) Pro každé textarea:
   document.querySelectorAll("textarea[name]").forEach(ta => {
     // a) pokud máme v localStorage uloženou hodnotu, naplníme ji
     if (formData.hasOwnProperty(ta.name)) {
@@ -280,6 +294,26 @@ document.getElementById("fileElem").addEventListener("change", function() {
       markUnsaved(ta);
       saveField(ta.name, ta.value);
     });
+  });
+
+  // 3b) Pro každý klíč začínající na hidden- v formData
+  Object.entries(formData).forEach(([fieldName, flag]) => {
+    if (!fieldName.startsWith('hidden-')) return;
+
+    const idSafe = fieldName.slice('hidden-'.length);
+    const img    = form.elements[`obrazek-${idSafe}`];
+    const btnX   = form.elements[`tlacitkoX-${idSafe}`];
+    const btnReload   = form.elements[`tlacitkoReload-${idSafe}`];
+
+    if (flag === 'smazano') {
+      if (img)  img.style.opacity       = 0.3;
+      if (btnReload) btnReload.style.display      = 'flex';
+      if (btnX) btnX.style.display      = 'none';
+    } else {
+      if (img)  img.style.opacity       = 1;
+      if (btnReload) btnReload.style.display      = 'none';
+      if (btnX) btnX.style.display      = 'flex';
+    }
   });
 
   // 4) Zachytíme i kliknutí na všechna tlačítka "načíst ->"
@@ -310,7 +344,25 @@ document.getElementById("fileElem").addEventListener("change", function() {
 
 });
 
+function previewInNewWindow(src) {
+  // vypočítáme 80 % šířky a výšky obrazovky
+  const w = Math.floor(window.screen.availWidth * 0.8);
+  const h = Math.floor(window.screen.availHeight * 0.8);
+  const features = `width=${w},height=${h},resizable=yes,scrollbars=yes`;
+  const win = window.open('', '_blank', features);
 
+  // do nového okna vypíšeme jen samotný obrázek
+  win.document.write(`
+    <html><head>
+      <title>Náhled obrázku</title>
+      <style>body,html{margin:0;padding:0;height:100%;overflow:auto;}
+             img{display:block;width:100%;height:auto;}</style>
+    </head><body>
+      <img src="${src}" alt="Preview">
+    </body></html>
+  `);
+  win.document.close();
+}
 
 
 </script>    
@@ -406,6 +458,16 @@ if (isset($_SESSION['uzivatel'])) {
 <?php
 if (isset($_REQUEST["uloz"])) {
 
+    $hledaniIdPolozky = mysqli_query($connection, "SELECT * FROM auta WHERE id='$polozka'");
+    $nalezeneIdPolozky = mysqli_fetch_array($hledaniIdPolozky);
+
+    if (!$nalezeneIdPolozky) {
+        echo "<script>window.alert(\"Položka neexistuje, není uloženo!\");</script>";
+        //ZobrazeniFormulare ($prihlasenId, $prihlasenOpravneni, $polozka, $connection);
+        echo "<script>window.close();</script>";
+    }
+    else {
+
     $adresarSlozkyFotekTempPolozky = "Fotky/temp/".$polozka."/";
 
 
@@ -427,7 +489,7 @@ if (isset($_REQUEST["uloz"])) {
 		?><script>window.alert("Uloženo!");</script>
 		<?php
 		ZobrazeniFormulare ($prihlasenId, $prihlasenOpravneni, $polozka, $connection);
-	
+}
 
 }
 
@@ -486,7 +548,7 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
 # ----------- FIRMA ---------------			
 echo "<tr class=\"barevnost1\">";
 echo "<td>Firma:</td>";
-echo "<td><select name=\"selectfirmy\">";
+echo "<td rowspan=\"2\"><select name=\"selectfirmy\">";
     echo "<option value=\"\">---vyber si položku---</option>";
     while ($nalezHledaniFirmy = mysqli_fetch_array($hodnotaHledaniFirmy)){
         echo "<option value=\"" .$nalezHledaniFirmy["firma"] ."\">".$nalezHledaniFirmy["firma"]."</option>";
@@ -494,25 +556,25 @@ echo "<td><select name=\"selectfirmy\">";
 echo "</select></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputfirmy.value=document.formularauta.selectfirmy.value;\"></td>";
 if (isset($_REQUEST["inputfirmy"]) && $_REQUEST["inputfirmy"]) {
-    echo "<td><textarea name=\"inputfirmy\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputfirmy"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputfirmy\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputfirmy"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["firma"]) {
-    echo "<td><textarea name=\"inputfirmy\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["firma"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputfirmy\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["firma"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputfirmy\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputfirmy\" oninput=\"this.value = this.value.slice(0,80;\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
 # ----------- FIRMA č. 2 (nebo úpravce) ---------------			
 echo "<tr class=\"barevnost1\">";
 echo "<td>Firma č. 2 (nebo úpravce):</td>";
-echo "<td></td>";
+
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputfirmy2.value=document.formularauta.selectfirmy.value;\"></td>";
 if (isset($_REQUEST["inputfirmy2"]) && $_REQUEST["inputfirmy2"]) {
-    echo "<td><textarea name=\"inputfirmy2\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputfirmy2"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputfirmy2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputfirmy2"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["firma2"]) {
-    echo "<td><textarea name=\"inputfirmy2\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["firma2"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputfirmy2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["firma2"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputfirmy2\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputfirmy2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -522,11 +584,11 @@ echo "<td>Číslo:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputcisla"]) && $_REQUEST["inputcisla"]) {
-    echo "<td><textarea name=\"inputcisla\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputcisla"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputcisla\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputcisla"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["cislo"]) {
-    echo "<td><textarea name=\"inputcisla\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["cislo"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputcisla\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["cislo"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputcisla\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputcisla\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -536,11 +598,11 @@ echo "<td>Název:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputnazev"]) && $_REQUEST["inputnazev"]) {
-    echo "<td><textarea name=\"inputnazev\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputnazev"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputnazev\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputnazev"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["nazev"]) {
-    echo "<td><textarea name=\"inputnazev\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["nazev"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputnazev\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["nazev"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputnazev\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputnazev\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -550,18 +612,18 @@ echo "<td>Upřesnění (např. generace, taxi, hasiči apod.):</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputupresneni"]) && $_REQUEST["inputupresneni"]) {
-    echo "<td><textarea name=\"inputupresneni\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputupresneni"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputupresneni\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputupresneni"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["upresneni"]) {
-    echo "<td><textarea name=\"inputupresneni\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["upresneni"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputupresneni\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["upresneni"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputupresneni\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputupresneni\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
 # ----------- BARVA ---------------			
 echo "<tr class=\"barevnost1\">";
 echo "<td>Barva:</td>";
-echo "<td><select name=\"selectbarvy\">";
+echo "<td  rowspan=\"5\" valign=\"top\"><select name=\"selectbarvy\">";
     echo "<option value=\"\">---vyber si položku---</option>";
     while ($nalezHledaniBarvy = mysqli_fetch_array($hodnotaHledaniBarvy)) {
         echo "<option value=\"" . $nalezHledaniBarvy["barva"] . "\">" . $nalezHledaniBarvy["barva"] . "</option>";
@@ -569,55 +631,55 @@ echo "<td><select name=\"selectbarvy\">";
 echo "</select></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputbarvy1.value=document.formularauta.selectbarvy.value;\"></td>";
 if (isset($_REQUEST["inputbarvy1"]) && $_REQUEST["inputbarvy1"]) {
-    echo "<td><textarea name=\"inputbarvy1\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy1"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy1"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["barva1"]) {
-    echo "<td><textarea name=\"inputbarvy1\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva1"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva1"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputbarvy1\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputbarvy1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
-echo "<tr class=\"barevnost1\"><td></td><td></td>";
+echo "<tr class=\"barevnost1\"><td></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputbarvy2.value=document.formularauta.selectbarvy.value;\"></td>";
 if (isset($_REQUEST["inputbarvy2"]) && $_REQUEST["inputbarvy2"]) {
-    echo "<td><textarea name=\"inputbarvy2\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy2"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy2"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["barva2"]) {
-    echo "<td><textarea name=\"inputbarvy2\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva2"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva2"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputbarvy2\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputbarvy2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
-echo "<tr class=\"barevnost1\"><td></td><td></td>";
+echo "<tr class=\"barevnost1\"><td></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputbarvy3.value=document.formularauta.selectbarvy.value;\"></td>";
 if (isset($_REQUEST["inputbarvy3"]) && $_REQUEST["inputbarvy3"]) {
-    echo "<td><textarea name=\"inputbarvy3\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy3"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy3\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy3"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["barva3"]) {
-    echo "<td><textarea name=\"inputbarvy3\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva3"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy3\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva3"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputbarvy3\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputbarvy3\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
-echo "<tr class=\"barevnost1\"><td></td><td></td>";
+echo "<tr class=\"barevnost1\"><td></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputbarvy4.value=document.formularauta.selectbarvy.value;\"></td>";
 if (isset($_REQUEST["inputbarvy4"]) && $_REQUEST["inputbarvy4"]) {
-    echo "<td><textarea name=\"inputbarvy4\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy4"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy4\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy4"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["barva4"]) {
-    echo "<td><textarea name=\"inputbarvy4\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva4"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy4\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva4"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputbarvy4\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputbarvy4\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
-echo "<tr class=\"barevnost1\"><td></td><td></td>";
+echo "<tr class=\"barevnost1\"><td></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputbarvy5.value=document.formularauta.selectbarvy.value;\"></td>";
 if (isset($_REQUEST["inputbarvy5"]) && $_REQUEST["inputbarvy5"]) {
-    echo "<td><textarea name=\"inputbarvy5\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy5"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy5\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputbarvy5"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["barva5"]) {
-    echo "<td><textarea name=\"inputbarvy5\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva5"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputbarvy5\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["barva5"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputbarvy5\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputbarvy5\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -632,11 +694,11 @@ echo "<td><select name=\"selectzavod\">";
 echo "</select></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputzavod.value=document.formularauta.selectzavod.value;\"></td>";
 if (isset($_REQUEST["inputzavod"]) && $_REQUEST["inputzavod"]) {
-    echo "<td><textarea name=\"inputzavod\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputzavod"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputzavod\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputzavod"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["zavod"]) {
-    echo "<td><textarea name=\"inputzavod\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["zavod"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputzavod\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["zavod"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputzavod\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputzavod\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -651,11 +713,11 @@ echo "<td><select name=\"selectserie\">";
 echo "</select></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputserie.value=document.formularauta.selectserie.value;\"></td>";
 if (isset($_REQUEST["inputserie"]) && $_REQUEST["inputserie"]) {
-    echo "<td><textarea name=\"inputserie\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputserie"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputserie\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputserie"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["serie"]) {
-    echo "<td><textarea name=\"inputserie\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["serie"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputserie\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["serie"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputserie\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputserie\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -665,11 +727,11 @@ echo "<td>Startovní číslo:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputstartovnicislo"]) && $_REQUEST["inputstartovnicislo"]) {
-    echo "<td><textarea name=\"inputstartovnicislo\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputstartovnicislo"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputstartovnicislo\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputstartovnicislo"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["startovnicislo"]) {
-    echo "<td><textarea name=\"inputstartovnicislo\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["startovnicislo"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputstartovnicislo\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["startovnicislo"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputstartovnicislo\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputstartovnicislo\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -679,11 +741,11 @@ echo "<td>Tým:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputtym"]) && $_REQUEST["inputtym"]) {
-    echo "<td><textarea name=\"inputtym\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputtym"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputtym\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputtym"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["tym"]) {
-    echo "<td><textarea name=\"inputtym\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["tym"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputtym\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["tym"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputtym\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputtym\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -693,11 +755,11 @@ echo "<td>Reklama:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputreklama"]) && $_REQUEST["inputreklama"]) {
-    echo "<td><textarea name=\"inputreklama\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputreklama"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputreklama\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputreklama"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["reklama"]) {
-    echo "<td><textarea name=\"inputreklama\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["reklama"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputreklama\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["reklama"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputreklama\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputreklama\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -707,11 +769,11 @@ echo "<td>Jezdci:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputjezdec1"]) && $_REQUEST["inputjezdec1"]) {
-    echo "<td><textarea name=\"inputjezdec1\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputjezdec1"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputjezdec1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputjezdec1"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["jezdec1"]) {
-    echo "<td><textarea name=\"inputjezdec1\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["jezdec1"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputjezdec1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["jezdec1"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputjezdec1\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputjezdec1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -720,11 +782,11 @@ echo "<td></td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputjezdec2"]) && $_REQUEST["inputjezdec2"]) {
-    echo "<td><textarea name=\"inputjezdec2\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputjezdec2"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputjezdec2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputjezdec2"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["jezdec2"]) {
-    echo "<td><textarea name=\"inputjezdec2\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["jezdec2"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputjezdec2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["jezdec2"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputjezdec2\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputjezdec2\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -733,11 +795,11 @@ echo "<td></td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputjezdec3"]) && $_REQUEST["inputjezdec3"]) {
-    echo "<td><textarea name=\"inputjezdec3\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputjezdec3"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputjezdec3\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputjezdec3"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["jezdec3"]) {
-    echo "<td><textarea name=\"inputjezdec3\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["jezdec3"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputjezdec3\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["jezdec3"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputjezdec3\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputjezdec3\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -754,11 +816,11 @@ echo "</select></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputroku.value=document.formularauta.selectroku.value;\"></td>";
 
 if (isset($_REQUEST["inputroku"]) && $_REQUEST["inputroku"]) {
-    echo "<td><textarea name=\"inputroku\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputroku"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputroku\" inputmode=\"numeric\" oninput=\"this.value = this.value.replace(/\D/g, '').slice(0,4);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputroku"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["rok"]) {
-    echo "<td><textarea name=\"inputroku\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["rok"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputroku\" inputmode=\"numeric\" oninput=\"this.value = this.value.replace(/\D/g, '').slice(0,4);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["rok"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputroku\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputroku\" inputmode=\"numeric\" oninput=\"this.value = this.value.replace(/\D/g, '').slice(0,4);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -768,11 +830,11 @@ echo "<td>Cena:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputceny"]) && $_REQUEST["inputceny"]) {
-    echo "<td><textarea name=\"inputceny\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputceny"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputceny\" inputmode=\"numeric\" oninput=\"this.value = this.value.replace(/\D/g, '');\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputceny"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["cena"]) {
-    echo "<td><textarea name=\"inputceny\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["cena"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputceny\" inputmode=\"numeric\" oninput=\"this.value = this.value.replace(/\D/g, '');\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["cena"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputceny\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputceny\" inputmode=\"numeric\" oninput=\"this.value = this.value.replace(/\D/g, '');\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -796,11 +858,11 @@ echo "<td>Poznámka:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputpoznamka"]) && $_REQUEST["inputpoznamka"]) {
-    echo "<td><textarea name=\"inputpoznamka\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputpoznamka"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputpoznamka\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputpoznamka"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["poznamka"]) {
-    echo "<td><textarea name=\"inputpoznamka\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["poznamka"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputpoznamka\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["poznamka"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputpoznamka\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputpoznamka\" oninput=\"this.value = this.value.slice(0,255);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -810,11 +872,11 @@ echo "<td>Umístění auta:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputumisteniauta"]) && $_REQUEST["inputumisteniauta"]) {
-    echo "<td><textarea name=\"inputumisteniauta\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputumisteniauta"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputumisteniauta\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputumisteniauta"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["umisteniauta"]) {
-    echo "<td><textarea name=\"inputumisteniauta\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["umisteniauta"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputumisteniauta\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["umisteniauta"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputumisteniauta\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputumisteniauta\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -824,11 +886,11 @@ echo "<td>Umístění krabičky:</td>";
 echo "<td></td>";
 echo "<td></td>";
 if (isset($_REQUEST["inputumistenikrabicky"]) && $_REQUEST["inputumistenikrabicky"]) {
-    echo "<td><textarea name=\"inputumistenikrabicky\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputumistenikrabicky"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputumistenikrabicky\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputumistenikrabicky"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["umistenikrabicky"]) {
-    echo "<td><textarea name=\"inputumistenikrabicky\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["umistenikrabicky"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputumistenikrabicky\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["umistenikrabicky"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputumistenikrabicky\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputumistenikrabicky\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 
@@ -842,11 +904,11 @@ echo "<td><select name=\"selectmame\">";
 echo "</select></td>";
 echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputmame.value=document.formularauta.selectmame.value;\"></td>";
 if (isset($_REQUEST["inputmame"]) && $_REQUEST["inputmame"]) {
-    echo "<td><textarea name=\"inputmame\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputmame"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputmame\" readonly style=\"width:300px; height:25px;\">" . $_REQUEST["inputmame"] . "</textarea></td>";
 } elseif ($nalezHledaniAut["mame"]) {
-    echo "<td><textarea name=\"inputmame\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["mame"] . "</textarea></td>";
+    echo "<td><textarea name=\"inputmame\" readonly style=\"width:300px; height:25px;\">" . $nalezHledaniAut["mame"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputmame\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputmame\" readonly style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 echo "</table>";
@@ -865,13 +927,12 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
   <label class=\"button\" for=\"fileElem\">Vyberte soubor ze složky</label>
 </div></td>";
 $slozkapolozky = dir("Fotky/temp/".$polozka);
+
 while($fotkavypis=$slozkapolozky->read()) { 
 	if ($fotkavypis=="." || $fotkavypis=="..") continue; 
 	    $fotkavypisbeztecky = str_replace('.','_', $fotkavypis);
 	    
-	    if (isset($_REQUEST["hidden-".$fotkavypisbeztecky]) && $_REQUEST["hidden-".$fotkavypisbeztecky] == "smazano") {
-	        
-	    echo "<td><div style='position: relative; display: inline-block;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px; opacity: 0.3\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>smazano</textarea>";
+	    echo "<td valign='top'><div style='position: relative; display: inline-block;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px\" onclick=\"previewInNewWindow(this.src)\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>ok</textarea>";
         echo "<input
        type='button'
        name='tlacitkoReload-".$fotkavypisbeztecky."'
@@ -886,7 +947,7 @@ while($fotkavypis=$slozkapolozky->read()) {
          color: white;
          border: none;
          font-size: 16px;
-         display: flex;
+         display: none;
          align-items: center;
          justify-content: center;
          cursor: pointer;'
@@ -900,77 +961,8 @@ while($fotkavypis=$slozkapolozky->read()) {
                   obrazek.style.opacity = 1;
                   var tlacitkoX = document.formularauta.elements['tlacitkoX-".$fotkavypisbeztecky."'];
                   tlacitkoX.style.display = 'flex';
-                  this.style.display = 'none';
-                })();
-              \"
-            >";
-            echo "<input
-       type='button'
-       name='tlacitkoX-".$fotkavypisbeztecky."'
-       value='×'
-       style='
-         position: absolute;
-         top: 5px;
-         right: 5px;
-         width: 20px;
-         height: 20px;
-         background-color: red;
-         color: white;
-         border: none;
-         font-size: 16px;
-         display: none;
-         align-items: center;
-         justify-content: center;
-         cursor: pointer;'
-                  onmouseover=\"this.style.backgroundColor='darkred';\" onmouseout=\"this.style.backgroundColor='red';\" 
-                  onclick=\"
-                (function(){
-                  var ta = document.formularauta.elements['hidden-".$fotkavypisbeztecky."'];
-                  ta.value = 'smazano';
-                  ta.dispatchEvent(new Event('input'));
-                  var obrazek = document.formularauta.elements['obrazek-".$fotkavypisbeztecky."'];
-                  obrazek.style.opacity = 0.3;
                   var tlacitkoReload = document.formularauta.elements['tlacitkoReload-".$fotkavypisbeztecky."'];
-                  tlacitkoReload.style.display = 'flex';
-                  this.style.display = 'none';
-                })();
-              \"
-            >";
-          echo "</div></td>";
-	        
-	    }
-	    else {
-	        
-	       echo "<td><div style='position: relative; display: inline-block;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>ok</textarea>";
-        echo "<input
-       type='button'
-       name='tlacitkoReload-".$fotkavypisbeztecky."'
-       value='&#x21BB;'
-       style='
-         position: absolute;
-         top: 5px;
-         right: 5px;
-         width: 20px;
-         height: 20px;
-         background-color: blue;
-         color: white;
-         border: none;
-         font-size: 16px;
-         display: none;
-         align-items: center;
-         justify-content: center;
-         cursor: pointer;'
-                  onmouseover=\"this.style.backgroundColor='darkblue';\" onmouseout=\"this.style.backgroundColor='blue';\" 
-                  onclick=\"
-                (function(){
-                  var ta = document.formularauta.elements['hidden-".$fotkavypisbeztecky."'];
-                  ta.value = 'ok';
-                  ta.dispatchEvent(new Event('input'));
-                  var obrazek = document.formularauta.elements['obrazek-".$fotkavypisbeztecky."'];
-                  obrazek.style.opacity = 1;
-                  var tlacitkoX = document.formularauta.elements['tlacitkoX-".$fotkavypisbeztecky."'];
-                  tlacitkoX.style.display = 'flex';
-                  this.style.display = 'none';
+                  tlacitkoReload.style.display = 'none';
                 })();
               \"
             >";
@@ -1002,12 +994,13 @@ while($fotkavypis=$slozkapolozky->read()) {
                   obrazek.style.opacity = 0.3;
                   var tlacitkoReload = document.formularauta.elements['tlacitkoReload-".$fotkavypisbeztecky."'];
                   tlacitkoReload.style.display = 'flex';
-                  this.style.display = 'none';
+                  var tlacitkoX = document.formularauta.elements['tlacitkoX-".$fotkavypisbeztecky."'];
+                  tlacitkoX.style.display = 'none';
                 })();
               \"
             >";
           echo "</div></td>";
-	    }
+	    
 	
 } 
 $slozkapolozky->close(); 
