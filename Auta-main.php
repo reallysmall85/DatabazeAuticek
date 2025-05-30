@@ -130,7 +130,7 @@ $result = mysqli_query($connection, $query);
         th, td {
             padding: 8px;
             border: 1px solid black;
-            max-width: 200px;
+            max-width:150px;
             word-wrap: break-word;
         }
         .fixed-arrow-nahoru {
@@ -341,7 +341,9 @@ echo "Počet nálezů: " .$totalRecords;
         if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
             echo "<td><input type='button' value='EDIT' style='background-color: blue; color: white; border: none; padding: 10px 20px; cursor: pointer;'
                   onmouseover=\"this.style.backgroundColor='darkblue';\" onmouseout=\"this.style.backgroundColor='blue';\" 
-                  onclick=\"window.open('Auta-edit.php?polozka={$row['id']}', '_blank');\"></td>";
+                  onclick=\"window.open('Auta-edit.php?polozka={$row['id']}', '_blank');\"><input type='button' value='COPY' style='background-color: khaki; color: white; border: none; padding: 10px 20px; margin-left: 5px; cursor: pointer;'
+                  onmouseover=\"this.style.backgroundColor='darkkhaki';\" onmouseout=\"this.style.backgroundColor='khaki';\" 
+                  onclick=\"window.open('Auta-edit.php?polozka={$row['id']}&duplikace=1', '_blank');\"></td>";
         }
         echo "</tr>";
     }

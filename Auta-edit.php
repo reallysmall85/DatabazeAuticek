@@ -50,6 +50,41 @@ if ($polozka == "nova"){
         exit();
 
 }
+
+
+
+if (isset($_GET['duplikace'])) {
+    $puvodniPolozka = (int)$_GET["polozka"];
+
+    $novaPolozka = Time();
+    $hledaniExistence = mysqli_query($connection, "SELECT 1 FROM auta WHERE id='$novaPolozka'");
+    if (mysqli_num_rows($hledaniExistence) > 0) {
+      $novaPolozka++;
+    }
+
+    mysqli_query($connection, "
+      INSERT INTO auta (
+        id,firma,firma2,cislo,nazev,upresneni,
+        barva1,barva2,barva3,barva4,barva5,
+        serie,zavod,startovnicislo,tym,reklama,
+        jezdec1,jezdec2,jezdec3,rok,cena,popis,
+        poznamka,umisteniauta,umistenikrabicky,mame
+      )
+      SELECT
+        '$novaPolozka', firma,firma2,cislo,nazev,upresneni,
+        barva1,barva2,barva3,barva4,barva5,
+        serie,zavod,startovnicislo,tym,reklama,
+        jezdec1,jezdec2,jezdec3,rok,cena,popis,
+        poznamka,umisteniauta,umistenikrabicky,mame
+      FROM auta
+      WHERE id='$puvodniPolozka'
+    "); #duplikuje radek
+    
+   header("Location: Auta-edit.php?polozka=" . $novaPolozka ."&byloduplikovano");
+    exit();
+
+}
+
 if ($nalezenyNazevPolozky['nazev'] == ""){
     echo "<title>Edit: ".$polozka."</title>";
 
@@ -456,6 +491,11 @@ if (isset($_SESSION['uzivatel'])) {
 
 
 <?php
+
+if(isset($_GET["byloduplikovano"])){
+    echo "<script>window.alert(\"Duplikováno a uloženo!\");</script>";
+}
+
 if (isset($_REQUEST["uloz"])) {
 
     $hledaniIdPolozky = mysqli_query($connection, "SELECT * FROM auta WHERE id='$polozka'");
