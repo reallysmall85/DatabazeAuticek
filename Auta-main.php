@@ -1,19 +1,24 @@
 <?php
 session_start();
 
+// 1) Kontrola přihlášení
 if (!isset($_SESSION['uzivatel'])) {
     header("Location: Prihlaseni.php");
     exit();
 }
 
-include("Pripojeni/pripojeniDatabaze.php");
+// 2) Připojení k databázi (mysql­i)
+include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
-// Připojení k databázi
 $connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
 if (!$connection) {
-    die("Database connection failed: " . mysqli_connect_error());
+    die("Nepodařilo se připojit k databázi: " . mysqli_connect_error());
 }
 mysqli_set_charset($connection, "utf8");
+
+
+
+
 
 // Získání filtrů z GET parametrů
 $firmaFilter  = isset($_GET['firma'])  ? $_GET['firma']  : '';
@@ -87,7 +92,8 @@ if (isset($dupQueryPart)) {
         }
     }
     $baseQuery = "FROM auta $where";
-    $query = "SELECT * " . $baseQuery . " ORDER BY firma";
+    $srovnani = isset($_GET['srovnani']) ? $_GET['srovnani'] : "firma";
+    $query = "SELECT * " . $baseQuery . " ORDER BY " .$srovnani;
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
 }
 
@@ -113,9 +119,9 @@ $result = mysqli_query($connection, $query);
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="author" content="martin">
-    <meta name="keywords" content="uvod">
+    <meta charset="UTF-8" />
+    <meta name="author" content="martin" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Databaze aut</title>
     <style>
         body, html {
@@ -267,6 +273,16 @@ if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
 <a href="#konec" class="fixed-arrow-dolu"><img src="sipka_dolu.jpg" width="30" height="30" title="Posun na konec stránky" style="opacity: 0.5;"></a>
 <?php
 echo "Počet nálezů: " .$totalRecords;
+
+
+$queryParams = [];
+if (!empty($searchQuery)) {
+    $queryParams['q'] = $searchQuery;
+}
+
+    $queryString = http_build_query($queryParams);
+    
+
 ?>
 
 <br>
@@ -274,15 +290,15 @@ echo "Počet nálezů: " .$totalRecords;
 <div style="max-width: 100%; overflow-x: auto;">
 <table>
     <tr>
-        <th>Firma</th>
-        <th>Číslo</th>
-        <th>Název</th>
+        <th>Firma <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=firma'\">";?></th>
+        <th>Číslo <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=cislo'\">";?></th>
+        <th>Název <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=nazev'\">";?></th>
         <th>Upřesnění</th>
         <th>Barvy</th>
         <th>Série / Závod</th>
         <th>Start.č. / Tým / Reklama</th>
         <th>Jezdec</th>
-        <th>Rok</th>
+        <th>Rok <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=rok'\">";?></th>
         <th>Cena</th>
         <th>QR
         <button onclick="skryvaniQR()">Skrýt/Zobrazit</button>
@@ -369,13 +385,13 @@ for ($a = 1; $a <= $totalPages; $a++) {
     if ($a == $stranka){
         echo "<input type='button' value='{$a}' style='background-color: darkgrey; color: orange; border: 1px solid black; padding: 8px; cursor: pointer;'
       onmouseover=\"this.style.color='darkorange';\" onmouseout=\"this.style.color='orange';\" 
-      onclick=\"window.location.href='Auta-main.php?{$queryString}'\">";
+      onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=$srovnani'\">";
 
     }
     else {
          echo "<input type='button' value='{$a}' style='background-color: grey; color: white; border: none; padding: 5px; cursor: pointer;'
       onmouseover=\"this.style.color='orange';\" onmouseout=\"this.style.color='white';\" 
-      onclick=\"window.location.href='Auta-main.php?{$queryString}'\">";
+      onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=$srovnani'\">";
     }
 
  

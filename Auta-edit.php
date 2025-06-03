@@ -1,28 +1,44 @@
 <?php
 session_start();
 
+// 1) Kontrola přihlášení
 if (!isset($_SESSION['uzivatel'])) {
     header("Location: Prihlaseni.php");
     exit();
 }
 
-include("Pripojeni/pripojeniDatabaze.php");
+// 2) Připojení k databázi (mysql­i)
+include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
-// Připojení k databázi
 $connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
 if (!$connection) {
-    die("Database connection failed: " . mysqli_connect_error());
+    die("Nepodařilo se připojit k databázi: " . mysqli_connect_error());
 }
 mysqli_set_charset($connection, "utf8");
 
-?>
+// 3) Kontrola oprávnění
+$opravneni = isset($_SESSION['uzivatel']['opravneni']) 
+    ? $_SESSION['uzivatel']['opravneni'] 
+    : 'nezname';
+$jmeno     = isset($_SESSION['uzivatel']['jmeno']) 
+    ? $_SESSION['uzivatel']['jmeno'] 
+    : '???';
+$prijmeni  = isset($_SESSION['uzivatel']['prijmeni']) 
+    ? $_SESSION['uzivatel']['prijmeni'] 
+    : '???';
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs">
+if ($opravneni !== 'admin' && $opravneni !== 'moderator') {
+    header("Location: Prihlaseni.php");
+    exit();
+}
+
+?>
+<!DOCTYPE html>
+<html lang="cs">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-	<meta name="author" content="martin"/>
-	<meta name="keywords" content="uvod"/>
+    <meta charset="UTF-8" />
+    <meta name="author" content="martin" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	
 <?php
     $polozka = $_GET["polozka"];
@@ -483,11 +499,12 @@ if (isset($_SESSION['uzivatel'])) {
 }
 ?>
 
+
 <a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
 <a href="Uvodni.php">
 <img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku">
-</a><br><br>
-
+</a>
+<br>
 
 
 <?php
