@@ -231,8 +231,27 @@ if (isset($_SESSION['uzivatel'])) {
     $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
     $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
-    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 'Chyba oprávnění';
-    echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>".$prihlasenOpravneni."</span><br>";
+    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
+    echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+        switch ($prihlasenOpravneni){
+            case 1:
+                echo "admin";
+                break;
+            case 2:
+                echo "moderator";
+                break;
+            case 3:
+                echo "uživatel";
+                break;
+            case 4:
+                echo "veřejnost";
+                break;    
+            default:
+                echo "úrovně č.: " .$prihlasenOpravneni;
+                break;
+
+        }
+         echo "</span><br>";
 
 }
 
@@ -246,7 +265,7 @@ if (isset($_SESSION['uzivatel'])) {
 </a>
 <br>
 <?php
-if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
+if ($prihlasenOpravneni <= 2 ){
     echo "<input type='button' value='NOVÁ POLOŽKA' style='background-color: orange; color: white; border: none; padding: 10px 20px; cursor: pointer; box-sizing: border-box;'
                   onmouseover=\"this.style.backgroundColor='darkorange';\" onmouseout=\"this.style.backgroundColor='orange';\" 
                   onclick=\"window.open('Auta-edit.php?polozka=nova', '_blank');\">";
@@ -304,7 +323,7 @@ if (!empty($searchQuery)) {
         <button onclick="skryvaniQR()">Skrýt/Zobrazit</button>
         </th>
         <th>Tisk QR</th>
-        <?php if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator") { echo "<th>EDIT</th>"; } ?>
+        <?php if ($prihlasenOpravneni <= 2 ) { echo "<th>EDIT</th>"; } ?>
     </tr>
     <?php
     while ($row = mysqli_fetch_assoc($result)) {
@@ -342,7 +361,7 @@ if (!empty($searchQuery)) {
             echo implode(", ", $jezdec);
         echo "</td>";
         echo "<td>{$row['rok']}</td>";
-        if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
+        if ($prihlasenOpravneni <= 2 ){
             echo "<td>{$row['cena']}</td>";
         } else {
             echo "<td><i>nelze zobrazit</i></td>";
@@ -354,7 +373,7 @@ if (!empty($searchQuery)) {
         }
         echo "<td><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\" style=\"display: none;\"></td>";
         echo "<td><button onclick=\"printQR('{$cestaQRauta}')\">Tisk QR</button></td>";
-        if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
+        if ($prihlasenOpravneni <= 2 ){
             echo "<td><input type='button' value='EDIT' style='background-color: blue; color: white; border: none; padding: 10px 20px; cursor: pointer;'
                   onmouseover=\"this.style.backgroundColor='darkblue';\" onmouseout=\"this.style.backgroundColor='blue';\" 
                   onclick=\"window.open('Auta-edit.php?polozka={$row['id']}', '_blank');\"><input type='button' value='COPY' style='background-color: khaki; color: white; border: none; padding: 10px 20px; margin-left: 5px; cursor: pointer;'

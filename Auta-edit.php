@@ -19,7 +19,7 @@ mysqli_set_charset($connection, "utf8");
 // 3) Kontrola oprávnění
 $opravneni = isset($_SESSION['uzivatel']['opravneni']) 
     ? $_SESSION['uzivatel']['opravneni'] 
-    : 'nezname';
+    : 4;
 $jmeno     = isset($_SESSION['uzivatel']['jmeno']) 
     ? $_SESSION['uzivatel']['jmeno'] 
     : '???';
@@ -27,7 +27,7 @@ $prijmeni  = isset($_SESSION['uzivatel']['prijmeni'])
     ? $_SESSION['uzivatel']['prijmeni'] 
     : '???';
 
-if ($opravneni !== 'admin' && $opravneni !== 'moderator') {
+if ($opravneni > 2) {
     header("Location: Prihlaseni.php");
     exit();
 }
@@ -487,9 +487,28 @@ if (isset($_SESSION['uzivatel'])) {
     $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
     $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
-    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 'Chyba oprávnění';
-    if ($prihlasenOpravneni == "admin" || $prihlasenOpravneni == "moderator"){
-         echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>".$prihlasenOpravneni."</span><br>";
+    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
+    if ($prihlasenOpravneni <= 2){
+        echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+        switch ($prihlasenOpravneni){
+            case 1:
+                echo "admin";
+                break;
+            case 2:
+                echo "moderator";
+                break;
+            case 3:
+                echo "uživatel";
+                break;
+            case 4:
+                echo "veřejnost";
+                break;    
+            default:
+                echo "úrovně č.: " .$prihlasenOpravneni;
+                break;
+
+        }
+         echo "</span><br>";
     }
     else {
         header("Location: Prihlaseni.php");
