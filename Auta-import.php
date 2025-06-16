@@ -90,6 +90,41 @@ if ($opravneni > 2 ) {
    
 
 }
+
+function zapisDoLogu($textzaznamu) {
+    // složka pro logy
+    $logDir = __DIR__ . '/Logy';
+
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+
+    }
+
+    $datumlogu = date('Y-m-d');
+    $logFile   = "{$logDir}/log-{$datumlogu}.log";
+
+    // připravíme řádek
+    $user = 
+    (isset($_SESSION['uzivatel']['jmeno'])
+        ? $_SESSION['uzivatel']['jmeno']
+        : 'Neznámý')
+  . ' '
+  . (isset($_SESSION['uzivatel']['prijmeni'])
+        ? $_SESSION['uzivatel']['prijmeni']
+        : '');
+
+    $time = date('Y-m-d H:i:s');
+    $line = "[$time] ($user) $textzaznamu" . PHP_EOL;
+
+    // přidáme na konec souboru (vytvoří, pokud neexistuje) a uzamkneme
+    file_put_contents(
+        $logFile,
+        $line,
+        FILE_APPEND | LOCK_EX
+    );
+}
+
+
 ?>
 
 <a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
@@ -132,6 +167,9 @@ if (isset($_POST['import'])) {
     if (!isset($_FILES['excelFile']) || $_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
         echo '<div class="error">Chyba při nahrávání souboru. Zkuste to prosím znovu.</div>';
     } else {
+
+        zapisDoLogu("Zapsáno do databáze auta z importovaného souboru:");
+
         $tmpPath  = $_FILES['excelFile']['tmp_name'];
         $origName = $_FILES['excelFile']['name'];
         $ext      = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
@@ -239,6 +277,13 @@ if (isset($_POST['import'])) {
             for ($i = 0; $i < $columnCount; $i++) {
                 $bindParams[] = & $values[$i];
             }
+
+   
+
+
+            zapisDoLogu(implode(', ', $bindParams));
+
+
             call_user_func_array(
                 array($stmt, 'bind_param'),
                 $bindParams

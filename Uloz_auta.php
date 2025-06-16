@@ -44,6 +44,41 @@ function Uloz ($radekAuta, $connection, $prihlasenId){
     WHERE id = '$radekAuta'
 ");
 
+$parts = [];
+$parts[] = "Do tabulky auta bylo změněno:";
+$parts[] = "firma='"            . $_REQUEST['inputfirmy']           . "'";
+$parts[] = "firma2='"           . $_REQUEST['inputfirmy2']          . "'";
+$parts[] = "cislo='"            . $_REQUEST['inputcisla']           . "'";
+$parts[] = "nazev='"            . $_REQUEST['inputnazev']           . "'";
+$parts[] = "upresneni='"        . $_REQUEST['inputupresneni']       . "'";
+$parts[] = "barva1='"           . $_REQUEST['inputbarvy1']          . "'";
+$parts[] = "barva2='"           . $_REQUEST['inputbarvy2']          . "'";
+$parts[] = "barva3='"           . $_REQUEST['inputbarvy3']          . "'";
+$parts[] = "barva4='"           . $_REQUEST['inputbarvy4']          . "'";
+$parts[] = "barva5='"           . $_REQUEST['inputbarvy5']          . "'";
+$parts[] = "serie='"            . $_REQUEST['inputserie']           . "'";
+$parts[] = "zavod='"            . $_REQUEST['inputzavod']           . "'";
+$parts[] = "startovnicislo='"   . $_REQUEST['inputstartovnicislo']  . "'";
+$parts[] = "tym='"              . $_REQUEST['inputtym']             . "'";
+$parts[] = "reklama='"          . $_REQUEST['inputreklama']         . "'";
+$parts[] = "jezdec1='"          . $_REQUEST['inputjezdec1']         . "'";
+$parts[] = "jezdec2='"          . $_REQUEST['inputjezdec2']         . "'";
+$parts[] = "jezdec3='"          . $_REQUEST['inputjezdec3']         . "'";
+$parts[] = "rok='"              . $_REQUEST['inputroku']            . "'";
+$parts[] = "cena='"             . $_REQUEST['inputceny']            . "'";
+$parts[] = "popis='"            . $_REQUEST['inputpopis']           . "'";
+$parts[] = "poznamka='"         . $_REQUEST['inputpoznamka']        . "'";
+$parts[] = "umisteniauta='"     . $_REQUEST['inputumisteniauta']    . "'";
+$parts[] = "umistenikrabicky='" . $_REQUEST['inputumistenikrabicky']. "'";
+$parts[] = "mame='"              . $_REQUEST['inputmame']            . "'";
+$parts[] = "id='"              . $radekAuta            . "'";
+
+// spojím oddělovačem a pošlu do logu
+zapisDoLogu(implode(', ', $parts));
+
+
+
+
 $adresarTempFotek = "Fotky/temp/".$radekAuta."/";
 $adresaslozkykvytvoreni = "Fotky/".$radekAuta."/";
 
@@ -81,11 +116,24 @@ foreach ($nalezeneFotkyTemp as $fotka) {
 	$kodnovefirmy1 = Time() +1;
 	mysqli_query($connection, "INSERT INTO autafirmy (id) values ('$kodnovefirmy1')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy"]."' WHERE id='$kodnovefirmy1'");
+	$parts = [];
+	$parts[] = "Do tabulky autafirmy bylo změněno:";
+	$parts[] = "firma='"            . $_REQUEST['inputfirmy']           . "'";
+	$parts[] = "id='"              . $kodnovefirmy1            . "'";
+	// spojím oddělovačem a pošlu do logu
+	zapisDoLogu(implode(', ', $parts));
+
 	}
 	if ($existenceFirmy2 == "neexistuje" and $_REQUEST["inputfirmy2"] != "" and $_REQUEST["inputfirmy"] != $_REQUEST["inputfirmy2"]){
 	$kodnovefirmy2 = Time() +2;
 	mysqli_query($connection, "INSERT INTO autafirmy (id) values ('$kodnovefirmy2')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy2"]."' WHERE id='$kodnovefirmy2'");
+	$parts = [];
+	$parts[] = "Do tabulky autafirmy bylo změněno:";
+	$parts[] = "firma='"            . $_REQUEST['inputfirmy2']           . "'";
+	$parts[] = "id='"              . $kodnovefirmy2            . "'";
+	// spojím oddělovačem a pošlu do logu
+	zapisDoLogu(implode(', ', $parts));
 	}
 
 
@@ -101,6 +149,12 @@ foreach ($nalezeneFotkyTemp as $fotka) {
 	$kodnovehozavodu = Time() +8;
 	mysqli_query($connection, "INSERT INTO autazavody (id) values ('$kodnovehozavodu')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autazavody SET zavod= '".$_REQUEST["inputzavod"]."' WHERE id='$kodnovehozavodu'");
+	$parts = [];
+	$parts[] = "Do tabulky autazavody bylo změněno:";
+	$parts[] = "zavod='"            . $_REQUEST['inputzavod']           . "'";
+	$parts[] = "id='"              . $kodnovehozavodu            . "'";
+	// spojím oddělovačem a pošlu do logu
+	zapisDoLogu(implode(', ', $parts));
 	}
 	
 # ------------ SERIE --------------
@@ -115,6 +169,12 @@ foreach ($nalezeneFotkyTemp as $fotka) {
 	$kodnoveserie = Time() +9;
 	mysqli_query($connection, "INSERT INTO autaserie (id) values ('$kodnoveserie')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autaserie SET serie= '".$_REQUEST["inputserie"]."' WHERE id='$kodnoveserie'");
+	$parts = [];
+	$parts[] = "Do tabulky autaserie bylo změněno:";
+	$parts[] = "serie='"            . $_REQUEST['inputserie']           . "'";
+	$parts[] = "id='"              . $kodnoveserie            . "'";
+	// spojím oddělovačem a pošlu do logu
+	zapisDoLogu(implode(', ', $parts));
 	}
 
 

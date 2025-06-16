@@ -62,6 +62,16 @@ if ($polozka == "nova"){
 
 		mysqli_query($connection, "INSERT INTO auta (id) values ('$polozka')"); #zalozi radek
 
+        $parts = [];
+        $parts[] = "Do tabulky auta bylo přidán nový záznam:";
+        $parts[] = "id='"              . $polozka            . "'";
+
+        // spojím oddělovačem a pošlu do logu
+        zapisDoLogu(implode(', ', $parts));
+
+
+
+
        header("Location: Auta-edit.php?polozka=" . $polozka);
         exit();
 
@@ -95,6 +105,15 @@ if (isset($_GET['duplikace'])) {
       FROM auta
       WHERE id='$puvodniPolozka'
     "); #duplikuje radek
+
+        $parts = [];
+        $parts[] = "Do tabulky auta bylo duplikován záznam, nový řádek pod č.:";
+        $parts[] = "id='"              . $novaPolozka            . "'";
+        $parts[] = "kopie vytvořena z řádku č.:";
+        $parts[] = "id='"              . $puvodniPolozka            . "'";
+
+        // spojím oddělovačem a pošlu do logu
+        zapisDoLogu(implode(', ', $parts));
     
    header("Location: Auta-edit.php?polozka=" . $novaPolozka ."&byloduplikovano");
     exit();
@@ -516,6 +535,39 @@ if (isset($_SESSION['uzivatel'])) {
    
 
 }
+
+function zapisDoLogu($textzaznamu) {
+    // složka pro logy
+    $logDir = __DIR__ . '/Logy';
+
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+
+    }
+
+    $datumlogu = date('Y-m-d');
+    $logFile   = "{$logDir}/log-{$datumlogu}.log";
+
+    // připravíme řádek
+    $user = 
+    (isset($_SESSION['uzivatel']['jmeno'])
+        ? $_SESSION['uzivatel']['jmeno']
+        : 'Neznámý')
+  . ' '
+  . (isset($_SESSION['uzivatel']['prijmeni'])
+        ? $_SESSION['uzivatel']['prijmeni']
+        : '');
+
+    $time = date('Y-m-d H:i:s');
+    $line = "[$time] ($user) $textzaznamu" . PHP_EOL;
+
+    // přidáme na konec souboru (vytvoří, pokud neexistuje) a uzamkneme
+    file_put_contents(
+        $logFile,
+        $line,
+        FILE_APPEND | LOCK_EX
+    );
+}
 ?>
 
 
@@ -610,6 +662,39 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
     die("Chyba při načítání dat: " . mysqli_error($connection));
 	}
 	$nalezHledaniAut = mysqli_fetch_array($hodnotaHledaniAut);
+
+        $parts = [];
+        $parts[] = "Byl načten záznam:";
+        $parts[] = "firma='"            . $nalezHledaniAut['firma']           . "'";
+        $parts[] = "firma2='"           . $nalezHledaniAut['firma2']          . "'";
+        $parts[] = "cislo='"            . $nalezHledaniAut['cislo']           . "'";
+        $parts[] = "nazev='"            . $nalezHledaniAut['nazev']           . "'";
+        $parts[] = "upresneni='"        . $nalezHledaniAut['upresneni']       . "'";
+        $parts[] = "barva1='"           . $nalezHledaniAut['barva1']          . "'";
+        $parts[] = "barva2='"           . $nalezHledaniAut['barva2']          . "'";
+        $parts[] = "barva3='"           . $nalezHledaniAut['barva3']          . "'";
+        $parts[] = "barva4='"           . $nalezHledaniAut['barva4']          . "'";
+        $parts[] = "barva5='"           . $nalezHledaniAut['barva5']          . "'";
+        $parts[] = "serie='"            . $nalezHledaniAut['serie']           . "'";
+        $parts[] = "zavod='"            . $nalezHledaniAut['zavod']           . "'";
+        $parts[] = "startovnicislo='"   . $nalezHledaniAut['startovnicislo']  . "'";
+        $parts[] = "tym='"              . $nalezHledaniAut['tym']             . "'";
+        $parts[] = "reklama='"          . $nalezHledaniAut['reklama']         . "'";
+        $parts[] = "jezdec1='"          . $nalezHledaniAut['jezdec1']         . "'";
+        $parts[] = "jezdec2='"          . $nalezHledaniAut['jezdec2']         . "'";
+        $parts[] = "jezdec3='"          . $nalezHledaniAut['jezdec3']         . "'";
+        $parts[] = "rok='"              . $nalezHledaniAut['rok']            . "'";
+        $parts[] = "cena='"             . $nalezHledaniAut['cena']            . "'";
+        $parts[] = "popis='"            . $nalezHledaniAut['popis']           . "'";
+        $parts[] = "poznamka='"         . $nalezHledaniAut['poznamka']        . "'";
+        $parts[] = "umisteniauta='"     . $nalezHledaniAut['umisteniauta']    . "'";
+        $parts[] = "umistenikrabicky='" . $nalezHledaniAut['umistenikrabicky']. "'";
+        $parts[] = "mame='"              . $nalezHledaniAut['mame']            . "'";
+        $parts[] = "id='"              . $nalezHledaniAut['id']            . "'";
+        
+    
+        // spojím oddělovačem a pošlu do logu
+        zapisDoLogu(implode(', ', $parts));
 
 
 	$hodnotaHledaniFirmy = mysqli_query($connection, "SELECT * FROM autafirmy WHERE id IS NOT NULL ORDER BY firma");

@@ -88,6 +88,40 @@ if (isset($_SESSION['uzivatel'])) {
 
 }
 
+function zapisDoLogu($textzaznamu) {
+    // složka pro logy
+    $logDir = __DIR__ . '/Logy';
+
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+
+    }
+
+    $datumlogu = date('Y-m-d');
+    $logFile   = "{$logDir}/log-{$datumlogu}.log";
+
+    // připravíme řádek
+    $user = 
+    (isset($_SESSION['uzivatel']['jmeno'])
+        ? $_SESSION['uzivatel']['jmeno']
+        : 'Neznámý')
+  . ' '
+  . (isset($_SESSION['uzivatel']['prijmeni'])
+        ? $_SESSION['uzivatel']['prijmeni']
+        : '');
+
+    $time = date('Y-m-d H:i:s');
+    $line = "[$time] ($user) $textzaznamu" . PHP_EOL;
+
+    // přidáme na konec souboru (vytvoří, pokud neexistuje) a uzamkneme
+    file_put_contents(
+        $logFile,
+        $line,
+        FILE_APPEND | LOCK_EX
+    );
+}
+
+
 $vypisDatUzivatele=mysqli_query($connection, "SELECT * FROM autauzivatele WHERE id='$prihlasenId'");
 		$nactenaDataUzivatele = mysqli_fetch_array($vypisDatUzivatele);
 
@@ -108,6 +142,16 @@ if ($_REQUEST["potvrzeni"]){
 			
 
 			mysqli_query($connection, "UPDATE autauzivatele SET heslo= '".$_REQUEST["usernewheslo"]."' WHERE id='$prihlasenId'");
+
+			$parts = [];
+			$parts[] = "Uživatel ";
+			$parts[] = "(jmeno)'"     . $nactenaDataUzivatele['jmeno']     . "'";
+			$parts[] = "(prijmeni)'"  . $nactenaDataUzivatele['prijmeni']  . "'";
+			$parts[] = " si změnil heslo";
+		
+			// spojím oddělovačem a pošlu do logu
+			zapisDoLogu(implode(', ', $parts));
+
 			echo "<script>window.alert(\"Bylo úspěšně změněno na nové heslo: ".$_REQUEST["usernewheslo"].".\");</script>";
 			ZobrazeniFormulareZmenahesla ($prihlasenId, $connection);
 			

@@ -143,9 +143,58 @@ function UzivateleUkladani ($zobrazovaneId, $connection){
         aktivni= '".$_REQUEST['aktivni']."'
         WHERE id='$zobrazovaneId'");
 
+        $parts = [];
+    $parts[] = "Do tabulky uživatelů bylo přidáno:";
+    $parts[] = "jmeno='"     . $_REQUEST['jmeno']     . "'";
+    $parts[] = "prijmeni='"  . $_REQUEST['prijmeni']  . "'";
+    $parts[] = "titulpred='" . $_REQUEST['titulpred'] . "'";
+    $parts[] = "titulza='"   . $_REQUEST['titulza']   . "'";
+    $parts[] = "telefon='"   . $_REQUEST['telefon']   . "'";
+    $parts[] = "email='"     . $_REQUEST['email']     . "'";
+    $parts[] = "opravneni='" . $_REQUEST['opravneni'] . "'";
+    $parts[] = "aktivni='"   . $_REQUEST['aktivni']   . "'";
+    $parts[] = "id='"        . $zobrazovaneId   . "'";
 
+    // spojím oddělovačem a pošlu do logu
+    zapisDoLogu(implode(', ', $parts));
 
 } #konec funkce UzivateleUkladani
+
+function zapisDoLogu($textzaznamu) {
+    // složka pro logy
+    $logDir = __DIR__ . '/Logy';
+
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+
+    }
+
+    $datumlogu = date('Y-m-d');
+    $logFile   = "{$logDir}/log-{$datumlogu}.log";
+
+    // připravíme řádek
+    $user = 
+    (isset($_SESSION['uzivatel']['jmeno'])
+        ? $_SESSION['uzivatel']['jmeno']
+        : 'Neznámý')
+  . ' '
+  . (isset($_SESSION['uzivatel']['prijmeni'])
+        ? $_SESSION['uzivatel']['prijmeni']
+        : '');
+
+    $time = date('Y-m-d H:i:s');
+    $line = "[$time] ($user) $textzaznamu" . PHP_EOL;
+
+    // přidáme na konec souboru (vytvoří, pokud neexistuje) a uzamkneme
+    file_put_contents(
+        $logFile,
+        $line,
+        FILE_APPEND | LOCK_EX
+    );
+}
+
+
+
 
 
 
@@ -167,7 +216,10 @@ elseif ($_REQUEST["nactiuzivatele"]){
 elseif ($_REQUEST["novy"]){
 	$zobrazovaneId = Time();
 	mysqli_query($connection, "INSERT INTO autauzivatele (id, heslo, opravneni, aktivni) values ('$zobrazovaneId', '1234', '4', 'on')"); #zalozi radek
-	
+    $parts = [];
+    $parts[] = "Byl přidán nový uživatel";
+    // spojím oddělovačem a pošlu do logu
+    zapisDoLogu(implode(', ', $parts));
 ?><script>window.alert("Uživatel byl založen. Heslo je: 1234, vyplň údaje a ulož");</script><?php 
 ZobrazeniFormulareUzivatele ($prihlasenId, $zobrazovaneId, $prihlasenOpravneni, $connection);
 }
@@ -175,7 +227,28 @@ ZobrazeniFormulareUzivatele ($prihlasenId, $zobrazovaneId, $prihlasenOpravneni, 
 elseif (isset($_REQUEST["smazat"])){
     $zobrazovaneId = $_REQUEST["skryteID"];
 	if ($_REQUEST["potvrzeniMazani"] == "potvrzeno"){
+
+        $vypisDatUzivatele=mysqli_query($connection, "SELECT * FROM autauzivatele WHERE id='$zobrazovaneId'");
+		$nactenaDataUzivatele = mysqli_fetch_array($vypisDatUzivatele);
+
+        $parts = [];
+        $parts[] = "Byl smazán uživatel:";
+        $parts[] = "jmeno='"     . $nactenaDataUzivatele['jmeno']     . "'";
+        $parts[] = "prijmeni='"  . $nactenaDataUzivatele['prijmeni']  . "'";
+        $parts[] = "titulpred='" . $nactenaDataUzivatele['titulpred'] . "'";
+        $parts[] = "titulza='"   . $nactenaDataUzivatele['titulza']   . "'";
+        $parts[] = "telefon='"   . $nactenaDataUzivatele['telefon']   . "'";
+        $parts[] = "email='"     . $nactenaDataUzivatele['email']     . "'";
+        $parts[] = "opravneni='" . $nactenaDataUzivatele['opravneni'] . "'";
+        $parts[] = "aktivni='"   . $nactenaDataUzivatele['aktivni']   . "'";
+        $parts[] = "id='"        . $nactenaDataUzivatele['id']        . "'";
+    
+        // spojím oddělovačem a pošlu do logu
+        zapisDoLogu(implode(', ', $parts));
+
+
 		mysqli_query($connection, "DELETE FROM autauzivatele WHERE id ='$zobrazovaneId'");
+
 		?><script>window.alert("Mazání bylo úspěšně provedeno.");</script>
 		<?php
         ZobrazeniFormulareUzivatele ($prihlasenId, $prihlasenId, $prihlasenOpravneni, $connection);
@@ -203,6 +276,21 @@ echo "<form method=\"post\" action=\"Uzivatele.php\" name=\"uzivateleFormular\">
 
 $vypisDatUzivatele=mysqli_query($connection, "SELECT * FROM autauzivatele WHERE id='$zobrazovaneId'");
 		$nactenaDataUzivatele = mysqli_fetch_array($vypisDatUzivatele);
+
+        $parts = [];
+        $parts[] = "Byl načten uživatel:";
+        $parts[] = "jmeno='"     . $nactenaDataUzivatele['jmeno']     . "'";
+        $parts[] = "prijmeni='"  . $nactenaDataUzivatele['prijmeni']  . "'";
+        $parts[] = "titulpred='" . $nactenaDataUzivatele['titulpred'] . "'";
+        $parts[] = "titulza='"   . $nactenaDataUzivatele['titulza']   . "'";
+        $parts[] = "telefon='"   . $nactenaDataUzivatele['telefon']   . "'";
+        $parts[] = "email='"     . $nactenaDataUzivatele['email']     . "'";
+        $parts[] = "opravneni='" . $nactenaDataUzivatele['opravneni'] . "'";
+        $parts[] = "aktivni='"   . $nactenaDataUzivatele['aktivni']   . "'";
+        $parts[] = "id='"        . $nactenaDataUzivatele['id']        . "'";
+    
+        // spojím oddělovačem a pošlu do logu
+        zapisDoLogu(implode(', ', $parts));
 
 
         if ($prihlasenOpravneni <= 2){
