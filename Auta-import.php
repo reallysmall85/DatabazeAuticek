@@ -215,6 +215,7 @@ if (isset($_POST['import'])) {
         $highestColumn = $sheet->getHighestColumn();
         $highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
         $headers = [];
+        $cisloSloupceRok = 0;
         for ($col = 0; $col < $highestColumnIndex; $col++) {
             $cellValue = trim((string) $sheet->getCellByColumnAndRow($col, 1)->getValue());
             if ($cellValue !== '') {
@@ -226,6 +227,9 @@ if (isset($_POST['import'])) {
                     exit();
                 }
                 $headers[] = $cellValue;
+            }
+            if ($cellValue == "rok"){
+                $cisloSloupceRok = $col;
             }
         }
 
@@ -256,6 +260,9 @@ if (isset($_POST['import'])) {
         // Pro mysqli bind_param potřebujeme řetězec typů – všechny jako "s" (string)
         $types = str_repeat('s', $columnCount);
 
+        $aktualiRokDvouciferne = date('y');
+    
+
         for ($row = 2; $row <= $highestRow; $row++) {
             $values = [];
             $allBlank = true;
@@ -263,6 +270,25 @@ if (isset($_POST['import'])) {
                 $val = $sheet->getCellByColumnAndRow($col, $row)->getValue();
                 if ($val !== null && $val !== '') {
                     $allBlank = false;
+                }
+                if ($col == $cisloSloupceRok){
+                    switch (true){
+                        case is_numeric($val) && $val < 100 && $val <= $aktualiRokDvouciferne:
+                            $val = str_pad($val, 2, '0', STR_PAD_LEFT) + 2000;
+                            break;
+                        case is_numeric($val) && $val < 100 && $val > $aktualiRokDvouciferne:
+                            $val = str_pad($val, 2, '0', STR_PAD_LEFT) + 1900;
+                            break;
+                        case is_numeric($val) && $val < 1900 && $val >= 100:
+                            $val = null;
+                            break;
+                        case is_string($val):
+                            $val = null;
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
                 $values[] = $val;
             }
