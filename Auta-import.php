@@ -49,9 +49,87 @@ if ($opravneni > 2 ) {
         button { padding: 6px 14px; font-size: 14px; }
         .error { color: #a00; }
         .success { color: #080; }
+
+        .tabulka-hlavni {
+            max-width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background-color: white;
+            margin-left: auto; 
+            margin-right: auto; 
+            margin-top: auto;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+            border: none; 
+   			
+        }
+        .tabulka-hlavni th,
+        .tabulka-hlavni td {
+            padding: 8px;
+            border: none;
+            word-wrap: break-word;
+        }
+        
+        .tabulka-hlaska {
+            max-width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background-color: white;
+            margin-left: auto; 
+            margin-right: auto; 
+            margin-top: 20px;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden; 
+   			border: none;
+        }
+        .tabulka-hlaska th,
+        .tabulka-hlaska td {
+            padding: 8px;
+            border: none;
+            word-wrap: break-word;
+        }
+        .tabulka-prihlasen {
+            background-color: white;
+            margin-left: 5px;; 
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+        .tabulka-prihlasen th,
+		.tabulka-prihlasen td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
+        .tabulka-ikony {
+            background-color: white;
+            margin-left: 5px;; 
+            margin-top: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+		.tabulka-ikony th, 
+		.tabulka-ikony td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
+
+
     </style>
 </head>
-<body>
+<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 
 <?php
@@ -62,7 +140,7 @@ if ($opravneni > 2 ) {
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
     $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
     if ($prihlasenOpravneni <= 2 ){
-        echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+        echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
         switch ($prihlasenOpravneni){
             case 1:
                 echo "admin";
@@ -81,7 +159,7 @@ if ($opravneni > 2 ) {
                 break;
 
         }
-         echo "</span><br>";
+        echo "</span></div></td></tr></table>";
 
     }
     else {
@@ -126,36 +204,53 @@ function zapisDoLogu($textzaznamu) {
 
 
 ?>
-
+<table class="tabulka-ikony">
+<tr>
+<td>
+<div>
 <a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php">
-<img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku">
-</a>
-<br>
+<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+</div>
+</td>
+</tr>
+</table>
 
-
-
-    <hr>
+    <table class="tabulka-hlavni">
+        <tr>
+            <td>
 
     <form action="Auta-import.php" method="post" enctype="multipart/form-data">
         <label for="excelFile">
             <b>VYBER TABULKU PRO IMPORT</b> <br>
             (podporované formáty: XLSX, XLS, CSV, ODS): 
-        </label><br><br>
+        </label>
+        
+            </td>
+        </tr>
+        <tr>
+            <td>
+
         <input 
             type="file" 
             id="excelFile" 
             name="excelFile" 
             accept=".xlsx,.xls,.csv,.ods" 
             required
-        ><br>
+        >
+            </td>
+        </tr>
+        <tr>
+            <td>
 
-        <button type="submit" name="import" style="background-color: darkviolet; color: white; border: none; padding: 10px 20px; margin-left: 5px; cursor: pointer; box-sizing: border-box;"
-                  onmouseover="this.style.backgroundColor='purple';" onmouseout="this.style.backgroundColor='darkviolet';">Importovat soubor</button>
+            <div align="right"><button type="submit" name="import" style="background-color: darkviolet; color: white; border: none; padding: 10px 20px; margin-left: 5px; cursor: pointer; box-sizing: border-box;"
+                  onmouseover="this.style.backgroundColor='purple';" onmouseout="this.style.backgroundColor='darkviolet';">Importovat soubor</button></div>
 
 
        
     </form>
+    </td>
+        </tr>
+            </table>
 
 <?php
 // 4) Zapojíme PHPExcel (uloženo v /Classes/)
@@ -165,7 +260,7 @@ require_once __DIR__ . '/Classes/PHPExcel/IOFactory.php';
 // 5) Po odeslání formuláře
 if (isset($_POST['import'])) {
     if (!isset($_FILES['excelFile']) || $_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
-        echo '<div class="error">Chyba při nahrávání souboru. Zkuste to prosím znovu.</div>';
+        echo '<table class="tabulka-hlaska"><tr><td><div class="error">Chyba při nahrávání souboru. Zkuste to prosím znovu.</div></td></tr></table>';
     } else {
 
         zapisDoLogu("Zapsáno do databáze auta z importovaného souboru:");
@@ -193,9 +288,9 @@ if (isset($_POST['import'])) {
                 $reader = PHPExcel_IOFactory::createReader('Excel2007');
             }
         } catch (Exception $e) {
-            echo '<div class="error">Nepodařilo se vytvořit čtečku pro tento formát: '
+            echo '<table class="tabulka-hlaska"><tr><td><div class="error">Nepodařilo se vytvořit čtečku pro tento formát: '
                  . htmlspecialchars($e->getMessage())
-                 . '</div>';
+                 . '</div></td></tr></table>';
             exit();
         }
 
@@ -203,9 +298,9 @@ if (isset($_POST['import'])) {
         try {
             $excel = $reader->load($tmpPath);
         } catch (Exception $e) {
-            echo '<div class="error">Chyba při načítání souboru: '
+            echo '<table class="tabulka-hlaska"><tr><td><div class="error">Chyba při načítání souboru: '
                  . htmlspecialchars($e->getMessage())
-                 . '</div>';
+                 . '</div></td></tr></table>';
             exit();
         }
 
@@ -221,9 +316,9 @@ if (isset($_POST['import'])) {
             if ($cellValue !== '') {
                 // Validujeme, aby sloupce byly jen alfanumerické + podtržítko
                 if (!preg_match('/^[A-Za-z0-9_]+$/', $cellValue)) {
-                    echo '<div class="error">Neplatný název sloupce v hlavičce: '
+                    echo '<table class="tabulka-hlaska"><tr><td><div class="error">Neplatný název sloupce v hlavičce: '
                          . htmlspecialchars($cellValue)
-                         . '. Sloupce mohou obsahovat jen písmena, číslice a podtržítko.</div>';
+                         . '. Sloupce mohou obsahovat jen písmena, číslice a podtržítko.</div></td></tr></table>';
                     exit();
                 }
                 $headers[] = $cellValue;
@@ -234,7 +329,7 @@ if (isset($_POST['import'])) {
         }
 
         if (count($headers) === 0) {
-            echo '<div class="error">Soubor nemá žádné platné hlavičky v prvním řádku.</div>';
+            echo '<table class="tabulka-hlaska"><tr><td><div class="error">Soubor nemá žádné platné hlavičky v prvním řádku.</div></td></tr></table>';
             exit();
         }
 
@@ -246,9 +341,9 @@ if (isset($_POST['import'])) {
         $insertSql = "INSERT INTO `$tableName` ($columnList) VALUES ($placeholders)";
         $stmt = mysqli_prepare($connection, $insertSql);
         if ($stmt === false) {
-            echo '<div class="error">Chyba při přípravě SQL dotazu: '
+            echo '<table class="tabulka-hlaska"><tr><td><div class="error">Chyba při přípravě SQL dotazu: '
                  . htmlspecialchars(mysqli_error($connection))
-                 . '</div>';
+                 . '</div></td></tr></table>';
             exit();
         }
 
@@ -317,16 +412,16 @@ if (isset($_POST['import'])) {
 
             // Spustíme INSERT
             if (!mysqli_stmt_execute($stmt)) {
-                echo '<div class="error">Chyba při vkládání na řádku ' . $row . ': '
+                echo '<table class="tabulka-hlaska"><tr><td><div class="error">Chyba při vkládání na řádku ' . $row . ': '
                      . htmlspecialchars(mysqli_stmt_error($stmt))
-                     . '</div>';
+                     . '</div></td></tr></table>';
                 exit();
             }
             $rowCount++;
         }
 
         mysqli_stmt_close($stmt);
-        echo '<div class="success">Importováno řádků: <strong>' . $rowCount . '</strong>.</div>';
+        echo '<table class="tabulka-hlaska"><tr><td><div class="success">Importováno řádků: <strong>' . $rowCount . '</strong>.</div></td></tr></table>';
     }
 }
 ?>

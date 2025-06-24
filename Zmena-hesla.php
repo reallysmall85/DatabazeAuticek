@@ -20,16 +20,67 @@ if (!isset($_SESSION['uzivatel'])) {
             width: 100%;
             max-width: 100%;
         }
-        table {
+		.tabulka-hlavni {
             max-width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
+            background-color: white;
+            margin-left: auto; 
+            margin-right: auto; 
+            margin-top: auto;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden; 
+            border: none; 
+   			
         }
-        th, td {
+        .tabulka-hlavni th,
+        .tabulka-hlavni td {
             padding: 8px;
-            border: 1px solid black;
+            border: none;
             word-wrap: break-word;
         }
+        .tabulka-hlavni td + td,
+        .tabulka-hlavni th + th {
+            border-left: 1px solid black;
+        }
+        .tabulka-hlavni tr + tr td {
+            border-top: 1px solid black;
+        }
+        .tabulka-prihlasen {
+            background-color: white;
+            margin-left: 5px;; 
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+        .tabulka-prihlasen th,
+		.tabulka-prihlasen td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
+        .tabulka-ikony {
+            background-color: white;
+            margin-left: 5px;; 
+            margin-top: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+		.tabulka-ikony th, 
+		.tabulka-ikony td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
 
     </style>
 <?php
@@ -56,7 +107,7 @@ mysqli_query($connection, "SET CHARACTER SET utf8");
 
  
 </head>
-<body>
+<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 <?php include("phpqrcode/qrlib.php");
 if (isset($_SESSION['uzivatel'])) {
@@ -65,7 +116,7 @@ if (isset($_SESSION['uzivatel'])) {
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
     $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
 	$prihlasenHeslo = isset($_SESSION['uzivatel']['heslo']) ? $_SESSION['uzivatel']['heslo'] : 'Chyba hesla';
-	echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+	echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
 	switch ($prihlasenOpravneni){
 		case 1:
 			echo "admin";
@@ -84,7 +135,7 @@ if (isset($_SESSION['uzivatel'])) {
 			break;
 
 	}
-	 echo "</span><br>";
+	 echo "</span></div></td></tr></table>";
 
 }
 
@@ -127,10 +178,17 @@ $vypisDatUzivatele=mysqli_query($connection, "SELECT * FROM autauzivatele WHERE 
 
 ?>
 
+<table class="tabulka-ikony">
+<tr>
+<td>
+<div>
 <a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php">
-<img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku">
-</a><br><br>
+<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+</div>
+</td>
+</tr>
+</table>
+
 <?php
 
 
@@ -153,8 +211,7 @@ if ($_REQUEST["potvrzeni"]){
 			zapisDoLogu(implode(', ', $parts));
 
 			echo "<script>window.alert(\"Bylo úspěšně změněno na nové heslo: ".$_REQUEST["usernewheslo"].".\");</script>";
-			ZobrazeniFormulareZmenahesla ($prihlasenId, $connection);
-			
+			echo "<script>window.close();</script>";
 		}
 		
 
@@ -174,21 +231,25 @@ else{
 
 
 function ZobrazeniFormulareZmenahesla ($prihlasenId, $connection){?>
-<body>
+
 
 
 <?php echo "<form method=\"post\" action=\"Zmena-hesla.php\" name=\"zmenaHesla\">";?>
-<table id="prihlaseni">
+<table class="tabulka-hlavni">
 
-	
+	<tr><th colspan="2">ZMĚNA HESLA</th></tr>
 
 	<tr><td>Zadej své staré heslo: </td><td><input name="useroldheslo" size="10" row="1" type="password"></td></tr>
 	<tr><td>Zadej své nové heslo: </td><td><input name="usernewheslo" size="10" row="1" type="password"></td></tr>
 	<tr><td>Zadej ještě jednou nové heslo (kontrola): </td><td><input name="usernewheslokontrola" size="10" row="1" type="password"></td></tr>
-	
+	<tr>	
+		<td colspan="2">
+			<div align="right"><input type="Submit" name="potvrzeni" value="OK" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';"  style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;"></div>
+			
+		</td>
+	</tr>
 </table>
-<br>
-	<input name="potvrzeni" type="Submit" value="OK">
+
 
 
 </form>

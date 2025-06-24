@@ -444,10 +444,87 @@ function previewInNewWindow(src) {
             max-width: 100%;         /* Maximální šířka 100 % obrazovky */
             border-collapse: collapse; /* Spojí okraje buněk */
         }
-        th, td {
-            padding: 8px;           /* Přidá mezery uvnitř buněk */
-            border: 1px solid black; /* Ohraničení buněk */
+        
+        .hlavnitabulkaeditace {
+            max-width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background-color: white;
+            margin-left: auto; 
+            margin-right: auto; 
+            margin-top: auto;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden; 
+            border: none; 
+   			
         }
+        .hlavnitabulkaeditace th,
+        .hlavnitabulkaeditace td {
+            padding: 8px;
+            border: none;
+            word-wrap: break-word;
+        }
+        .hlavnitabulkaeditace td + td,
+        .hlavnitabulkaeditace th + th {
+            border-left: 1px solid black;
+        }
+        .hlavnitabulkaeditace tr + tr td {
+            border-top: 1px solid black;
+        }
+        
+        .tabulka-fotky {
+            background-color: white;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+            border: none;
+            padding-bottom: 8px;
+        }
+        .tabulka-fotky th,
+		.tabulka-fotky td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none !important;
+            white-space: nowrap;
+		}
+        .tabulka-prihlasen {
+            background-color: white;
+            margin-left: 5px;; 
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+        .tabulka-prihlasen th,
+		.tabulka-prihlasen td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
+        .tabulka-ikony {
+            background-color: white;
+            margin-left: 5px;; 
+            margin-top: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+		.tabulka-ikony th, 
+		.tabulka-ikony td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
               
         .barevnost1 {
             background-color: #f5f5f5;
@@ -481,6 +558,18 @@ function previewInNewWindow(src) {
         textarea.unsaved {
             color: red;
         }
+        .QR-box {
+            display: inline-flex; 
+            align-items: center;
+            gap: 8px;
+        }
+        .QR-box img {
+            max-width: 180px;          
+           
+        }
+        .QR-box button {
+            padding: 6px 12px;
+}
 
         
     </style>
@@ -490,7 +579,7 @@ function previewInNewWindow(src) {
 
 
 
-<body>
+<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 <?php
 
@@ -508,7 +597,7 @@ if (isset($_SESSION['uzivatel'])) {
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
     $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
     if ($prihlasenOpravneni <= 2){
-        echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+        echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
         switch ($prihlasenOpravneni){
             case 1:
                 echo "admin";
@@ -527,7 +616,7 @@ if (isset($_SESSION['uzivatel'])) {
                 break;
 
         }
-         echo "</span><br>";
+        echo "</span></div></td></tr></table>";
     }
     else {
         header("Location: Prihlaseni.php");
@@ -571,11 +660,16 @@ function zapisDoLogu($textzaznamu) {
 ?>
 
 
+<table class="tabulka-ikony">
+<tr>
+<td>
+<div>
 <a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php">
-<img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku">
-</a>
-<br>
+<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+</div>
+</td>
+</tr>
+</table>
 
 
 <?php
@@ -652,10 +746,10 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
 
 
 
-<table id="hlavnitabulkaeditace">
-
-
-
+<table class="hlavnitabulkaeditace">
+<tr>
+<th colspan="4">EDITACE ZÁZNAMU</th>
+</tr>
 <?php
 	$hodnotaHledaniAut = mysqli_query($connection, "SELECT * FROM auta WHERE id='$polozka'");
 	if (!$hodnotaHledaniAut) {
@@ -1072,12 +1166,30 @@ if (isset($_REQUEST["inputmame"]) && $_REQUEST["inputmame"]) {
     echo "<td><textarea name=\"inputmame\" readonly style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
-echo "</table>";
+
+
+# ---------QR -----------
+
+echo "<tr class=\"barevnost1\"><td>QR:<td></td><td></td>";
+
+        $cestaQRauta = "QR-auta/".$nalezHledaniAut["id"].".png";
+		
+		if(!file_exists($cestaQRauta)){
+			QRcode::png($nalezHledaniAut["id"], $cestaQRauta);
+		}
+		echo "<td><div class=\"QR-box\"><img src='".$cestaQRauta."'>";
+        echo "<button onclick=\"printQR('".$cestaQRauta."')\">Tisk</button>"; 
+echo "</div></td></tr>";
+
+
 
 
 # ---------FOTKY -----------
 
-echo "<table>";
+echo "<tr><td colspan=\"4\">";
+
+
+echo "<table class=\"tabulka-fotky\">";
 echo "<tr>";
 echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20px; font-weight: bold;\">
   Úspěšně nahráno!
@@ -1086,14 +1198,15 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
   <h3>Přetáhněte sem soubor</h3>
   <input type=\"file\" id=\"fileElem\" multiple accept=\"*\" style=\"display:none\">
   <label class=\"button\" for=\"fileElem\">Vyberte soubor ze složky</label>
-</div></td>";
+</div></td></tr></table></td></tr><tr><td colspan=\"4\"><table class=\"tabulka-fotky\"><tr><td colspan=\"4\"><div align=\"left\">FOTKY:</div></td></tr><tr>";
 $slozkapolozky = dir("Fotky/temp/".$polozka);
-
+$pocetFotekKZobrazeni = 0;
 while($fotkavypis=$slozkapolozky->read()) { 
 	if ($fotkavypis=="." || $fotkavypis=="..") continue; 
 	    $fotkavypisbeztecky = str_replace('.','_', $fotkavypis);
+        
 	    
-	    echo "<td valign='top'><div style='position: relative; display: inline-block;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px\" onclick=\"previewInNewWindow(this.src)\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>ok</textarea>";
+	    echo "<td valign='top'><div style='position: relative; display: inline-block; box-shadow: 0 2px 15px rgba(0,0,0,0.5); border-radius: 6px;'><img src=\"Fotky/temp/$polozka/$fotkavypis\" name=\"obrazek-".$fotkavypisbeztecky."\" style=\"max-width: 180px\" onclick=\"previewInNewWindow(this.src)\"><textarea name='hidden-".$fotkavypisbeztecky."' style='display: none;'>ok</textarea>";
         echo "<input
        type='button'
        name='tlacitkoReload-".$fotkavypisbeztecky."'
@@ -1161,52 +1274,38 @@ while($fotkavypis=$slozkapolozky->read()) {
               \"
             >";
           echo "</div></td>";
-	    
+          $pocetFotekKZobrazeni = $pocetFotekKZobrazeni + 1;
+          if ($pocetFotekKZobrazeni == 5){
+              echo "</tr><tr>";
+              $pocetFotekKZobrazeni = 0;
+          }
 	
 } 
 $slozkapolozky->close(); 
 echo "</tr>";
 echo "</table>";
+echo "</td></tr><tr><td colspan=\"4\">";
 
-
-
-# ---------QR -----------
-
-echo "<table>";
-echo "<tr>";
-
-$cestaQRauta = "QR-auta/".$nalezHledaniAut["id"].".png";
-		
-		if(!file_exists($cestaQRauta)){
-			QRcode::png($nalezHledaniAut["id"], $cestaQRauta);
-		}
-		
-
-
-			echo "<td><img src='".$cestaQRauta."'></td>";
-			echo "<td>";
-               
-               echo "<button onclick=\"printQR('".$cestaQRauta."')\">Tisk</button>"; 
-            echo "</td>";
-
-
-
-echo "</tr>";
-echo "</table>";
 
 
 # ---------SUBMIT -----------
 
-echo "<input type=\"Submit\" name=\"uloz\" value=\"Uložit záznam\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
+echo "<table class=\"tabulka-fotky\">";
+echo "<div align=\"right\"><input type=\"Submit\" name=\"uloz\" value=\"Uložit záznam\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
 
 
 ?>
 
 	<input type="hidden" name="potvrzeniMazani" value="nepotvrzeno" />
 	<input type="submit" name="smaz" value="Smazat záznam!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
-
-
+    </div>
+</td>
+</tr>
+</table>
 	
+    </td>
+    </tr>
+    <table>
 		
 </form>
 <?php

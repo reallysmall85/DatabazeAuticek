@@ -41,8 +41,21 @@ $searchQueryLowerDiakritika = mb_strtolower(trim($searchQuery), 'UTF-8');
 $searchQueryLower = iconv('UTF-8', 'ASCII//TRANSLIT', $searchQueryLowerDiakritika);
 
 
+if (isset($_SESSION['uzivatel'])) {
+    $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
+    $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
+    $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
+    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
+}
 
-if ($searchQueryLower === 'duplicity') {
+$zobrazujmame = "ANO";
+
+if (isset($_GET['zobrazpozadavky']) && $prihlasenOpravneni <= 2){
+    $zobrazujmame = "NE";
+}
+
+
+if ($searchQueryLower === 'duplicity' && $zobrazujmame == 'ANO') {
     // Definujeme poddotaz, který vybere řádky, kde se ve sloupci cislo vyskytuje více než jednou
     $dupQueryPart = " WHERE cislo IN (
                         SELECT cislo 
@@ -58,9 +71,24 @@ if (isset($dupQueryPart)) {
     $baseQuery = "FROM auta " . $dupQueryPart;
     $query = "SELECT * " . $baseQuery . " ORDER BY cislo";
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
-} else {
+} 
+
+else {
     // Standardní vyhledávání
     $where = "WHERE id IS NOT NULL";
+
+    if ($zobrazujmame == 'ANO'){
+        $where .= " AND (
+            mame = 'ANO' OR 
+            mame = '' OR 
+            mame IS NULL
+        )";
+    }
+
+    else {
+        $where .= " AND mame = 'NE'";
+    }
+
     if (!empty($searchQuery)) {
         // Rozdělení zadaného textu na jednotlivá slova
         $words = preg_split('/\s+/', trim($searchQuery));
@@ -139,6 +167,39 @@ $result = mysqli_query($connection, $query);
             max-width:150px;
             word-wrap: break-word;
         }
+        .tabulka-prihlasen {
+            background-color: white;
+            margin-left: 5px;; 
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+        .tabulka-prihlasen th,
+		.tabulka-prihlasen td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
+        .tabulka-ikony {
+            background-color: white;
+            margin-left: 5px;; 
+            margin-top: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+   			border-radius: 6px;
+   			overflow: hidden;
+        }
+		.tabulka-ikony th, 
+		.tabulka-ikony td {
+			padding: 8px;
+            word-wrap: break-word;
+            max-width: none;
+			border: none;
+            white-space: nowrap;
+		}
         .fixed-arrow-nahoru {
             position: fixed;
             bottom: 20px; /* Vzdálenost od spodního okraje */
@@ -225,14 +286,10 @@ $result = mysqli_query($connection, $query);
   });
 </script>
 </head>
-<body>
+<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 <?php include("phpqrcode/qrlib.php");
-if (isset($_SESSION['uzivatel'])) {
-    $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
-    $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
-    $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
-    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
-    echo "Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+
+    echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
         switch ($prihlasenOpravneni){
             case 1:
                 echo "admin";
@@ -251,27 +308,32 @@ if (isset($_SESSION['uzivatel'])) {
                 break;
 
         }
-         echo "</span><br>";
+        echo "</span></div></td></tr></table>";
 
-}
+
 
 
 
 ?>
 
+<table class="tabulka-ikony">
+<tr>
+<td>
+<div>
 <a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php">
-<img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku">
-</a>
-<br>
+<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+</div>
+</td>
+</tr>
+</table>
 <?php
 if ($prihlasenOpravneni <= 2 ){
-    echo "<input type='button' value='NOVÁ POLOŽKA' style='background-color: orange; color: white; border: none; padding: 10px 20px; cursor: pointer; box-sizing: border-box;'
+    echo "<div style=\"margin-top: 5px;\"><input type='button' value='NOVÁ POLOŽKA' style='background-color: orange; color: white; border: none; padding: 10px 20px; cursor: pointer; box-sizing: border-box;'
                   onmouseover=\"this.style.backgroundColor='darkorange';\" onmouseout=\"this.style.backgroundColor='orange';\" 
                   onclick=\"window.open('Auta-edit.php?polozka=nova', '_blank');\">";
     echo "<input type='button' value='IMPORT' style='background-color: darkviolet; color: white; border: none; padding: 10px 20px; margin-left: 5px; cursor: pointer; box-sizing: border-box;'
                   onmouseover=\"this.style.backgroundColor='purple';\" onmouseout=\"this.style.backgroundColor='darkviolet';\" 
-                  onclick=\"window.open('Auta-import.php', '_blank');\">";
+                  onclick=\"window.open('Auta-import.php', '_blank');\"></div>";
     #echo "<a href=\"Auta-edit.php?polozka=nova\" target=\"_blank\">Nová položka</a>";
 }
 ?>
@@ -281,6 +343,7 @@ if ($prihlasenOpravneni <= 2 ){
     <input type="text" name="q" placeholder="Zadejte klíčová slova (nebo 'duplicity')" 
            value="<?php echo htmlspecialchars(isset($_GET['q']) ? $_GET['q'] : ''); ?>" 
            style="width: 500px; font-size: 20px; background-color: #e0f8e0; padding: 10px 20px; box-sizing: border-box;" autocomplete="off">
+    <input type="hidden" name="zobrazpozadavky" value="<?php echo htmlspecialchars($zobrazujmame); ?>">
     <input type="submit" value="Hledat" 
            style="background-color: green; color: white; border: none; padding: 10px 20px; font-size: 20px; cursor: pointer; box-sizing: border-box;" 
            onmouseover="this.style.backgroundColor='darkgreen';" 
@@ -306,7 +369,7 @@ if (!empty($searchQuery)) {
 
 <br>
 <!-- Výpis dat v tabulce -->
-<div style="max-width: 100%; overflow-x: auto;">
+<div style="max-width: 100%; overflow-x: auto; background-color: white;">
 <table>
     <tr>
         <th>Firma <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=firma'\">";?></th>
@@ -415,6 +478,7 @@ for ($a = 1; $a <= $totalPages; $a++) {
 
  
 }
+
 ?>
 </div>
 </body>
