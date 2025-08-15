@@ -136,7 +136,7 @@ if (isset($_POST["potvrzeniPrihlaseni"])){
 function ZobrazeniFormularePrihlaseni ($hodnotaHledaniUzivatele){
 ?>
 
-<body class="pruhledny" style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body class="pruhledny" style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 <form method="post" action="Prihlaseni.php" name="kartaPrihlaseni">
 

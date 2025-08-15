@@ -139,7 +139,7 @@ mysqli_query($connection, "SET CHARACTER SET utf8");
 </head>
 
 
-<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 
 <?php include("phpqrcode/qrlib.php");

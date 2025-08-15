@@ -55,12 +55,13 @@ if ($opravneni > 2) {
 if ($polozka == "nova"){
 
 		$polozka = Time();
+		$caspridani = date('Y-m-d H:i:s');
 		$hledaniExistence = mysqli_query($connection, "SELECT * FROM auta WHERE id='$polozka'");
         if (mysqli_num_rows($hledaniExistence) > 0) {
           $polozka = $polozka + 1;
         }
 
-		mysqli_query($connection, "INSERT INTO auta (id) values ('$polozka')"); #zalozi radek
+		mysqli_query($connection, "INSERT INTO auta (id, pridano) values ('$polozka', '$caspridani')"); #zalozi radek
 
         $parts = [];
         $parts[] = "Do tabulky auta bylo přidán nový záznam:";
@@ -83,6 +84,7 @@ if (isset($_GET['duplikace'])) {
     $puvodniPolozka = (int)$_GET["polozka"];
 
     $novaPolozka = Time();
+    $caspridani = date('Y-m-d H:i:s');
     $hledaniExistence = mysqli_query($connection, "SELECT 1 FROM auta WHERE id='$novaPolozka'");
     if (mysqli_num_rows($hledaniExistence) > 0) {
       $novaPolozka++;
@@ -94,14 +96,14 @@ if (isset($_GET['duplikace'])) {
         barva1,barva2,barva3,barva4,barva5,
         serie,zavod,startovnicislo,tym,reklama,
         jezdec1,jezdec2,jezdec3,rok,cena,popis,
-        poznamka,umisteniauta,umistenikrabicky,mame
+        poznamka,umisteniauta,umistenikrabicky,mame,pridano
       )
       SELECT
         '$novaPolozka', firma,firma2,cislo,nazev,upresneni,
         barva1,barva2,barva3,barva4,barva5,
         serie,zavod,startovnicislo,tym,reklama,
         jezdec1,jezdec2,jezdec3,rok,cena,popis,
-        poznamka,umisteniauta,umistenikrabicky,mame
+        poznamka,umisteniauta,umistenikrabicky,mame,'$caspridani'
       FROM auta
       WHERE id='$puvodniPolozka'
     "); #duplikuje radek
@@ -205,6 +207,8 @@ foreach ($nalezeneUlozeneFotky as $fotka) {
 		if(dialogoveokno) document.formularauta.potvrzeniMazani.value='potvrzeno';
 		}
 </script>
+
+
 
  <script>
         // Funkce pro tisk QR kódu
@@ -579,7 +583,7 @@ function previewInNewWindow(src) {
 
 
 
-<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 <?php
 
@@ -715,9 +719,9 @@ if (isset($_REQUEST["uloz"])) {
 
 }
 
-elseif (isset($_REQUEST["smaz"])){
+elseif (isset($_REQUEST["smaz"]) || isset($_GET['smazpolozku'])){
 
-	if ($_REQUEST["potvrzeniMazani"] == "potvrzeno"){
+	if (($_REQUEST["potvrzeniMazani"] == "potvrzeno") || isset($_GET['smazpolozku'])){
 		Smaz ($polozka, $connection);
 		?><script>window.alert("Mazání bylo úspěšně provedeno.");</script>
 		<?php
@@ -741,16 +745,7 @@ function ZobrazeniFormulare ($prihlasenId, $prihlasenOpravneni, $polozka, $conne
 
 
 echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\"formularauta\">";
-?>
 
-
-
-
-<table class="hlavnitabulkaeditace">
-<tr>
-<th colspan="4">EDITACE ZÁZNAMU</th>
-</tr>
-<?php
 	$hodnotaHledaniAut = mysqli_query($connection, "SELECT * FROM auta WHERE id='$polozka'");
 	if (!$hodnotaHledaniAut) {
     die("Chyba při načítání dat: " . mysqli_error($connection));
@@ -784,6 +779,7 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
         $parts[] = "umisteniauta='"     . $nalezHledaniAut['umisteniauta']    . "'";
         $parts[] = "umistenikrabicky='" . $nalezHledaniAut['umistenikrabicky']. "'";
         $parts[] = "mame='"              . $nalezHledaniAut['mame']            . "'";
+        $parts[] = "pridano='"           . $nalezHledaniAut['pridano']         . "'";
         $parts[] = "id='"              . $nalezHledaniAut['id']            . "'";
         
     
@@ -798,6 +794,14 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
 	$hodnotaHledaniZavody = mysqli_query($connection, "SELECT * FROM autazavody WHERE id IS NOT NULL ORDER BY zavod");
 	$hodnotaHledaniSerie = mysqli_query($connection, "SELECT * FROM autaserie WHERE id IS NOT NULL ORDER BY serie");
 	$hodnotaHledaniBarvy = mysqli_query($connection, "SELECT * FROM autabarvy WHERE id IS NOT NULL ORDER BY barva");
+
+# -----------NADPIS----------
+
+echo "<table class=\"hlavnitabulkaeditace\">";
+echo "<tr>";
+echo "<th colspan=\"4\">EDITACE ZÁZNAMU (vytvořen: ". $nalezHledaniAut['pridano'] .")</th>";
+echo "</tr>";
+
 
 
 # ----------- FIRMA ---------------			

@@ -129,7 +129,7 @@ if ($opravneni > 2 ) {
 
     </style>
 </head>
-<body style="background-image: url(pozadi-auticka3.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
 
 
 <?php
@@ -327,10 +327,14 @@ if (isset($_POST['import'])) {
                 $cisloSloupceRok = $col;
             }
         }
+       
 
         if (count($headers) === 0) {
             echo '<table class="tabulka-hlaska"><tr><td><div class="error">Soubor nemá žádné platné hlavičky v prvním řádku.</div></td></tr></table>';
             exit();
+        }
+        else {
+             $headers[] = 'pridano';
         }
 
         // 9) Připravíme SQL INSERT
@@ -361,7 +365,7 @@ if (isset($_POST['import'])) {
         for ($row = 2; $row <= $highestRow; $row++) {
             $values = [];
             $allBlank = true;
-            for ($col = 0; $col < $columnCount; $col++) {
+            for ($col = 0; $col < ($columnCount - 1); $col++) {
                 $val = $sheet->getCellByColumnAndRow($col, $row)->getValue();
                 if ($val !== null && $val !== '') {
                     $allBlank = false;
@@ -391,6 +395,10 @@ if (isset($_POST['import'])) {
                 // celý řádek prázdný → přeskočíme
                 continue;
             }
+            else {
+                $caspridani = date('Y-m-d H:i:s');
+                $values[] =  $caspridani;
+            }
 
             // Dynamické bind_param – musíme předat reference v poli
             $bindParams = [];
@@ -402,7 +410,7 @@ if (isset($_POST['import'])) {
    
 
 
-            zapisDoLogu(implode(', ', $bindParams));
+            zapisDoLogu(implode(', ', $values));
 
 
             call_user_func_array(

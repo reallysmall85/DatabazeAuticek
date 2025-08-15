@@ -6,9 +6,44 @@ ini_set('display_errors', 1);
 
 function Smaz ($radek, $connection){
 
+	$hodnotaHledaniAut = mysqli_query($connection, "SELECT * FROM auta WHERE id='$radek'");
+	if (!$hodnotaHledaniAut) {
+    die("Chyba při načítání dat: " . mysqli_error($connection));
+	}
+	$nalezHledaniAut = mysqli_fetch_array($hodnotaHledaniAut);
+
+        $parts = [];
+        $parts[] = "Byl smazán záznam (z databáze):";
+        $parts[] = "firma='"            . $nalezHledaniAut['firma']           . "'";
+        $parts[] = "firma2='"           . $nalezHledaniAut['firma2']          . "'";
+        $parts[] = "cislo='"            . $nalezHledaniAut['cislo']           . "'";
+        $parts[] = "nazev='"            . $nalezHledaniAut['nazev']           . "'";
+        $parts[] = "upresneni='"        . $nalezHledaniAut['upresneni']       . "'";
+        $parts[] = "barva1='"           . $nalezHledaniAut['barva1']          . "'";
+        $parts[] = "barva2='"           . $nalezHledaniAut['barva2']          . "'";
+        $parts[] = "barva3='"           . $nalezHledaniAut['barva3']          . "'";
+        $parts[] = "barva4='"           . $nalezHledaniAut['barva4']          . "'";
+        $parts[] = "barva5='"           . $nalezHledaniAut['barva5']          . "'";
+        $parts[] = "serie='"            . $nalezHledaniAut['serie']           . "'";
+        $parts[] = "zavod='"            . $nalezHledaniAut['zavod']           . "'";
+        $parts[] = "startovnicislo='"   . $nalezHledaniAut['startovnicislo']  . "'";
+        $parts[] = "tym='"              . $nalezHledaniAut['tym']             . "'";
+        $parts[] = "reklama='"          . $nalezHledaniAut['reklama']         . "'";
+        $parts[] = "jezdec1='"          . $nalezHledaniAut['jezdec1']         . "'";
+        $parts[] = "jezdec2='"          . $nalezHledaniAut['jezdec2']         . "'";
+        $parts[] = "jezdec3='"          . $nalezHledaniAut['jezdec3']         . "'";
+        $parts[] = "rok='"              . $nalezHledaniAut['rok']            . "'";
+        $parts[] = "cena='"             . $nalezHledaniAut['cena']            . "'";
+        $parts[] = "popis='"            . $nalezHledaniAut['popis']           . "'";
+        $parts[] = "poznamka='"         . $nalezHledaniAut['poznamka']        . "'";
+        $parts[] = "umisteniauta='"     . $nalezHledaniAut['umisteniauta']    . "'";
+        $parts[] = "umistenikrabicky='" . $nalezHledaniAut['umistenikrabicky']. "'";
+        $parts[] = "mame='"              . $nalezHledaniAut['mame']            . "'";
+        $parts[] = "pridano='"           . $nalezHledaniAut['pridano']         . "'";
+        $parts[] = "id='"              . $nalezHledaniAut['id']            . "'";
+
 			
-			$parts = [];
-        $parts[] = "Byl smazán záznam:";
+        $parts[] = "Kde byly před smazáním editovány tyto údaje:";
         $parts[] = "firma='"            . $_REQUEST['inputfirmy']           . "'";
 		$parts[] = "firma2='"           . $_REQUEST['inputfirmy2']          . "'";
 		$parts[] = "cislo='"            . $_REQUEST['inputcisla']           . "'";
