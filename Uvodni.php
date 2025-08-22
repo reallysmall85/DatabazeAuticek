@@ -94,6 +94,9 @@ if (!isset($_SESSION['uzivatel'])) {
  			 text-decoration: none; /* vypne podtržení */
  			 color: black;          /* nastaví barvu textu na černou */
 		}
+		
+	
+		
     </style>
 
 

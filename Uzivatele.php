@@ -82,6 +82,46 @@ if (!isset($_SESSION['uzivatel'])) {
 			border: none;
             white-space: nowrap;
 		}
+		
+		.zaoblene-tlacitko-zelene {
+            background-color: green; 
+            color: white; 
+            border: 1px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+
+        .zaoblene-tlacitko-cervene {
+            background-color: red; 
+            color: white; 
+            border: px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+
+        .zaoblene-tlacitko-oranzove {
+            background-color: orange; 
+            color: white; 
+            border: 1px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+
 
     </style>
 
@@ -353,7 +393,7 @@ echo "<table class=\"tabulka-hlavni\"><tr><th colspan=\"2\">UŽIVATELSKÉ ÚDAJE
 
         if ($prihlasenOpravneni <= 2){
         
-        echo "<tr><td colspan=\"2\"><div><input type=\"Submit\" name=\"novy\" value=\"Založit uživatele\" onmouseover=\"this.style.backgroundColor='darkorange';\" onmouseout=\"this.style.backgroundColor='orange';\"  style=\"background-color: orange; color: white; border: none; padding: 10px 20px; cursor: pointer;\"></div>";
+        echo "<tr><td colspan=\"2\"><div><input type=\"Submit\" class=\"zaoblene-tlacitko-oranzove\" name=\"novy\" value=\"Založit uživatele\" onmouseover=\"this.style.backgroundColor='darkorange';\" onmouseout=\"this.style.backgroundColor='orange';\"></div>";
       
         echo "<div align=\"center\" style=\"padding: 20px 0px 20px;\">Načti uživatele:";
         
@@ -459,7 +499,7 @@ echo "<table class=\"tabulka-hlavni\"><tr><th colspan=\"2\">UŽIVATELSKÉ ÚDAJE
 		
 
 <?php
-echo "<tr><td colspan=\"2\"><div align=\"right\"><input type=\"Submit\" name=\"ulozit\" value=\"Uložit\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
+echo "<tr><td colspan=\"2\"><div align=\"right\"><input type=\"Submit\" class=\"zaoblene-tlacitko-zelene\" name=\"ulozit\" value=\"Uložit\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\">";
 
 
 
@@ -472,12 +512,11 @@ if ($prihlasenOpravneni <= 2){
     echo "<input"
        . " type=\"submit\"" 
        . " name=\"smazat\""
+       . "class=\"zaoblene-tlacitko-cervene\""
        . " value=\"Smazat {$jmeno} {$prijmeni}\""
        . " onclick=\"dotazkmazani();\""
        . " onmouseover=\"this.style.backgroundColor='darkred';\""
        . " onmouseout=\"this.style.backgroundColor='red';\""
-       . " style=\"background-color: red; color: white; border: none;"
-       . " padding: 10px 20px; margin-left: 5px; cursor: pointer;\""
        . ">";
 
 

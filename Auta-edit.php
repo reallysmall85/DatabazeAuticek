@@ -39,6 +39,9 @@ if ($opravneni > 2) {
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+
+    
 	
 <?php
     $polozka = $_GET["polozka"];
@@ -575,8 +578,32 @@ function previewInNewWindow(src) {
             padding: 6px 12px;
 }
 
-        
-    </style>
+    .zaoblene-tlacitko-zelene {
+            background-color: green; 
+            color: white; 
+            border: 1px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+
+        .zaoblene-tlacitko-cervene {
+            background-color: red; 
+            color: white; 
+            border: 1px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+</style>
 
 </head>
 
@@ -1063,7 +1090,7 @@ if (isset($_REQUEST["inputjezdec3"]) && $_REQUEST["inputjezdec3"]) {
 echo "</tr>";
 
 # ----------- ROK ---------------
-$rok = StrFTime("%Y", Time());			
+$rok = date("Y");			
 echo "<tr class=\"barevnost2\">";
 echo "<td>Rok:</td>";
 echo "<td><select name=\"selectroku\">";
@@ -1201,7 +1228,7 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
     <div id=\"drop-area\">
   <h3>Přetáhněte sem soubor</h3>
   <input type=\"file\" id=\"fileElem\" multiple accept=\"*\" style=\"display:none\">
-  <label class=\"button\" for=\"fileElem\">Vyberte soubor ze složky</label>
+  <label class=\"zaoblene-tlacitko-zelene\" for=\"fileElem\">Vyberte soubor ze složky</label>
 </div></td></tr></table></td></tr><tr><td colspan=\"4\"><table class=\"tabulka-fotky\"><tr><td colspan=\"4\"><div align=\"left\">FOTKY:</div></td></tr><tr>";
 $slozkapolozky = dir("Fotky/temp/".$polozka);
 $pocetFotekKZobrazeni = 0;
@@ -1295,13 +1322,13 @@ echo "</td></tr><tr><td colspan=\"4\">";
 # ---------SUBMIT -----------
 
 echo "<table class=\"tabulka-fotky\">";
-echo "<div align=\"right\"><input type=\"Submit\" name=\"uloz\" value=\"Uložit záznam\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
+echo "<div align=\"right\"><input type=\"Submit\" class=\"zaoblene-tlacitko-zelene\" name=\"uloz\" value=\"Uložit záznam\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
 
 
 ?>
 
 	<input type="hidden" name="potvrzeniMazani" value="nepotvrzeno" />
-	<input type="submit" name="smaz" value="Smazat záznam!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+	<input type="submit" class="zaoblene-tlacitko-cervene" name="smaz" value="Smazat záznam!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
     </div>
 </td>
 </tr>

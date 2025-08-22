@@ -81,6 +81,20 @@ if (!isset($_SESSION['uzivatel'])) {
 			border: none;
             white-space: nowrap;
 		}
+		
+		.zaoblene-tlacitko-zelene {
+            background-color: green; 
+            color: white; 
+            border: 1px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+
 
     </style>
 <?php
@@ -244,7 +258,7 @@ function ZobrazeniFormulareZmenahesla ($prihlasenId, $connection){?>
 	<tr><td>Zadej ještě jednou nové heslo (kontrola): </td><td><input name="usernewheslokontrola" size="10" row="1" type="password"></td></tr>
 	<tr>	
 		<td colspan="2">
-			<div align="right"><input type="Submit" name="potvrzeni" value="OK" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';"  style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;"></div>
+			<div align="right"><input type="Submit" class="zaoblene-tlacitko-zelene" name="potvrzeni" value="OK" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';"></div>
 			
 		</td>
 	</tr>

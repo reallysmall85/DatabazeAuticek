@@ -59,6 +59,19 @@ error_reporting(E_ALL);
             border: none;
             word-wrap: break-word;
         }
+        
+    .zaoblene-tlacitko-zelene {
+            background-color: green; 
+            color: white; 
+            border: 1px solid black;
+            border: none;
+            padding: 8px 15px; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border-radius: 6px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
 
     </style>
 
@@ -169,7 +182,7 @@ function ZobrazeniFormularePrihlaseni ($hodnotaHledaniUzivatele){
 		<td>
 		</td>	
 		<td>
-			<div align="right"><input type="Submit" name="potvrzeniPrihlaseni" value="Přihlásit" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';"  style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;"></div>
+			<div align="right"><input type="Submit" class="zaoblene-tlacitko-zelene" name="potvrzeniPrihlaseni" value="Přihlásit" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';"></div>
 			
 		</td>
 	</tr>

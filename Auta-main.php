@@ -275,7 +275,7 @@ $result = mysqli_query($connection, $query);
         .zaoblene-tlacitko {
             background-color: lightgrey; 
             color: black; 
-            //border:1px solid black;
+            border: 1px solid black;
             border: none;
             padding: 8px 15px; 
             cursor: pointer; 
@@ -288,7 +288,7 @@ $result = mysqli_query($connection, $query);
         .zaoblene-tlacitko-cervene {
             background-color: red; 
             color: white; 
-            //border:1px solid black;
+            border: 1px solid black;
             border: none;
             padding: 8px 15px; 
             cursor: pointer; 
