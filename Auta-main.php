@@ -166,139 +166,12 @@ $result = mysqli_query($connection, $query);
 <head>
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
     <title>Databaze aut</title>
-    <style>
-        body, html {
-            width: 100%;
-            max-width: 100%;
-        }
-        .hlavnitabulka {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            margin-left: auto; 
-            margin-right: auto; 
-            margin-top: 8px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden; 
-            border: none; 
-   			
-        }
-        .hlavnitabulka th,
-        .hlavnitabulka td {
-            padding: 8px;
-            border: none;
-            word-wrap: break-word;
-        }
-        .hlavnitabulka td + td,
-        .hlavnitabulka th + th {
-            border-left: 1px solid black;
-        }
-        .hlavnitabulka tr + tr td {
-            border-top: 1px solid black;
-        }
-        .tabulka-prihlasen {
-            background-color: white;
-            margin-left: 5px;; 
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-        .tabulka-prihlasen th,
-		.tabulka-prihlasen td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-        .tabulka-ikony {
-            background-color: white;
-            margin-left: 5px;
-            margin-top: 5px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-		.tabulka-ikony th, 
-		.tabulka-ikony td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-		.tabulka-hledani {
-            background-color: white;
-            position: fixed;
-            top: 8px;            /* odsazení od vrchu okna */
-            left: 50%;           /* výchozí bod je střed viewportu */
-            transform: translateX(-50%);
-            z-index: 1000; /* Zajišťuje, že bude nad ostatním obsahem */
-            font-size: 20px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-   			text-align: center;
-        }
-		.tabulka-hledani th, 
-		.tabulka-hledani td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-        .fixed-arrow-nahoru {
-            position: fixed;
-            bottom: 120px; /* Vzdálenost od spodního okraje */
-            left: 20px;  /* Vzdálenost od levého okraje */
-            z-index: 1000; /* Zajišťuje, že bude nad ostatním obsahem */
-        }
-        .fixed-arrow-dolu {
-            position: fixed;
-            top: 250px; /* Vzdálenost od horního okraje */
-            left: 20px;  /* Vzdálenost od levého okraje */
-            z-index: 1000; /* Zajišťuje, že bude nad ostatním obsahem */
-        }
-        
-        .zelenePozadi {
-            background-color: #f0fff0;
-        }
-        
-        .zaoblene-tlacitko {
-            background-color: lightgrey; 
-            color: black; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
+    
 
-        .zaoblene-tlacitko-cervene {
-            background-color: red; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
-
-    </style>
     <script>
     // Funkce, která načte vybrané filtry a přesměruje na stránku s odpovídajícími GET parametry
     function applyFilters() {
@@ -377,7 +250,7 @@ $result = mysqli_query($connection, $query);
 
 
 </head>
-<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body>
 <?php 
 
 include("phpqrcode/qrlib.php");
@@ -436,27 +309,47 @@ if ($prihlasenOpravneni <= 2 ){
 <tr>
 <td>
 <!-- Filtrační formulář -->
-<div>
-  <form method="get" action="Auta-main.php" autocomplete="off">
-    <input type="text" name="q" placeholder="Zadejte klíčová slova (nebo 'duplicity')" 
-           value="<?php echo htmlspecialchars(isset($_GET['q']) ? $_GET['q'] : ''); ?>" 
-           style="width: 500px; font-size: 20px; background-color: #e0f8e0; padding: 10px 20px; box-sizing: border-box;" autocomplete="off">
-    <br>
-    <input type="text" name="datumod" placeholder="datum od" 
-            value="<?php echo htmlspecialchars(isset($_GET['datumod']) ? $_GET['datumod'] : ''); ?>" 
-           style="width: 150px; font-size: 14px; background-color: white; padding: 10px 20px; box-sizing: border-box;" autocomplete="off">
-    <input type="text" name="datumdo" placeholder="datum do" 
-            value="<?php echo htmlspecialchars(isset($_GET['datumdo']) ? $_GET['datumdo'] : ''); ?>" 
-           style="width: 150px; font-size: 14px; background-color: white; padding: 10px 20px; box-sizing: border-box;" autocomplete="off">
-   
+<div class="search-box">
+  <form class="search-form" method="get" action="Auta-main.php" autocomplete="off">
+    <div class="search-main">
+      <input
+        type="search"
+        class="search-input"
+        name="q"
+        placeholder="Zadejte klíčová slova (nebo 'duplicity')"
+        value="<?php echo htmlspecialchars(isset($_GET['q']) ? $_GET['q'] : ''); ?>"
+        autocomplete="off"
+      >
+    </div>
 
-    <input type="hidden" name="zobrazpozadavky" value="<?php echo htmlspecialchars($zobrazujpozadavky); ?>">
-    <input type="submit" value="Hledat" 
-           style="background-color: green; color: white; border: none; padding: 10px 20px; font-size: 20px; cursor: pointer; box-sizing: border-box; border-radius: 6px;" 
-           onmouseover="this.style.backgroundColor='darkgreen';" 
-           onmouseout="this.style.backgroundColor='green';">
+    <div class="search-row">
+      <div class="date-group">
+        <input
+          type="search"
+          class="date-input"
+          name="datumod"
+          placeholder="datum od"
+          value="<?php echo htmlspecialchars(isset($_GET['datumod']) ? $_GET['datumod'] : ''); ?>"
+          autocomplete="off"
+        >
+        <input
+          type="search"
+          class="date-input"
+          name="datumdo"
+          placeholder="datum do"
+          value="<?php echo htmlspecialchars(isset($_GET['datumdo']) ? $_GET['datumdo'] : ''); ?>"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="actions">
+        <input type="hidden" name="zobrazpozadavky" value="<?php echo htmlspecialchars($zobrazujpozadavky); ?>">
+        <button type="submit" class="btn-search">Hledat</button>
+      </div>
+    </div>
   </form>
 </div>
+
 
 
 <?php

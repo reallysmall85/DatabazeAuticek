@@ -12,96 +12,17 @@ if (!isset($_SESSION['uzivatel'])) {
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
 	<title>Uvodni stranka</title>
 
 
-	 <style>
-        body, html {
-            width: 100%;
-            max-width: 100%;
-        }
-        
-		.tabulka-hlavni {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-			position: fixed;
-  			top: 50%;
-  			left: 50%; 
-  			transform: translate(-50%, -50%);
-  			margin: 0;
-			font-size: 20px; 
-   			text-align: center;
-        }
-        .tabulka-hlavni th {
-			padding-top: 16px;
-			padding-bottom: 8px;
-			padding-left: 12px;
-			padding-right: 12px;
-            border: none;
-            word-wrap: break-word;
-		} 
-		.tabulka-hlavni td {
-            padding-top: 5px;
-			padding-bottom: 20px;
-			padding-left: 12px;
-			padding-right: 12px;
-            border: none;
-            word-wrap: break-word;
-        }
-
-		.tabulka-prihlasen {
-            background-color: white;
-            margin-left: 5px;; 
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-        .tabulka-prihlasen th,
-		.tabulka-prihlasen td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-        .tabulka-ikony {
-            background-color: white;
-            margin-left: 5px;; 
-            margin-top: 5px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-		.tabulka-ikony th, 
-		.tabulka-ikony td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-        a,
-		a:visited,
-		a:hover,
-		a:active {
- 			 text-decoration: none; /* vypne podtržení */
- 			 color: black;          /* nastaví barvu textu na černou */
-		}
-		
-	
-		
-    </style>
+	 
 
 
 </head>
-<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body>
 <?php
 if (isset($_SESSION['uzivatel'])) {
     $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
@@ -147,7 +68,7 @@ function isMobile() {
 </table>
 
 
-<table class="tabulka-hlavni">
+<table class="tabulka-uvodni">
 	<tr>
 	<th colspan="3" style="padding: 20px 0px 20px;">
 		AUTÍČKÁRNA

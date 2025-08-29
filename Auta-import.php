@@ -42,9 +42,14 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 <head>
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
     <title>Import tabulky do databáze</title>
     <style>
+        
+
+
         .header { margin-bottom: 15px; }
         .header span { font-weight: bold; }
         form { margin-top: 20px; margin-bottom: 20px; }
@@ -53,92 +58,11 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
         .error { color: #a00; }
         .success { color: #080; }
 
-        .tabulka-hlavni {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            margin-left: auto; 
-            margin-right: auto; 
-            margin-top: auto;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-            border-radius: 6px;
-            overflow: hidden;
-            border: none;
-        }
-        .tabulka-hlavni th, .tabulka-hlavni td {
-            padding: 8px;
-            border: none;
-            word-wrap: break-word;
-        }
-        .tabulka-hlaska {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            margin-left: auto; 
-            margin-right: auto; 
-            margin-top: 20px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-            border-radius: 6px;
-            overflow: hidden; 
-            border: none;
-        }
-        .tabulka-hlaska th, .tabulka-hlaska td {
-            padding: 8px;
-            border: none;
-            word-wrap: break-word;
-        }
-        .tabulka-prihlasen {
-            background-color: white;
-            margin-left: 5px;; 
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .tabulka-prihlasen th, .tabulka-prihlasen td {
-            padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-            border: none;
-            white-space: nowrap;
-        }
-        .tabulka-ikony {
-            background-color: white;
-            margin-left: 5px;; 
-            margin-top: 5px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .tabulka-ikony th, .tabulka-ikony td {
-            padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-            border: none;
-            white-space: nowrap;
-        }
-
-        .zaoblene-tlacitko-fialove {
-            background-color: darkviolet; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
+    
 
     </style>
 </head>
-<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body>
 
 <?php
 if (isset($_SESSION['uzivatel'])) {
@@ -192,7 +116,7 @@ function zapisDoLogu($textzaznamu) {
 </tr>
 </table>
 
-<table class="tabulka-hlavni">
+<table class="tabulka-import">
 <tr><td>
 <form action="Auta-import.php" method="post" enctype="multipart/form-data">
     <label for="excelFile">

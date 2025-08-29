@@ -38,7 +38,9 @@ if ($opravneni > 2) {
 <head>
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
     
 
     
@@ -445,172 +447,14 @@ function previewInNewWindow(src) {
 </script>    
     
 
-<style>
-        table {
-           
-            max-width: 100%;         /* Maximální šířka 100 % obrazovky */
-            border-collapse: collapse; /* Spojí okraje buněk */
-        }
-        
-        .hlavnitabulkaeditace {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            margin-left: auto; 
-            margin-right: auto; 
-            margin-top: auto;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden; 
-            border: none; 
-   			
-        }
-        .hlavnitabulkaeditace th,
-        .hlavnitabulkaeditace td {
-            padding: 8px;
-            border: none;
-            word-wrap: break-word;
-        }
-        .hlavnitabulkaeditace td + td,
-        .hlavnitabulkaeditace th + th {
-            border-left: 1px solid black;
-        }
-        .hlavnitabulkaeditace tr + tr td {
-            border-top: 1px solid black;
-        }
-        
-        .tabulka-fotky {
-            background-color: white;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-            border: none;
-            padding-bottom: 8px;
-        }
-        .tabulka-fotky th,
-		.tabulka-fotky td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none !important;
-            white-space: nowrap;
-		}
-        .tabulka-prihlasen {
-            background-color: white;
-            margin-left: 5px;; 
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-        .tabulka-prihlasen th,
-		.tabulka-prihlasen td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-        .tabulka-ikony {
-            background-color: white;
-            margin-left: 5px;; 
-            margin-top: 5px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-		.tabulka-ikony th, 
-		.tabulka-ikony td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-              
-        .barevnost1 {
-            background-color: #f5f5f5;
-        }
-        .barevnost2 {
-            background-color: #fffff0;
-        }
-        #drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 20px;
-            width: 300px;
-            margin: 50px auto;
-            padding: 20px;
-            text-align: center;
-        }
 
-        #drop-area.hover {
-            border-color: #333;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-        textarea.unsaved {
-            color: red;
-        }
-        .QR-box {
-            display: inline-flex; 
-            align-items: center;
-            gap: 8px;
-        }
-        .QR-box img {
-            max-width: 180px;          
-           
-        }
-        .QR-box button {
-            padding: 6px 12px;
-}
-
-    .zaoblene-tlacitko-zelene {
-            background-color: green; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
-
-        .zaoblene-tlacitko-cervene {
-            background-color: red; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
-</style>
 
 </head>
 
 
 
 
-<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body>
 
 <?php
 

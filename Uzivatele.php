@@ -14,116 +14,11 @@ if (!isset($_SESSION['uzivatel'])) {
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="author" content="martin"/>
-	<meta name="keywords" content="uvod"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
 	<title>Uživatelé</title>
-	<style>
-        body, html {
-            width: 100%;
-            max-width: 100%;
-        }
-        .tabulka-hlavni {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            margin-left: auto; 
-            margin-right: auto; 
-            margin-top: auto;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden; 
-            border: none; 
-   			
-        }
-        .tabulka-hlavni th,
-        .tabulka-hlavni td {
-            padding: 8px;
-            border: none;
-            word-wrap: break-word;
-        }
-        .tabulka-hlavni td + td,
-        .tabulka-hlavni th + th {
-            border-left: 1px solid black;
-        }
-        .tabulka-hlavni tr + tr td {
-            border-top: 1px solid black;
-        }
-        .tabulka-prihlasen {
-            background-color: white;
-            margin-left: 5px;; 
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-        .tabulka-prihlasen th,
-		.tabulka-prihlasen td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-        .tabulka-ikony {
-            background-color: white;
-            margin-left: 5px;; 
-            margin-top: 5px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden;
-        }
-		.tabulka-ikony th, 
-		.tabulka-ikony td {
-			padding: 8px;
-            word-wrap: break-word;
-            max-width: none;
-			border: none;
-            white-space: nowrap;
-		}
-		
-		.zaoblene-tlacitko-zelene {
-            background-color: green; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
 
-        .zaoblene-tlacitko-cervene {
-            background-color: red; 
-            color: white; 
-            border: px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
-
-        .zaoblene-tlacitko-oranzove {
-            background-color: orange; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
-
-
-    </style>
 
 
 
@@ -179,7 +74,7 @@ mysqli_query($connection, "SET CHARACTER SET utf8");
 </head>
 
 
-<body style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body>
 
 
 <?php include("phpqrcode/qrlib.php");
@@ -389,7 +284,7 @@ $vypisDatUzivatele=mysqli_query($connection, "SELECT * FROM autauzivatele WHERE 
     
         // spojím oddělovačem a pošlu do logu
         zapisDoLogu(implode(', ', $parts));
-echo "<table class=\"tabulka-hlavni\"><tr><th colspan=\"2\">UŽIVATELSKÉ ÚDAJE</th></tr>";
+echo "<table class=\"tabulka-uzivatele\"><tr><th colspan=\"2\">UŽIVATELSKÉ ÚDAJE</th></tr>";
 
         if ($prihlasenOpravneni <= 2){
         

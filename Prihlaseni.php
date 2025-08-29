@@ -10,70 +10,10 @@ error_reporting(E_ALL);
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
 	<title>Prihlaseni</title>
-
-<style>
-        body, html {
-            width: 100%;
-            max-width: 100%;
-        }
-        .prihlaseni {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden; 
-			position: fixed;
-  			top: 50%;
-  			left: 50%; 
-  			transform: translate(-50%, -50%);
-  			margin: 0;
-			font-size: 20px;
-			   			
-        }
-        .prihlaseni th, 
-		.prihlaseni td {
-            padding: 8px 12px;
-            border: none;
-            word-wrap: break-word;
-        }
-		.chyba {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: white;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden; 
-			margin-left: auto;
-			margin-right: auto;
-			margin-top: auto;
-			font-size: 20px;
-			border: none;
-        }
-        .chyba th, 
-		.chyba td {
-            padding: 8px 12px;
-            border: none;
-            word-wrap: break-word;
-        }
-        
-    .zaoblene-tlacitko-zelene {
-            background-color: green; 
-            color: white; 
-            border: 1px solid black;
-            border: none;
-            padding: 8px 15px; 
-            cursor: pointer; 
-            box-sizing: border-box;
-            border-radius: 6px;
-            margin-right: 2px;
-            margin-left: 2px;
-        }
-
-    </style>
 
 
 
@@ -149,7 +89,7 @@ if (isset($_POST["potvrzeniPrihlaseni"])){
 function ZobrazeniFormularePrihlaseni ($hodnotaHledaniUzivatele){
 ?>
 
-<body class="pruhledny" style="background-image: url(pozadi-auticka5.png); background-position: top left; background-repeat: repeat;  background-size: 40%;">
+<body>
 
 <form method="post" action="Prihlaseni.php" name="kartaPrihlaseni">
 
