@@ -13,8 +13,8 @@ if (!isset($_SESSION['uzivatel'])) {
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 767px)">
-	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 768px)">
+	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 1199px)">
+	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 1200px)">
 	<title>Uvodni stranka</title>
 
 
@@ -52,9 +52,6 @@ if (isset($_SESSION['uzivatel'])) {
 
 }
 
-function isMobile() {
-    return preg_match('/(android|iphone|ipad|ipod|opera mini|mobile|silk|kindle|blackberry|bb10|iemobile|windows phone)/i', $_SERVER['HTTP_USER_AGENT']);
-}
 
 ?>
 <table class="tabulka-ikony">
@@ -68,46 +65,39 @@ function isMobile() {
 </table>
 
 
-<table class="tabulka-uvodni">
-	<tr>
-	<th colspan="3" style="padding: 20px 0px 20px;">
-		AUTÍČKÁRNA
-	</th>
-	</tr>
-	<tr>
-		<td>
-			<a href="Auta-main.php?stranka=1">
-				<div><img width="310" height="310" src="seznam.png" name="Seznam aut"></div>
-				<div>SEZNAM AUT</div>
-			</a>
-		</td>
-		
-		<?php
-		
-		if (isMobile()){
-			echo "</tr><tr>";
-		}
-		
-		
-		if ($prihlasenOpravneni <= 2){
-			echo "<td><a href=\"Auta-main.php?stranka=1&zobrazpozadavky=ano\"><div><img width=\"310\" height=\"310\" src=\"pozadavky.png\" name=\"Seznam chybějících\"></div><div>SEZNAM POŽADAVKŮ</div></a></td>";
-			
-			if (isMobile()){
-			echo "</tr><tr>";
-			}
-		}
-		?>
-		
-		<td>
-			<a href="Uzivatele.php">
-				<div><img width="310" height="310" src="uzivatele.png" name="Uzivatele"></div>
-				<div>UŽIVATELÉ</div>
-			</a>
-		</td>
-	</tr>
-	
+<table class="tabulka-uvodni" role="presentation">
+<tr>
+  <td colspan="3">
+    <div class="menu-grid">
+      <div class="tile">
+        <a href="Auta-main.php?stranka=1">
+          <img src="seznam.png" alt="Seznam aut">
+          <div>SEZNAM AUT</div>
+        </a>
+      </div>
+
+      <?php if ($prihlasenOpravneni <= 2): ?>
+      <div class="tile">
+        <a href="Auta-main.php?stranka=1&zobrazpozadavky=ano">
+          <img src="pozadavky.png" alt="Seznam požadavků">
+          <div>SEZNAM POŽADAVKŮ</div>
+        </a>
+      </div>
+      <?php endif; ?>
+
+      <div class="tile">
+        <a href="Uzivatele.php">
+          <img src="uzivatele.png" alt="Uživatelé">
+          <div>UŽIVATELÉ</div>
+        </a>
+      </div>
+    </div>
+  </td>
+</tr>
 
 </table>
+
+
 
 
 </body>

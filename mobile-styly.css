@@ -19,6 +19,7 @@ a:active {
       color: black;          /* nastaví barvu textu na černou */
 }
 
+
 .hlavnitabulka {
     max-width: 100%;
     border-collapse: collapse;
@@ -47,45 +48,72 @@ a:active {
     border-top: 1px solid black;
 }
 
-
-.tabulka-uvodni {
-    max-height: 75%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-       border-radius: 6px;
-       overflow: hidden;
-    position: fixed;
-      top: 50%;
-      left: 50%; 
-      transform: translate(-50%, -50%);
-      margin: 0;
-    font-size: 20px; 
-       text-align: center;
-}
-.tabulka-uvodni th {
-    padding-top: 16px;
-    padding-bottom: 8px;
-    padding-left: 12px;
-    padding-right: 12px;
-    border: none;
-    word-wrap: break-word;
-} 
-.tabulka-uvodni td {
-    padding-top: 5px;
-    padding-bottom: 20px;
-    padding-left: 12px;
-    padding-right: 12px;
-    border: none;
-    word-wrap: break-word;
-}
-
+/* Obal: už ne fixed – ať může přirozeně zabrat viewport */
+.tabulka-uvodni{
+    width: clamp(280px, 92vw, 1000px);
+    margin: 8dvh auto 4dvh;
+    background-color: rgba(255,255,255,.9);
+    border-radius: 6px;
+    box-shadow: 0 2px 15px rgba(0,0,0,.5);
+    padding: 12px;
+    overflow: hidden;           /* jistota proti přetékání boxu */
+  }
+  
+  .menu-grid{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap:16px;
+    align-items:center;
+    justify-items:center;
+  }
+  
+  @media (max-width:1024px){
+    .menu-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width:767px){
+    .menu-grid{ gap:12px; }
+  }
+  @media (max-width:767px) and (orientation:portrait){
+    .menu-grid{ grid-template-columns: 1fr; }
+  }
+  
+  
+  /* Obrázky responsivně – žádné fixní px */
+  .tabulka-uvodni img{
+    display: block;
+    max-width: 100%;
+    width: clamp(120px, 28vw, 220px);   /* zmenšuje se na mobilu */
+    height: auto;
+    max-height: 35dvh;                  /* nikdy ne vyšší než část obrazovky */
+  }
+  
+  /* Písmo + dlaždice */
+  .tabulka-uvodni .tile a{ display:grid; place-items:center; gap:8px; text-align:center; }
+  .uvodni-title{ padding: 12px; font-size: 22px; }
+  
+  /* Přeskupování podle šířky a orientace */
+  @media (max-width: 1024px){
+    .tabulka-uvodni .menu-row{ grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  @media (max-width: 767px){
+    .tabulka-uvodni{ width: 94vw; margin: 6dvh auto 3dvh; padding: 10px; }
+    .tabulka-uvodni .menu-row{ gap: 12px; }
+    .tabulka-uvodni img{ width: clamp(110px, 38vw, 200px); max-height: 30dvh; }
+  }
+  
+  /* Na telefonech na výšku – 1 sloupec */
+  @media (max-width: 767px) and (orientation: portrait){
+    .tabulka-uvodni .menu-row{ grid-template-columns: 1fr; }
+  }
+  
 
 .tabulka-prihlasen {
     background-color: white;
     margin-left: 5px;; 
     font-size: 16px;
+    position: relative;
+    z-index: 999;
     box-shadow: 0 2px 15px rgba(0,0,0,0.5);
        border-radius: 6px;
        overflow: hidden;
@@ -96,7 +124,7 @@ a:active {
     word-wrap: break-word;
     max-width: none;
     border: none;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 
@@ -105,6 +133,8 @@ a:active {
     margin-left: 5px;
     margin-top: 5px;
     font-size: 16px;
+    position: relative;
+    z-index: 1000;
     box-shadow: 0 2px 15px rgba(0,0,0,0.5);
        border-radius: 6px;
        overflow: hidden;
@@ -115,31 +145,31 @@ a:active {
     word-wrap: break-word;
     max-width: none;
     border: none;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 
-.tabulka-hledani {
-    background-color: white;
-    position: fixed;
-    top: 8px;            /* odsazení od vrchu okna */
-    left: 50%;           /* výchozí bod je střed viewportu */
-    transform: translateX(-50%);
-    z-index: 1000; /* Zajišťuje, že bude nad ostatním obsahem */
-    font-size: 20px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-       border-radius: 6px;
-       overflow: hidden;
-       text-align: center;
-}
-.tabulka-hledani th, 
-.tabulka-hledani td {
-    padding: 8px;
-    word-wrap: break-word;
-    max-width: none;
-    border: none;
-    white-space: nowrap;
-}
+		.tabulka-hledani{
+            position: sticky;    /* zůstane přilepené nahoře při scrollu */
+            top: 8px;
+            z-index: 1000;
+
+            background:#fff;
+            font-size:20px;
+            box-shadow:0 2px 15px rgba(0,0,0,.5);
+            border-radius:6px;
+            padding:12px;
+
+            /* rozumné omezení šířky a centrování */
+            width: min(1100px, 96vw);
+            margin: 8px auto;
+             text-align: left;
+    }
+
+/* ať se vnitřek drží šířky boxu */
+.search-box { max-width: 100%; }
+
+
 
 
 .fixed-arrow-nahoru {
@@ -204,11 +234,66 @@ a:active {
 }
 
  
-.search-box { max-width: 700px; }
 
-.search-form { display: block; }
 
-.search-main { margin-bottom: 12px; }
+/* --- rozvržení formuláře --- */
+.search-form{
+  display: grid;
+  grid-template-areas:
+    "q"
+    "dates"
+    "filters"
+    "actions";
+  gap: 12px;
+  align-items: start;
+}
+
+/* fulltext přes celou šířku */
+.search-main{ grid-area: q; }
+
+/* datumy vedle sebe */
+.dates{
+  grid-area: dates;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, max-content)); /* žádné fr */
+  gap: 8px 12px;
+  justify-content: start;   /* mřížka přirazí vlevo */
+  justify-items: start;     /* položky se neroztahují */
+  width: fit-content;       /* kontejner se „zabalí“ na obsah */
+  max-width: 100%;
+}
+
+/* mřížka filtrů – dlaždice */
+.filters-grid{
+  grid-area: filters;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 16px;
+  align-items: start;
+}
+
+/* každá dlaždice: input nahoře, případné menu pod ním */
+.filter-field{
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+}
+
+/* tlačítko vpravo dole */
+.actions{
+  grid-area: actions;
+  display: grid;
+}
+.actions .btn-search{
+  justify-self: end;
+  align-self: end;
+}
+
+/* drobná úprava šířek inputů, ať se roztahují */
+.search-input, .date-input{ width: 100%; }
+
+/* zbytek: tvé styly pro <details>, scroll apod. už máš */
+
 .search-input {
 width: 100%;
 max-width: 600px;  
@@ -257,6 +342,43 @@ box-sizing: border-box;
 }
 .btn-search:hover { background-color: darkgreen; }
 
+/* výška jednoho řádku – uprav dle tvé tabulky */
+:root { --filtr-row-h: 36px; }
+
+/* malé rozbalovací tlačítko */
+.filtr-toggle{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; font-size:14px; line-height:1;
+  background:#fff; border:1px solid #ccc; border-radius:6px;
+  box-shadow:0 1px 6px rgba(0,0,0,.15); cursor:pointer; user-select:none;
+}
+.filtr-toggle::marker{ content:""; }             /* schovej default šipku v některých prohl. */
+.filtr-panel[open] .filtr-toggle { background:#f7f7f7; }
+.filtr-panel .filtr-toggle::before{ content:"▸"; }
+.filtr-panel[open] .filtr-toggle::before{ content:"▾"; }
+
+/* panel se seznamem firem */
+.filtracni-scroll{
+  margin-top:8px;
+  max-height: calc(var(--filtr-row-h) * 6);
+  overflow:auto;
+  background: rgba(255,255,255,.9);
+  border:1px solid #ddd; border-radius:6px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15);
+  font-size: 12px;
+}
+
+/* tabulka uvnitř – kompaktní řádky */
+.filtracnitabulka{ width:100%; border-collapse:collapse; }
+.filtracnitabulka td{
+  padding:6px 10px; line-height: calc(var(--filtr-row-h) - 12px);
+  white-space: normal; border-bottom:1px solid #eee;
+}
+.filtracnitabulka tr:last-child td{ border-bottom:none; }
+
+/* ať je zjevně klikací */
+.filtracnitabulka .filtr-row{ cursor:pointer; }
+.filtracnitabulka .filtr-row:hover td{ background:rgba(0,0,0,.05); }
 
 
 .hlavnitabulkaeditace {
@@ -304,7 +426,7 @@ padding: 8px;
 word-wrap: break-word;
 max-width: none;
 border: none !important;
-white-space: nowrap;
+white-space: normal;
 }
 
 
@@ -510,3 +632,15 @@ border-top: 1px solid black;
     margin-left: 2px;
 }
 
+/* žádný horizontální scrollbar kvůli přetaženým prvkům */
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+
+/* pro jistotu: všechny obrázky responsivní */
+img { max-width: 100%; height: auto; }
+
+/* fixní horní prvek a malé boxy nikdy nepřes 100% */
+.tabulka-prihlasen,
+.tabulka-ikony,
+.tabulka-hledani {
+  max-width: 100%;            /* ne 100vw (to na desktopu zahrnuje i scrollbar) */
+}
