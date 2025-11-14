@@ -276,14 +276,13 @@
 }
 
 /* tlačítko vpravo dole */
-.actions{
-  grid-area: actions;
-  display: grid;
-}
-.actions .btn-search{
-  justify-self: end;
-  align-self: end;
-}
+.actions {
+    grid-area: actions;        /* zůstává, pokud to používáš v parent gridu */
+    display: flex;
+    flex-direction: column;    /* pod sebe */
+    align-items: flex-end;     /* zarovnání doprava */
+    gap: 0.5rem;               /* mezera mezi tlačítky */
+  }
 
 /* drobná úprava šířek inputů, ať se roztahují */
 .search-input, .date-input{ width: 100%; }

@@ -149,13 +149,13 @@ function extrahujBarvyZTextu(?string $text): array {
     return $out;
 }
 
-/** Rozdělí jména jezdců podle - , ; : / \ _ (mezery okolo se ignorují), vrátí max 3 položky. */
+/** Rozdělí jména jezdců podle , ; : / \ _ (mezery okolo se ignorují), vrátí max 3 položky. */
 function extrahujJezdceZTextu(?string $text): array {
     if ($text === null) return [];
     $s = trim((string)$text);
     if ($s === '') return [];
-    // oddělovače: - , ; : / \ _
-    $parts = preg_split('/\s*(?:\-|,|;|:|\/|\\\\|_)\s*/u', $s, -1, PREG_SPLIT_NO_EMPTY);
+    // oddělovače: , ; : / \ _
+    $parts = preg_split('/\s*(?:,|;|:|\/|\\\\|_)\s*/u', $s, -1, PREG_SPLIT_NO_EMPTY);
     $out = [];
     foreach ($parts as $p) {
         $p = trim($p);
@@ -228,6 +228,17 @@ function zapisDoLogu($textzaznamu) {
 <a href="Uvodni.php"><img width="50" height="50" src="Home.png" title="Zpět na úvodní stránku"></a>
 </div></td></tr>
 </table>
+<table class="tabulka-ikony">
+    <tr>
+        <td>
+            <div style="margin-top: 2px; margin-bottom: 2px">
+            <input type="button" class="zaoblene-tlacitko" value="Zavřít tuto stránku" onmouseover="this.style.backgroundColor='grey';" onmouseout="this.style.backgroundColor='lightgrey';" onclick="window.close();">
+            </div>
+        </td>
+    </tr>
+</table>
+
+
 
 <table class="tabulka-import">
 <tr><td>
@@ -554,7 +565,7 @@ if (isset($_POST['import'])) {
         }
 
         mysqli_stmt_close($stmt);
-        echo '<table class="tabulka-hlaska"><tr><td><div class="success">Importováno řádků: <strong>' . $rowCount . '</strong>.</div></td></tr></table>';
+        echo '<table class="tabulka-hlaska"><tr><td><div class="success">Importováno řádků: <strong>' . $rowCount . '</strong></div></td></tr></table>';
     }
 }
 ?>

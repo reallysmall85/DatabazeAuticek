@@ -248,7 +248,7 @@ if (isset($dupQueryPart)) {
 
     $baseQuery  = "FROM auta $where";
     $srovnani   = $_GET['srovnani'] ?? "firma";
-    $query      = "SELECT * " . $baseQuery . " ORDER BY " . $srovnani;
+    $query      = "SELECT * " . $baseQuery . " ORDER BY " . $srovnani . " , nazev ";
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
 }
 
@@ -442,14 +442,19 @@ if ($prihlasenOpravneni <= 2 ){
   </div>
 
   <div class="dates">Datum přidání:
-    <input type="search" class="date-input" name="datumod" placeholder="Datum od" value="<?php echo htmlspecialchars($_GET['datumod'] ?? ''); ?>" autocomplete="off">
-    <input type="search" class="date-input" name="datumdo" placeholder="Datum do" value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>" autocomplete="off">
+    <div> od: <input type="date" class="date-input" name="datumod" placeholder="Datum od" value="<?php echo htmlspecialchars($_GET['datumod'] ?? ''); ?>" autocomplete="off"> </div>
+    <div> do: <input type="date" class="date-input" name="datumdo" placeholder="Datum do" value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>" autocomplete="off"> </div>
   </div>
 
 <details class="filtry-hledani-pozitivni">
-<summary title="Zobrazit/skrýt filtry">Filtry</summary>
+<summary title="Zobrazit/skrýt filtry">Filtry (klikni pro zobrazení)</summary>
 
   <div class="filters-grid">
+    <div class="filter-field">
+      <i>Do kolonek zadávej výrazy jen s mezerami</i>
+    </div>
+</div>
+<div class="filters-grid">
     <!-- Firma -->
     <div class="filter-field">
       <input id="filtrfirma" type="search" class="date-input" name="filtrfirma" placeholder="Filtr firem" value="<?php echo htmlspecialchars($_GET['filtrfirma'] ?? ''); ?>" autocomplete="off"/>
@@ -556,7 +561,8 @@ if ($prihlasenOpravneni <= 2 ){
 
   <div class="actions">
     <input type="hidden" name="zobrazpozadavky" value="<?php echo htmlspecialchars($zobrazujpozadavky); ?>">
-    <button type="submit" class="btn-search">Hledat</button>
+    <button type="submit" class="zaoblene-tlacitko-zelene" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';">HLEDEJ</button>
+    <input type="button" class="zaoblene-tlacitko" value="Hledej vše" onmouseover="this.style.backgroundColor='grey';" onmouseout="this.style.backgroundColor='lightgrey';" onclick="window.location.replace('Auta-main.php?stranka=1');">
   </div>
 </form>
 </div>
@@ -570,6 +576,8 @@ if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
     $queryParams['datumod'] = date('Y-m-d', $datumod);
     $queryParams['datumdo'] = date('Y-m-d', $datumdo);
 }
+
+
 $queryParams['filtrfirma'] = $filtraceSloupecFirma;
 $queryParams['filtrcislo'] = $filtraceSloupecCislo;
 $queryParams['filtrnazev'] = $filtraceSloupecNazev;
@@ -686,6 +694,9 @@ if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
     $queryParams['datumod'] = date('Y-m-d', $datumod);
     $queryParams['datumdo'] = date('Y-m-d', $datumdo);
 }
+
+if (!empty($_GET['srovnani'])) { $queryParams['srovnani'] = $srovnani; }
+
 $queryParams['filtrfirma'] = $filtraceSloupecFirma;
 $queryParams['filtrcislo'] = $filtraceSloupecCislo;
 $queryParams['filtrnazev'] = $filtraceSloupecNazev;

@@ -1172,7 +1172,7 @@ echo "<div align=\"right\"><input type=\"Submit\" class=\"zaoblene-tlacitko-zele
 ?>
 
 	<input type="hidden" name="potvrzeniMazani" value="nepotvrzeno" />
-	<input type="submit" class="zaoblene-tlacitko-cervene" name="smaz" value="Smazat záznam!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+	<input type="submit" class="zaoblene-tlacitko-cervene" name="smaz" value="Smazat celou položku!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
     </div>
 </td>
 </tr>
