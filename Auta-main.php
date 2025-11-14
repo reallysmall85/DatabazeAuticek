@@ -7,7 +7,7 @@ if (!isset($_SESSION['uzivatel'])) {
     exit();
 }
 
-// 2) Připojení k databázi (mysql­i)
+// 2) Připojení k databázi (mysqli)
 include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
 $connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
@@ -16,41 +16,36 @@ if (!$connection) {
 }
 mysqli_set_charset($connection, "utf8");
 
-
-
-
-
 // Získání filtrů z GET parametrů
-$firmaFilter  = isset($_GET['firma'])  ? $_GET['firma']  : '';
-$firma2Filter = isset($_GET['firma2'])  ? $_GET['firma2']  : '';
-$cisloFilter  = isset($_GET['cislo'])  ? $_GET['cislo']  : '';
-$nazevFilter  = isset($_GET['nazev'])    ? $_GET['nazev']    : '';
-$upresneniFilter  = isset($_GET['upresneni'])  ? $_GET['upresneni']  : '';
-$barvaFilter  = isset($_GET['barva'])  ? $_GET['barva']  : '';
-$serieFilter  = isset($_GET['serie'])  ? $_GET['serie']  : '';
-$zavodFilter  = isset($_GET['zavod'])  ? $_GET['zavod']  : '';
-$startovnicisloFilter  = isset($_GET['startovnicislo'])  ? $_GET['startovnicislo']  : '';
-$tymFilter   = isset($_GET['tym'])   ? $_GET['tym']   : '';
-$reklamaFilter   = isset($_GET['reklama'])   ? $_GET['reklama']   : '';
-$jezdecFilter = isset($_GET['jezdec']) ? $_GET['jezdec'] : '';
-$rokFilter    = isset($_GET['rok'])    ? $_GET['rok']    : '';
-$poznamkaFilter    = isset($_GET['poznamka'])    ? $_GET['poznamka']    : '';
+$firmaFilter  = $_GET['firma']   ?? '';
+$firma2Filter = $_GET['firma2']  ?? '';
+$cisloFilter  = $_GET['cislo']   ?? '';
+$nazevFilter  = $_GET['nazev']   ?? '';
+$upresneniFilter = $_GET['upresneni'] ?? '';
+$barvaFilter  = $_GET['barva']   ?? '';
+$serieFilter  = $_GET['serie']   ?? '';
+$zavodFilter  = $_GET['zavod']   ?? '';
+$startovnicisloFilter = $_GET['startovnicislo'] ?? '';
+$tymFilter    = $_GET['tym']     ?? '';
+$reklamaFilter= $_GET['reklama'] ?? '';
+$jezdecFilter = $_GET['jezdec']  ?? '';
+$rokFilter    = $_GET['rok']     ?? '';
+$poznamkaFilter = $_GET['poznamka'] ?? '';
 
-$searchQuery = isset($_GET['q']) ? $_GET['q'] : '';
+$searchQuery = $_GET['q'] ?? '';
 $searchQueryLowerDiakritika = mb_strtolower(trim($searchQuery), 'UTF-8');
 $searchQueryLower = iconv('UTF-8', 'ASCII//TRANSLIT', $searchQueryLowerDiakritika);
 
-$filtraceSloupecFirma = isset($_GET['filtrfirma']) ? $_GET['filtrfirma'] : '';
-$filtraceSloupecCislo = isset($_GET['filtrcislo']) ? $_GET['filtrcislo'] : '';
-$filtraceSloupecNazev = isset($_GET['filtrnazev']) ? $_GET['filtrnazev'] : '';
-$filtraceSloupecUpresneni = isset($_GET['filtrupresneni']) ? $_GET['filtrupresneni'] : '';
-$filtraceSloupecBarva = isset($_GET['filtrbarva']) ? $_GET['filtrbarva'] : '';
-$filtraceSloupecZavody = isset($_GET['filtrzavody']) ? $_GET['filtrzavody'] : '';
-$filtraceSloupecSerie = isset($_GET['filtrserie']) ? $_GET['filtrserie'] : '';
-$filtraceSloupecStartTymReklama = isset($_GET['filtrstarttymreklama']) ? $_GET['filtrstarttymreklama'] : '';
-$filtraceSloupecJezdec = isset($_GET['filtrjezdec']) ? $_GET['filtrjezdec'] : '';
-$filtraceSloupecRok = isset($_GET['filtrrok']) ? $_GET['filtrrok'] : '';
-
+$filtraceSloupecFirma = $_GET['filtrfirma'] ?? '';
+$filtraceSloupecCislo = $_GET['filtrcislo'] ?? '';
+$filtraceSloupecNazev = $_GET['filtrnazev'] ?? '';
+$filtraceSloupecUpresneni = $_GET['filtrupresneni'] ?? '';
+$filtraceSloupecBarva = $_GET['filtrbarva'] ?? '';
+$filtraceSloupecZavody = $_GET['filtrzavody'] ?? '';
+$filtraceSloupecSerie = $_GET['filtrserie'] ?? '';
+$filtraceSloupecStartTymReklama = $_GET['filtrstarttymreklama'] ?? '';
+$filtraceSloupecJezdec = $_GET['filtrjezdec'] ?? '';
+$filtraceSloupecRok = $_GET['filtrrok'] ?? '';
 
 $queryFiltrFirma = "SELECT DISTINCT firma FROM autafirmy ORDER BY firma";
 $resultFiltrFirma = mysqli_query($connection, $queryFiltrFirma);
@@ -64,34 +59,28 @@ $resultFiltrSerie = mysqli_query($connection, $queryFiltrSerie);
 $queryFiltrZavody = "SELECT DISTINCT zavod FROM autazavody ORDER BY zavod";
 $resultFiltrZavody = mysqli_query($connection, $queryFiltrZavody);
 
-
 if (isset($_SESSION['uzivatel'])) {
-    $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
-    $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
-    $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
-    $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
+    $prihlasenId        = $_SESSION['uzivatel']['id']        ?? 1234;
+    $prihlasenJmeno     = $_SESSION['uzivatel']['jmeno']     ?? 'Jméno';
+    $prihlasenPrijmeni  = $_SESSION['uzivatel']['prijmeni']  ?? 'Příjmení';
+    $prihlasenOpravneni = $_SESSION['uzivatel']['opravneni'] ?? 4;
 }
 
-
-
-if (isset($_GET['zobrazpozadavky']) && $_GET['zobrazpozadavky'] == "ano" && $prihlasenOpravneni <= 2){
+if (isset($_GET['zobrazpozadavky']) && $_GET['zobrazpozadavky'] === "ano" && $prihlasenOpravneni <= 2){
     $zobrazujpozadavky = "ano";
-}
-else {
+} else {
     $zobrazujpozadavky = "ne";
 }
 
-if (isset($_GET['datumod']) && !empty($_GET['datumod'])) {
+if (!empty($_GET['datumod'])) {
     $datumod = strtotime($_GET['datumod']);
 }
-
-if (isset($_GET['datumdo']) && !empty($_GET['datumdo'])) {
+if (!empty($_GET['datumdo'])) {
     $datumdo = strtotime($_GET['datumdo']);
 }
 
-
-if ($searchQueryLower === 'duplicity' && $zobrazujpozadavky == 'ne') {
-    // Definujeme poddotaz, který vybere řádky, kde se ve sloupci cislo vyskytuje více než jednou
+if ($searchQueryLower === 'duplicity' && $zobrazujpozadavky === 'ne') {
+    // Vypiš duplicitní cislo (kromě prázdných)
     $dupQueryPart = " WHERE cislo IN (
                         SELECT cislo 
                         FROM auta 
@@ -101,254 +90,183 @@ if ($searchQueryLower === 'duplicity' && $zobrazujpozadavky == 'ne') {
                      ) ";
 }
 
-// Pokud se pracuje s duplicity, sestavíme dotazy podle tohoto nastavení
 if (isset($dupQueryPart)) {
-    $baseQuery = "FROM auta " . $dupQueryPart;
-    $query = "SELECT * " . $baseQuery . " ORDER BY cislo";
+    $baseQuery  = "FROM auta " . $dupQueryPart;
+    $query      = "SELECT * " . $baseQuery . " ORDER BY cislo";
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
-} 
-
-else {
+} else {
     // Standardní vyhledávání
     $where = "WHERE id IS NOT NULL";
 
-    if ($zobrazujpozadavky == 'ne'){
-        $where .= " AND (
-            mame = 'ANO' OR 
-            mame = '' OR 
-            mame IS NULL
-        )";
-    }
-
-    else {
+    if ($zobrazujpozadavky === 'ne'){
+        $where .= " AND (mame = 'ANO' OR mame = '' OR mame IS NULL)";
+    } else {
         $where .= " AND mame = 'NE'";
     }
-    
+
     if (isset($datumod) && isset($datumdo)){
         $datumodpromysql = date('Y-m-d', $datumod);
         $datumdopromysql = date('Y-m-d', strtotime('+1 day', $datumdo));
         $where .= " AND pridano BETWEEN '$datumodpromysql' AND '$datumdopromysql'";
     }
-    
-    if (isset($filtraceSloupecFirma)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsFirma = preg_split('/\s+/', trim($filtraceSloupecFirma));
-            foreach ($wordsFirma as $wordFirma) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeFirma = mysqli_real_escape_string($connection, $wordFirma);
-            $where .= "(firma LIKE '%$wordSafeFirma%' OR firma2 LIKE '%$wordSafeFirma%')";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-    }
-    
-    if (isset($filtraceSloupecCislo)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsCislo = preg_split('/\s+/', trim($filtraceSloupecCislo));
-            foreach ($wordsCislo as $wordCislo) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeCislo = mysqli_real_escape_string($connection, $wordCislo);
-            $where .= "cislo LIKE '%$wordSafeCislo%'";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-    }
-    
-    if (isset($filtraceSloupecNazev)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsNazev = preg_split('/\s+/', trim($filtraceSloupecNazev));
-            foreach ($wordsNazev as $wordNazev) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeNazev = mysqli_real_escape_string($connection, $wordNazev);
-            $where .= "nazev LIKE '%$wordSafeNazev%'";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
-    }
-    
-    if (isset($filtraceSloupecUpresneni)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsUpresneni = preg_split('/\s+/', trim($filtraceSloupecUpresneni));
-            foreach ($wordsUpresneni as $wordUpresneni) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeUpresneni = mysqli_real_escape_string($connection, $wordUpresneni);
-            $where .= "upresneni LIKE '%$wordSafeUpresneni%'";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
-    }
-    
-    if (isset($filtraceSloupecBarva)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsBarva = preg_split('/\s+/', trim($filtraceSloupecBarva));
-            foreach ($wordsBarva as $wordBarva) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeBarva = mysqli_real_escape_string($connection, $wordBarva);
-            $where .= "(barva1 LIKE '%$wordSafeBarva%' 
-              OR barva2 LIKE '%$wordSafeBarva%' 
-              OR barva3 LIKE '%$wordSafeBarva%' 
-              OR barva4 LIKE '%$wordSafeBarva%' 
-              OR barva5 LIKE '%$wordSafeBarva%')";
 
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-
-        
-    }
-    
-    if (isset($filtraceSloupecZavody)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsZavody = preg_split('/\s+/', trim($filtraceSloupecZavody));
-            foreach ($wordsZavody as $wordZavody) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeZavody = mysqli_real_escape_string($connection, $wordZavody);
-            $where .= "zavod LIKE '%$wordSafeZavody%'";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
-    }
-    
-    if (isset($filtraceSloupecSerie)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsSerie = preg_split('/\s+/', trim($filtraceSloupecSerie));
-            foreach ($wordsSerie as $wordSerie) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeSerie = mysqli_real_escape_string($connection, $wordSerie);
-            $where .= "serie LIKE '%$wordSafeSerie%'";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
+    // ---- Per-sloupcové filtry s COALESCE ----
+    $tokensFirma = preg_split('/\s+/', trim($filtraceSloupecFirma), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensFirma)) {
+        $or = [];
+        foreach ($tokensFirma as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "(COALESCE(firma,'') LIKE '%$w%' OR COALESCE(firma2,'') LIKE '%$w%')";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
     }
 
-    if (isset($filtraceSloupecStartTymReklama)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsStartTymReklama = preg_split('/\s+/', trim($filtraceSloupecStartTymReklama));
-            foreach ($wordsStartTymReklama as $wordStartTymReklama) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeStartTymReklama = mysqli_real_escape_string($connection, $wordStartTymReklama);
-            $where .= "(startovnicislo LIKE '%$wordSafeStartTymReklama%' OR tym LIKE '%$wordSafeStartTymReklama%' OR reklama LIKE '%$wordSafeStartTymReklama%')";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
-    }
-    
-    if (isset($filtraceSloupecJezdec)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsJezdec = preg_split('/\s+/', trim($filtraceSloupecJezdec));
-            foreach ($wordsJezdec as $wordJezdec) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeJezdec = mysqli_real_escape_string($connection, $wordJezdec);
-            $where .= "(jezdec1 LIKE '%$wordSafeJezdec%' OR jezdec2 LIKE '%$wordSafeJezdec%' OR jezdec3 LIKE '%$wordSafeJezdec%')";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
+    $tokensCislo = preg_split('/\s+/', trim($filtraceSloupecCislo), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensCislo)) {
+        $or = [];
+        foreach ($tokensCislo as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "COALESCE(cislo,'') LIKE '%$w%'";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
     }
 
-    if (isset($filtraceSloupecRok)){
-            $pocetZadani = 1;
-            $where .= " AND (";
-            $wordsRok = preg_split('/\s+/', trim($filtraceSloupecRok));
-            foreach ($wordsRok as $wordRok) {
-                if ($pocetZadani > 1){
-                    $where .= " OR ";
-                }
-            $wordSafeRok = mysqli_real_escape_string($connection, $wordRok);
-            $where .= "rok LIKE '%$wordSafeRok%'";
-            $pocetZadani = $pocetZadani + 1;
-            }
-            $where .= ")";
-        
+    $tokensNazev = preg_split('/\s+/', trim($filtraceSloupecNazev), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensNazev)) {
+        $or = [];
+        foreach ($tokensNazev as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "COALESCE(nazev,'') LIKE '%$w%'";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
     }
 
+    $tokensUpresneni = preg_split('/\s+/', trim($filtraceSloupecUpresneni), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensUpresneni)) {
+        $or = [];
+        foreach ($tokensUpresneni as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "COALESCE(upresneni,'') LIKE '%$w%'";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
 
+    $tokensBarva = preg_split('/\s+/', trim($filtraceSloupecBarva), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensBarva)) {
+        $or = [];
+        foreach ($tokensBarva as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "(COALESCE(barva1,'') LIKE '%$w%' 
+                  OR COALESCE(barva2,'') LIKE '%$w%' 
+                  OR COALESCE(barva3,'') LIKE '%$w%' 
+                  OR COALESCE(barva4,'') LIKE '%$w%' 
+                  OR COALESCE(barva5,'') LIKE '%$w%')";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
+
+    $tokensZavody = preg_split('/\s+/', trim($filtraceSloupecZavody), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensZavody)) {
+        $or = [];
+        foreach ($tokensZavody as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "COALESCE(zavod,'') LIKE '%$w%'";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
+
+    $tokensSerie = preg_split('/\s+/', trim($filtraceSloupecSerie), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensSerie)) {
+        $or = [];
+        foreach ($tokensSerie as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "COALESCE(serie,'') LIKE '%$w%'";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
+
+    $tokensSTR = preg_split('/\s+/', trim($filtraceSloupecStartTymReklama), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensSTR)) {
+        $or = [];
+        foreach ($tokensSTR as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "(COALESCE(startovnicislo,'') LIKE '%$w%' OR COALESCE(tym,'') LIKE '%$w%' OR COALESCE(reklama,'') LIKE '%$w%')";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
+
+    $tokensJezdec = preg_split('/\s+/', trim($filtraceSloupecJezdec), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensJezdec)) {
+        $or = [];
+        foreach ($tokensJezdec as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            $or[] = "(COALESCE(jezdec1,'') LIKE '%$w%' OR COALESCE(jezdec2,'') LIKE '%$w%' OR COALESCE(jezdec3,'') LIKE '%$w%')";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
+
+    $tokensRok = preg_split('/\s+/', trim($filtraceSloupecRok), -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($tokensRok)) {
+        $or = [];
+        foreach ($tokensRok as $tok) {
+            $w = mysqli_real_escape_string($connection, $tok);
+            // Rok jako text (aby LIKE fungoval i na INT/YEAR)
+            $or[] = "COALESCE(CAST(rok AS CHAR),'') LIKE '%$w%'";
+        }
+        $where .= " AND (" . implode(" OR ", $or) . ")";
+    }
+
+    // ---- Fulltext přes více sloupců s COALESCE ----
     if (!empty($searchQuery)) {
-        // Rozdělení zadaného textu na jednotlivá slova
-        $words = preg_split('/\s+/', trim($searchQuery));
+        $words = preg_split('/\s+/', trim($searchQuery), -1, PREG_SPLIT_NO_EMPTY);
         foreach ($words as $word) {
-            $wordSafe = mysqli_real_escape_string($connection, $word);
-            // Přidáme podmínku, že alespoň v jednom z relevantních sloupců musí být hledané slovo
+            $w = mysqli_real_escape_string($connection, $word);
             $where .= " AND (
-                firma LIKE '%$wordSafe%' OR 
-                firma2 LIKE '%$wordSafe%' OR 
-                cislo LIKE '%$wordSafe%' OR 
-                nazev LIKE '%$wordSafe%' OR 
-                upresneni LIKE '%$wordSafe%' OR 
-                barva1 LIKE '%$wordSafe%' OR 
-                barva2 LIKE '%$wordSafe%' OR 
-                barva3 LIKE '%$wordSafe%' OR 
-                barva4 LIKE '%$wordSafe%' OR 
-                barva5 LIKE '%$wordSafe%' OR 
-                serie LIKE '%$wordSafe%' OR 
-                zavod LIKE '%$wordSafe%' OR 
-                startovnicislo LIKE '%$wordSafe%' OR 
-                tym LIKE '%$wordSafe%' OR 
-                reklama LIKE '%$wordSafe%' OR 
-                jezdec1 LIKE '%$wordSafe%' OR 
-                jezdec2 LIKE '%$wordSafe%' OR 
-                jezdec3 LIKE '%$wordSafe%' OR 
-                poznamka LIKE '%$wordSafe%' OR 
-                rok LIKE '%$wordSafe%'
+                COALESCE(firma,'')            LIKE '%$w%' OR 
+                COALESCE(firma2,'')           LIKE '%$w%' OR 
+                COALESCE(cislo,'')            LIKE '%$w%' OR 
+                COALESCE(nazev,'')            LIKE '%$w%' OR 
+                COALESCE(upresneni,'')        LIKE '%$w%' OR 
+                COALESCE(barva1,'')           LIKE '%$w%' OR 
+                COALESCE(barva2,'')           LIKE '%$w%' OR 
+                COALESCE(barva3,'')           LIKE '%$w%' OR 
+                COALESCE(barva4,'')           LIKE '%$w%' OR 
+                COALESCE(barva5,'')           LIKE '%$w%' OR 
+                COALESCE(serie,'')            LIKE '%$w%' OR 
+                COALESCE(zavod,'')            LIKE '%$w%' OR 
+                COALESCE(startovnicislo,'')   LIKE '%$w%' OR 
+                COALESCE(tym,'')              LIKE '%$w%' OR 
+                COALESCE(reklama,'')          LIKE '%$w%' OR 
+                COALESCE(jezdec1,'')          LIKE '%$w%' OR 
+                COALESCE(jezdec2,'')          LIKE '%$w%' OR 
+                COALESCE(jezdec3,'')          LIKE '%$w%' OR 
+                COALESCE(poznamka,'')         LIKE '%$w%' OR 
+                COALESCE(CAST(rok AS CHAR),'') LIKE '%$w%'
             )";
         }
     }
-    $baseQuery = "FROM auta $where";
-    $srovnani = isset($_GET['srovnani']) ? $_GET['srovnani'] : "firma";
-    $query = "SELECT * " . $baseQuery . " ORDER BY " .$srovnani;
+
+    $baseQuery  = "FROM auta $where";
+    $srovnani   = $_GET['srovnani'] ?? "firma";
+    $query      = "SELECT * " . $baseQuery . " ORDER BY " . $srovnani;
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
 }
 
 // Stránkování
 $stranka = isset($_GET['stranka']) ? (int)$_GET['stranka'] : 1;
-if ($stranka < 1) {
-    $stranka = 1;
-}
-$limit = 100;
+if ($stranka < 1) $stranka = 1;
+$limit  = 100;
 $offset = ($stranka - 1) * $limit;
 
-// Zjištění celkového počtu záznamů pro paginaci
-$countResult = mysqli_query($connection, $countQuery);
-$countRow = mysqli_fetch_assoc($countResult);
-$totalRecords = $countRow['total'];
-$totalPages = ceil($totalRecords / $limit);
+// Počet záznamů
+$countResult   = mysqli_query($connection, $countQuery);
+$countRow      = mysqli_fetch_assoc($countResult);
+$totalRecords  = (int)$countRow['total'];
+$totalPages    = (int)ceil($totalRecords / $limit);
 
-// Načtení dat pouze pro aktuální stránku (přidáme LIMIT a OFFSET)
+// Data pro stránku
 $query .= " LIMIT $limit OFFSET $offset";
 $result = mysqli_query($connection, $query);
-
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -359,268 +277,153 @@ $result = mysqli_query($connection, $query);
 	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 1199px)">
 	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 1200px)">
     <title>Databaze aut</title>
-    
-
     <script>
-    // Funkce, která načte vybrané filtry a přesměruje na stránku s odpovídajícími GET parametry
     function applyFilters() {
-    var firma           = document.getElementById('selectfirma').value;
-    var firma2          = document.getElementById('selectfirma2').value;
-    var cislo           = document.getElementById('selectcislo').value;
-    var nazev           = document.getElementById('selectnazev').value;
-    var upresneni       = document.getElementById('selectupresneni').value;
-    var barva           = document.getElementById('selectbarva').value;
-    var serie           = document.getElementById('selectserie').value;
-    var zavod           = document.getElementById('selectzavod').value;
-    var startovnicislo  = document.getElementById('selectstartovnicislo').value;
-    var tym             = document.getElementById('selecttym').value;
-    var reklama         = document.getElementById('selectreklama').value;
-    var jezdec          = document.getElementById('selectjezdec').value;
-    var rok             = document.getElementById('selectroku').value;
-    var poznamka        = document.getElementById('selectpoznamka').value;
-    
-    var url = 'Auta-main.php?stranka=1';
-    if(firma)          url += '&firma='           + encodeURIComponent(firma);
-    if(firma2)         url += '&firma2='          + encodeURIComponent(firma2);
-    if(cislo)          url += '&cislo='           + encodeURIComponent(cislo);
-    if(nazev)          url += '&nazev='           + encodeURIComponent(nazev);
-    if(upresneni)      url += '&upresneni='       + encodeURIComponent(upresneni);
-    if(barva)          url += '&barva='           + encodeURIComponent(barva);
-    if(serie)          url += '&serie='           + encodeURIComponent(serie);
-    if(zavod)          url += '&zavod='           + encodeURIComponent(zavod);
-    if(startovnicislo) url += '&startovnicislo='  + encodeURIComponent(startovnicislo);
-    if(tym)            url += '&tym='             + encodeURIComponent(tym);
-    if(reklama)        url += '&reklama='         + encodeURIComponent(reklama);
-    if(jezdec)         url += '&jezdec='          + encodeURIComponent(jezdec);
-    if(rok)            url += '&rok='             + encodeURIComponent(rok);
-    if(poznamka)       url += '&poznamka='        + encodeURIComponent(poznamka);
-    
-    window.location.href = url;
-}
-    // Funkce pro tisk QR kódu
+        var firma           = document.getElementById('selectfirma').value;
+        var firma2          = document.getElementById('selectfirma2').value;
+        var cislo           = document.getElementById('selectcislo').value;
+        var nazev           = document.getElementById('selectnazev').value;
+        var upresneni       = document.getElementById('selectupresneni').value;
+        var barva           = document.getElementById('selectbarva').value;
+        var serie           = document.getElementById('selectserie').value;
+        var zavod           = document.getElementById('selectzavod').value;
+        var startovnicislo  = document.getElementById('selectstartovnicislo').value;
+        var tym             = document.getElementById('selecttym').value;
+        var reklama         = document.getElementById('selectreklama').value;
+        var jezdec          = document.getElementById('selectjezdec').value;
+        var rok             = document.getElementById('selectroku').value;
+        var poznamka        = document.getElementById('selectpoznamka').value;
+
+        var url = 'Auta-main.php?stranka=1';
+        if(firma)          url += '&firma='           + encodeURIComponent(firma);
+        if(firma2)         url += '&firma2='          + encodeURIComponent(firma2);
+        if(cislo)          url += '&cislo='           + encodeURIComponent(cislo);
+        if(nazev)          url += '&nazev='           + encodeURIComponent(nazev);
+        if(upresneni)      url += '&upresneni='       + encodeURIComponent(upresneni);
+        if(barva)          url += '&barva='           + encodeURIComponent(barva);
+        if(serie)          url += '&serie='           + encodeURIComponent(serie);
+        if(zavod)          url += '&zavod='           + encodeURIComponent(zavod);
+        if(startovnicislo) url += '&startovnicislo='  + encodeURIComponent(startovnicislo);
+        if(tym)            url += '&tym='             + encodeURIComponent(tym);
+        if(reklama)        url += '&reklama='         + encodeURIComponent(reklama);
+        if(jezdec)         url += '&jezdec='          + encodeURIComponent(jezdec);
+        if(rok)            url += '&rok='             + encodeURIComponent(rok);
+        if(poznamka)       url += '&poznamka='        + encodeURIComponent(poznamka);
+
+        window.location.href = url;
+    }
     function printQR(imageSrc) {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write('<html><head><title>Tisk QR kódu</title></head><body>');
-        printWindow.document.write('<img src="' + imageSrc + '" style="width:300px;height:300px;">');
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
+        const w = window.open('', '_blank');
+        w.document.write('<html><head><title>Tisk QR kódu</title></head><body>');
+        w.document.write('<img src="' + imageSrc + '" style="width:300px;height:300px;">');
+        w.document.write('</body></html>');
+        w.document.close();
+        w.print();
     }
-    
     function skryvaniQR() {
-    var cells = document.querySelectorAll('.bunkaQR');
-    cells.forEach(function(cell) {
-        if (cell.style.display === 'none') {
-            cell.style.display = '';
-        } else {
-            cell.style.display = 'none';
-        }
-    });
-}
-    
-    </script>
-    <script>
+        var cells = document.querySelectorAll('.bunkaQR');
+        cells.forEach(function(cell) {
+            cell.style.display = (cell.style.display === 'none') ? '' : 'none';
+        });
+    }
+    // jednoduchá pojistka proti smyčkám (reload <= 5 s)
+  const RELOAD_COOLDOWN_MS = 5000;
+  let lastReload = Number(sessionStorage.getItem('lastReload') || 0);
+
+  function safeReload(reason = '') {
+    const now = Date.now();
+    if (now - lastReload < RELOAD_COOLDOWN_MS) return;
+    lastReload = now;
+    sessionStorage.setItem('lastReload', String(now));
+    // location.reload(true) je deprecated – používej prostý reload
+    location.reload();
+  }
+
+  // 1) Když se karta znovu zobrazí (přepnutí záložek / návrat z jiné app)
   document.addEventListener('visibilitychange', () => {
-    // když se uživatel přepne *na* tento panel
-    if (document.visibilityState === 'visible') {
-      // např. znovu načíst
-      location.reload();
+    if (document.visibilityState === 'visible') safeReload('visibility');
+  });
+
+  // 2) Když okno/tab získá focus (uživatel se vrátí klikem/Alt+Tab)
+  window.addEventListener('focus', () => {
+    safeReload('focus');
+  });
+
+  // 3) Když se stránka vrátí z BFCache (zpět/vpřed nebo iOS návrat z pozadí)
+  window.addEventListener('pageshow', (e) => {
+    // e.persisted === true => načteno z BFCache
+    if (e.persisted) safeReload('pageshow-bfcache');
+  });
+
+  // 4) Chrome Page Lifecycle – obnova z „freeze“ stavu
+  document.addEventListener?.('resume', () => {
+    safeReload('resume');
+  });
+
+  // 5) Když se vrátí konektivita (uživatel byl offline)
+  window.addEventListener('online', () => {
+    safeReload('online');
+  });
+    function dotazkmazani(id){
+        if (window.confirm("Opravdu chcete smazat záznam?")) {
+            window.open('Auta-edit.php?polozka=' + id + '&smazpolozku=1', '_blank');
+        }
     }
-  });
-</script>
-<script>
-		function dotazkmazani(polozkakmazani){
-		dialogoveokno=window.confirm("Opravdu chcete smazat záznam?");
-		if(dialogoveokno) window.open('Auta-edit.php?polozka=' + polozkakmazani + '&smazpolozku=1', '_blank');
-		}
-</script>
-
-<script>
-(function () {
-  function addFirma(token) {
-    var inp = document.getElementById('filtrfirma');
-    if (!inp) return;
-    token = (token || '').trim();
-    if (!token) return;
-
-    // prosté přidání s mezerou
-    inp.value = inp.value ? (inp.value + ' ' + token) : token;
-
-    inp.focus();
-    // caret na konec (když typ=search, funguje v moderních prohlížečích)
-    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
-  }
-
-  // delegace kliků (bez inline onclick)
-  document.addEventListener('click', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    addFirma(row.dataset.firma);
-  });
-
-  // klávesnice: Enter/mezerník na řádku
-  document.addEventListener('keydown', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      addFirma(row.dataset.firma);
-    }
-  });
-})();
-</script>
-
-<script>
-(function () {
-  function addBarva(token) {
-    var inp = document.getElementById('filtrbarva');
-    if (!inp) return;
-    token = (token || '').trim();
-    if (!token) return;
-
-    // prosté přidání s mezerou
-    inp.value = inp.value ? (inp.value + ' ' + token) : token;
-
-    inp.focus();
-    // caret na konec (když typ=search, funguje v moderních prohlížečích)
-    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
-  }
-
-  // delegace kliků (bez inline onclick)
-  document.addEventListener('click', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    addBarva(row.dataset.barva);
-  });
-
-  // klávesnice: Enter/mezerník na řádku
-  document.addEventListener('keydown', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      addBarva(row.dataset.barva);
-    }
-  });
-})();
-</script>
-
-<script>
-(function () {
-  function addSerie(token) {
-    var inp = document.getElementById('filtrserie');
-    if (!inp) return;
-    token = (token || '').trim();
-    if (!token) return;
-
-    // prosté přidání s mezerou
-    inp.value = inp.value ? (inp.value + ' ' + token) : token;
-
-    inp.focus();
-    // caret na konec (když typ=search, funguje v moderních prohlížečích)
-    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
-  }
-
-  // delegace kliků (bez inline onclick)
-  document.addEventListener('click', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    addSerie(row.dataset.serie);
-  });
-
-  // klávesnice: Enter/mezerník na řádku
-  document.addEventListener('keydown', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      addSerie(row.dataset.serie);
-    }
-  });
-})();
-</script>
-
-<script>
-(function () {
-  function addZavody(token) {
-    var inp = document.getElementById('filtrzavody');
-    if (!inp) return;
-    token = (token || '').trim();
-    if (!token) return;
-
-    // prosté přidání s mezerou
-    inp.value = inp.value ? (inp.value + ' ' + token) : token;
-
-    inp.focus();
-    // caret na konec (když typ=search, funguje v moderních prohlížečích)
-    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
-  }
-
-  // delegace kliků (bez inline onclick)
-  document.addEventListener('click', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    addZavody(row.dataset.zavody);
-  });
-
-  // klávesnice: Enter/mezerník na řádku
-  document.addEventListener('keydown', function (e) {
-    var row = e.target.closest('.filtr-row');
-    if (!row) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      addZavody(row.dataset.zavody);
-    }
-  });
-})();
-</script>
-
-
-
+    (function () {
+      function addToken(inputId, token) {
+        var inp = document.getElementById(inputId);
+        if (!inp) return;
+        token = (token || '').trim();
+        if (!token) return;
+        inp.value = inp.value ? (inp.value + ' ' + token) : token;
+        inp.focus();
+        try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
+      }
+      document.addEventListener('click', function (e) {
+        var row = e.target.closest('.filtr-row'); if (!row) return;
+        if (row.dataset.firma) addToken('filtrfirma', row.dataset.firma);
+        if (row.dataset.barva) addToken('filtrbarva', row.dataset.barva);
+        if (row.dataset.serie) addToken('filtrserie', row.dataset.serie);
+        if (row.dataset.zavody) addToken('filtrzavody', row.dataset.zavody);
+      });
+      document.addEventListener('keydown', function (e) {
+        var row = e.target.closest('.filtr-row'); if (!row) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (row.dataset.firma) addToken('filtrfirma', row.dataset.firma);
+          if (row.dataset.barva) addToken('filtrbarva', row.dataset.barva);
+          if (row.dataset.serie) addToken('filtrserie', row.dataset.serie);
+          if (row.dataset.zavody) addToken('filtrzavody', row.dataset.zavody);
+        }
+      });
+    })();
+    </script>
 </head>
 <body>
 <?php 
-
 include("phpqrcode/qrlib.php");
 
-    echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
-        switch ($prihlasenOpravneni){
-            case 1:
-                echo "admin";
-                break;
-            case 2:
-                echo "moderator";
-                break;
-            case 3:
-                echo "uživatel";
-                break;
-            case 4:
-                echo "veřejnost";
-                break;    
-            default:
-                echo "úrovně č.: " .$prihlasenOpravneni;
-                break;
-
-        }
-        echo "</span></div></td></tr></table>";
-
-
-
-
-
+echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+switch ($prihlasenOpravneni){
+    case 1: echo "admin"; break;
+    case 2: echo "moderator"; break;
+    case 3: echo "uživatel"; break;
+    case 4: echo "veřejnost"; break;
+    default: echo "úrovně č.: " .$prihlasenOpravneni; break;
+}
+echo "</span></div></td></tr></table>";
 ?>
 
 <table class="tabulka-ikony" id="zacatek">
 <tr>
 <td>
 <div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" title="Odhlásit se"></a>
+<a href="Uvodni.php"><img width="50" height="50" src="Home.png" title="Zpět na úvodní stránku"></a>
 </div>
 </td>
 </tr>
 </table>
-
 
 <?php
 if ($prihlasenOpravneni <= 2 ){
@@ -628,63 +431,28 @@ if ($prihlasenOpravneni <= 2 ){
                   onclick=\"window.open('Auta-edit.php?polozka=nova', '_blank');\">";
     echo "<input class='zaoblene-tlacitko' type='button' value='IMPORT' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" 
                   onclick=\"window.open('Auta-import.php', '_blank');\"></div></td></tr></table>";
-    #echo "<a href=\"Auta-edit.php?polozka=nova\" target=\"_blank\">Nová položka</a>";
 }
 ?>
 
-
 <div class="tabulka-hledani">
-
-<!-- Filtrační formulář -->
 <div class="search-box">
   <form class="search-form" method="get" action="Auta-main.php" autocomplete="off">
-  <!-- 1) Fulltext -->
   <div class="search-main">Hledání:
-    <input
-      type="search"
-      class="search-input"
-      name="q"
-      placeholder="Sem zadej klíčová slova (nebo 'duplicity')"
-      value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>"
-      autocomplete="off"
-    >
+    <input type="search" class="search-input" name="q" placeholder="Sem zadej klíčová slova (nebo 'duplicity')" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" autocomplete="off">
   </div>
 
-  <!-- 2) Datum od / do vedle sebe -->
   <div class="dates">Datum přidání:
-    <input
-      type="search"
-      class="date-input"
-      name="datumod"
-      placeholder="Datum od"
-      value="<?php echo htmlspecialchars($_GET['datumod'] ?? ''); ?>"
-      autocomplete="off"
-    >
-    <input
-      type="search"
-      class="date-input"
-      name="datumdo"
-      placeholder="Datum do"
-      value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>"
-      autocomplete="off"
-    >
+    <input type="search" class="date-input" name="datumod" placeholder="Datum od" value="<?php echo htmlspecialchars($_GET['datumod'] ?? ''); ?>" autocomplete="off">
+    <input type="search" class="date-input" name="datumdo" placeholder="Datum do" value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>" autocomplete="off">
   </div>
+
 <details class="filtry-hledani-pozitivni">
 <summary title="Zobrazit/skrýt filtry">Filtry</summary>
-  <!-- 3) Mřížka všech filtrů (každý filtr = dlaždice .filter-field) -->
-  <div class="filters-grid">
 
+  <div class="filters-grid">
     <!-- Firma -->
     <div class="filter-field">
-      <input
-        id="filtrfirma"
-        type="search"
-        class="date-input"
-        name="filtrfirma"
-        placeholder="Filtr firem"
-        value="<?php echo htmlspecialchars($_GET['filtrfirma'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrfirma" type="search" class="date-input" name="filtrfirma" placeholder="Filtr firem" value="<?php echo htmlspecialchars($_GET['filtrfirma'] ?? ''); ?>" autocomplete="off"/>
       <details class="filtr-panel">
         <summary class="filtr-toggle" title="Zobrazit/skrýt výpis firem">Výběr firem</summary>
         <div class="filtracni-scroll">
@@ -700,56 +468,24 @@ if ($prihlasenOpravneni <= 2 ){
       </details>
     </div>
 
-    <!-- Číslo (bez menu) -->
+    <!-- Číslo -->
     <div class="filter-field">
-      <input
-        id="filtrcislo"
-        type="search"
-        class="date-input"
-        name="filtrcislo"
-        placeholder="Filtr čísla"
-        value="<?php echo htmlspecialchars($_GET['filtrcislo'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrcislo" type="search" class="date-input" name="filtrcislo" placeholder="Filtr čísla" value="<?php echo htmlspecialchars($_GET['filtrcislo'] ?? ''); ?>" autocomplete="off" />
     </div>
 
-    <!-- Název (bez menu) -->
+    <!-- Název -->
     <div class="filter-field">
-      <input
-        id="filtrnazev"
-        type="search"
-        class="date-input"
-        name="filtrnazev"
-        placeholder="Filtr názvu"
-        value="<?php echo htmlspecialchars($_GET['filtrnazev'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrnazev" type="search" class="date-input" name="filtrnazev" placeholder="Filtr názvu" value="<?php echo htmlspecialchars($_GET['filtrnazev'] ?? ''); ?>" autocomplete="off" />
     </div>
 
-    <!-- Upřesnění (bez menu) -->
+    <!-- Upřesnění -->
     <div class="filter-field">
-      <input
-        id="filtrupresneni"
-        type="search"
-        class="date-input"
-        name="filtrupresneni"
-        placeholder="Filtr upřesnění"
-        value="<?php echo htmlspecialchars($_GET['filtrupresneni'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrupresneni" type="search" class="date-input" name="filtrupresneni" placeholder="Filtr upřesnění" value="<?php echo htmlspecialchars($_GET['filtrupresneni'] ?? ''); ?>" autocomplete="off" />
     </div>
 
     <!-- Barvy + menu -->
     <div class="filter-field">
-      <input
-        id="filtrbarva"
-        type="search"
-        class="date-input"
-        name="filtrbarva"
-        placeholder="Filtr barev"
-        value="<?php echo htmlspecialchars($_GET['filtrbarva'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrbarva" type="search" class="date-input" name="filtrbarva" placeholder="Filtr barev" value="<?php echo htmlspecialchars($_GET['filtrbarva'] ?? ''); ?>" autocomplete="off" />
       <details class="filtr-panel">
         <summary class="filtr-toggle" title="Zobrazit/skrýt výpis barev">Výběr barev</summary>
         <div class="filtracni-scroll">
@@ -767,15 +503,7 @@ if ($prihlasenOpravneni <= 2 ){
 
     <!-- Série + menu -->
     <div class="filter-field">
-      <input
-        id="filtrserie"
-        type="search"
-        class="date-input"
-        name="filtrserie"
-        placeholder="Filtr série"
-        value="<?php echo htmlspecialchars($_GET['filtrserie'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrserie" type="search" class="date-input" name="filtrserie" placeholder="Filtr série" value="<?php echo htmlspecialchars($_GET['filtrserie'] ?? ''); ?>" autocomplete="off" />
       <details class="filtr-panel">
         <summary class="filtr-toggle" title="Zobrazit/skrýt výpis serií">Výběr serií</summary>
         <div class="filtracni-scroll">
@@ -793,15 +521,7 @@ if ($prihlasenOpravneni <= 2 ){
 
     <!-- Závody + menu -->
     <div class="filter-field">
-      <input
-        id="filtrzavody"
-        type="search"
-        class="date-input"
-        name="filtrzavody"
-        placeholder="Filtr závodů"
-        value="<?php echo htmlspecialchars($_GET['filtrzavody'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrzavody" type="search" class="date-input" name="filtrzavody" placeholder="Filtr závodů" value="<?php echo htmlspecialchars($_GET['filtrzavody'] ?? ''); ?>" autocomplete="off" />
       <details class="filtr-panel">
         <summary class="filtr-toggle" title="Zobrazit/skrýt výpis závodů">Výběr závodů</summary>
         <div class="filtracni-scroll">
@@ -817,103 +537,57 @@ if ($prihlasenOpravneni <= 2 ){
       </details>
     </div>
 
-    <!-- Start.č./Tým/Reklama (bez menu) -->
+    <!-- Start.č./Tým/Reklama -->
     <div class="filter-field">
-      <input
-        id="filtrstarttymreklama"
-        type="search"
-        class="date-input"
-        name="filtrstarttymreklama"
-        placeholder="Filtr st.č./tým/reklama"
-        value="<?php echo htmlspecialchars($_GET['filtrstarttymreklama'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrstarttymreklama" type="search" class="date-input" name="filtrstarttymreklama" placeholder="Filtr st.č./tým/reklama" value="<?php echo htmlspecialchars($_GET['filtrstarttymreklama'] ?? ''); ?>" autocomplete="off" />
     </div>
 
-    <!-- Jezdec (bez menu) -->
+    <!-- Jezdec -->
     <div class="filter-field">
-      <input
-        id="filtrjezdec"
-        type="search"
-        class="date-input"
-        name="filtrjezdec"
-        placeholder="Filtr jezdec"
-        value="<?php echo htmlspecialchars($_GET['filtrjezdec'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrjezdec" type="search" class="date-input" name="filtrjezdec" placeholder="Filtr jezdec" value="<?php echo htmlspecialchars($_GET['filtrjezdec'] ?? ''); ?>" autocomplete="off" />
     </div>
 
-    <!-- Rok (bez menu) -->
+    <!-- Rok -->
     <div class="filter-field">
-      <input
-        id="filtrrok"
-        type="search"
-        class="date-input"
-        name="filtrrok"
-        placeholder="Filtr rok"
-        value="<?php echo htmlspecialchars($_GET['filtrrok'] ?? ''); ?>"
-        autocomplete="off"
-      />
+      <input id="filtrrok" type="search" class="date-input" name="filtrrok" placeholder="Filtr rok" value="<?php echo htmlspecialchars($_GET['filtrrok'] ?? ''); ?>" autocomplete="off" />
     </div>
   </div>
 </details>
 
-  <!-- 4) Akce vpravo dole -->
   <div class="actions">
     <input type="hidden" name="zobrazpozadavky" value="<?php echo htmlspecialchars($zobrazujpozadavky); ?>">
     <button type="submit" class="btn-search">Hledat</button>
   </div>
 </form>
-
 </div>
-
-
 </div>
-
-
-
 
 <?php
-
-
 $queryParams = [];
-if (!empty($searchQuery)) {
-    $queryParams['q'] = $searchQuery;
+if (!empty($searchQuery)) { $queryParams['q'] = $searchQuery; }
+$queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
+if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
+    $queryParams['datumod'] = date('Y-m-d', $datumod);
+    $queryParams['datumdo'] = date('Y-m-d', $datumdo);
 }
-    $queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
-    if (isset($_GET['datumod']) && isset ($_GET['datumdo']) && !empty($_GET['datumod']) && !empty($_GET['datumdo'])){
-        $queryParams['datumod'] = date('Y-m-d', $datumod);
-        $queryParams['datumdo'] = date('Y-m-d', $datumdo);
-    }
-    
+$queryParams['filtrfirma'] = $filtraceSloupecFirma;
+$queryParams['filtrcislo'] = $filtraceSloupecCislo;
+$queryParams['filtrnazev'] = $filtraceSloupecNazev;
+$queryParams['filtrupresneni'] = $filtraceSloupecUpresneni;
+$queryParams['filtrbarva'] = $filtraceSloupecBarva;
+$queryParams['filtrzavody'] = $filtraceSloupecZavody;
+$queryParams['filtrserie'] = $filtraceSloupecSerie;
+$queryParams['filtrstarttymreklama'] = $filtraceSloupecStartTymReklama;
+$queryParams['filtrjezdec'] = $filtraceSloupecJezdec;
+$queryParams['filtrrok'] = $filtraceSloupecRok;
 
-    
-    
-    
-    $queryParams['filtrfirma'] = $filtraceSloupecFirma;
-    $queryParams['filtrcislo'] = $filtraceSloupecCislo;
-    $queryParams['filtrnazev'] = $filtraceSloupecNazev;
-    $queryParams['filtrupresneni'] = $filtraceSloupecUpresneni;
-    $queryParams['filtrbarva'] = $filtraceSloupecBarva;
-    $queryParams['filtrzavody'] = $filtraceSloupecZavody;
-    $queryParams['filtrserie'] = $filtraceSloupecSerie;
-    $queryParams['filtrstarttymreklama'] = $filtraceSloupecStartTymReklama;
-    $queryParams['filtrjezdec'] = $filtraceSloupecJezdec;
-    $queryParams['filtrrok'] = $filtraceSloupecRok;
-    
-    $queryString = http_build_query($queryParams);
-    
-    
-    
-    
+$queryString = http_build_query($queryParams);
+
 echo "<div style=\"font-size: 14px; text-align: left; padding-top: 0px;\">Počet nálezů: <b>" .$totalRecords ."</b>";
 if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('d.m.Y', $datumod) ."</b> až <b>".date('d.m.Y', $datumdo)."</b></div>";}
-
 ?>
 
 <a href="#konec" class="fixed-arrow-dolu"><img src="sipka_dolu.jpg" width="30" height="30" title="Posun na konec stránky" style="opacity: 0.5;"></a>
-<!-- Výpis dat v tabulce -->
-
 
 <table class="hlavnitabulka">
     <thead>
@@ -928,9 +602,7 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
         <th>Jezdec</th>
         <th>Rok <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=rok'\">";?></th>
         <th>Cena</th>
-        <th>QR
-        <button onclick="skryvaniQR()">Skrýt/Zobrazit</button>
-        </th>
+        <th>QR <button onclick="skryvaniQR()">Skrýt/Zobrazit</button></th>
         <th>Tisk QR</th>
         <?php if ($prihlasenOpravneni <= 2 ) { echo "<th>EDIT</th>"; } ?>
     </tr>
@@ -938,57 +610,62 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
     <tbody>
     <?php
     while ($row = mysqli_fetch_assoc($result)) {
-        #tento if-else ve finální verzi smazat:
-            if ($row['mame'] == "ANO"){
-                echo "<tr id=\"{$row['id']}\" class=\"zelenePozadi\">";
-                
-            }
-            else {
-                 echo "<tr id=\"{$row['id']}\">";
-            }
-       
+        if ($row['mame'] == "ANO"){
+            echo "<tr id=\"{$row['id']}\" class=\"zelenePozadi\">";
+        } else {
+            echo "<tr id=\"{$row['id']}\">";
+        }
+
         echo "<td>";
             $firmy = array_filter([$row['firma'], $row['firma2']]);
             echo implode(", ", $firmy);
         echo "</td>";
+
         echo "<td>{$row['cislo']}</td>";
         echo "<td>{$row['nazev']}</td>";
         echo "<td>{$row['upresneni']}</td>";
+
         echo "<td>";
-            // Sestavení seznamu barev, pokud jsou nastaveny
             $barvy = array_filter([$row['barva1'], $row['barva2'], $row['barva3'], $row['barva4'], $row['barva5']]);
             echo implode(", ", $barvy);
         echo "</td>";
+
         echo "<td>";
             $zavody = array_filter([$row['serie'], $row['zavod']]);
             echo implode(", ", $zavody);
         echo "</td>";
+
         echo "<td>";
             $team = array_filter([$row['startovnicislo'], $row['tym'], $row['reklama']]);
             echo implode(", ", $team);
         echo "</td>";
+
         echo "<td>";
             $jezdec = array_filter([$row['jezdec1'], $row['jezdec2'], $row['jezdec3']]);
             echo implode(", ", $jezdec);
         echo "</td>";
+
         echo "<td>{$row['rok']}</td>";
+
         if ($prihlasenOpravneni <= 2 ){
             echo "<td>{$row['cena']}</td>";
         } else {
             echo "<td><i>nelze zobrazit</i></td>";
         }
-        // QR kód
+
         $cestaQRauta = "QR-auta/{$row['id']}.png";
         if (!file_exists($cestaQRauta)) {
             QRcode::png($row['id'], $cestaQRauta);
         }
         echo "<td><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\" style=\"display: none;\"></td>";
         echo "<td><input class='zaoblene-tlacitko' type='button' value='Tisk QR' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\"  onclick=\"printQR('{$cestaQRauta}')\"></td>";
+
         if ($prihlasenOpravneni <= 2 ){
-            echo "<td style=\"word-wrap: normal; word-break: normal; white-space: nowrap;\"><div><input class='zaoblene-tlacitko' type='button' value='EDIT' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" 
-                  onclick=\"window.open('Auta-edit.php?polozka={$row['id']}', '_blank');\"><input class='zaoblene-tlacitko' type='button' value='COPY' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" 
-                  onclick=\"window.open('Auta-edit.php?polozka={$row['id']}&duplikace=1', '_blank');\"><input class='zaoblene-tlacitko-cervene' type='button' value='DEL' onmouseover=\"this.style.backgroundColor='darkred';\" onmouseout=\"this.style.backgroundColor='red';\" 
-                  onclick=\"dotazkmazani({$row['id']});\"></div></td>";
+            echo "<td style=\"word-wrap: normal; word-break: normal; white-space: nowrap;\"><div>
+                <input class='zaoblene-tlacitko' type='button' value='EDIT' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" onclick=\"window.open('Auta-edit.php?polozka={$row['id']}', '_blank');\">
+                <input class='zaoblene-tlacitko' type='button' value='COPY' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" onclick=\"window.open('Auta-edit.php?polozka={$row['id']}&duplikace=1', '_blank');\">
+                <input class='zaoblene-tlacitko-cervene' type='button' value='DEL' onmouseover=\"this.style.backgroundColor='darkred';\" onmouseout=\"this.style.backgroundColor='red';\" onclick=\"dotazkmazani({$row['id']});\">
+            </div></td>";
         }
         echo "</tr>";
     }
@@ -997,51 +674,43 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
 </table>
 
 <a href="#zacatek" class="fixed-arrow-nahoru"><img src="sipka_nahoru.jpg" width="30" height="30" title="Posun na začátek stránky" style="opacity: 0.5;"></a>
-<!-- Stránkování -->
+
 <div style="text-align: center; margin: 20px;" id="konec">
 STRÁNKY:
 <br>
 <?php
-// Při generování odkazů na jednotlivé stránky jsou do URL připojeny i aktuálně nastavené filtry.
 $queryParams = [];
-if (!empty($searchQuery)) {
-    $queryParams['q'] = $searchQuery;
-}
+if (!empty($searchQuery)) { $queryParams['q'] = $searchQuery; }
 $queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
-if (isset($_GET['datumod']) && isset ($_GET['datumdo']) && !empty($_GET['datumod']) && !empty($_GET['datumdo'])){
-        $queryParams['datumod'] = date('Y-m-d', $datumod);
-        $queryParams['datumdo'] = date('Y-m-d', $datumdo);
-    }
-    $queryParams['filtrfirma'] = $filtraceSloupecFirma;
-    $queryParams['filtrcislo'] = $filtraceSloupecCislo;
-    $queryParams['filtrnazev'] = $filtraceSloupecNazev;
-    $queryParams['filtrupresneni'] = $filtraceSloupecUpresneni;
-    $queryParams['filtrbarva'] = $filtraceSloupecBarva;
-    $queryParams['filtrzavody'] = $filtraceSloupecZavody;
-    $queryParams['filtrserie'] = $filtraceSloupecSerie;
-    $queryParams['filtrstarttymreklama'] = $filtraceSloupecStartTymReklama;
-    $queryParams['filtrjezdec'] = $filtraceSloupecJezdec;
-    $queryParams['filtrrok'] = $filtraceSloupecRok;
+if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
+    $queryParams['datumod'] = date('Y-m-d', $datumod);
+    $queryParams['datumdo'] = date('Y-m-d', $datumdo);
+}
+$queryParams['filtrfirma'] = $filtraceSloupecFirma;
+$queryParams['filtrcislo'] = $filtraceSloupecCislo;
+$queryParams['filtrnazev'] = $filtraceSloupecNazev;
+$queryParams['filtrupresneni'] = $filtraceSloupecUpresneni;
+$queryParams['filtrbarva'] = $filtraceSloupecBarva;
+$queryParams['filtrzavody'] = $filtraceSloupecZavody;
+$queryParams['filtrserie'] = $filtraceSloupecSerie;
+$queryParams['filtrstarttymreklama'] = $filtraceSloupecStartTymReklama;
+$queryParams['filtrjezdec'] = $filtraceSloupecJezdec;
+$queryParams['filtrrok'] = $filtraceSloupecRok;
 
 for ($a = 1; $a <= $totalPages; $a++) {
     $queryParams['stranka'] = $a;
     $queryString = http_build_query($queryParams);
-    
+
     if ($a == $stranka){
         echo "<input type='button' value='{$a}' style='background-color: darkgrey; color: orange; border: 1px solid black; padding: 8px; cursor: pointer;'
       onmouseover=\"this.style.color='darkorange';\" onmouseout=\"this.style.color='orange';\" 
       onclick=\"window.location.href='Auta-main.php?{$queryString}'\">";
-
-    }
-    else {
-         echo "<input type='button' value='{$a}' style='background-color: grey; color: white; border: none; padding: 5px; cursor: pointer;'
+    } else {
+        echo "<input type='button' value='{$a}' style='background-color: grey; color: white; border: none; padding: 5px; cursor: pointer;'
       onmouseover=\"this.style.color='orange';\" onmouseout=\"this.style.color='white';\" 
       onclick=\"window.location.href='Auta-main.php?{$queryString}'\">";
     }
-
- 
 }
-
 ?>
 </div>
 </body>
