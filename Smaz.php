@@ -14,7 +14,7 @@ function Smaz ($radek, $connection){
 
         $parts = [];
         $parts[] = "Byl smazán záznam (z databáze):";
-        $parts[] = "firma='"            . $nalezHledaniAut['firma']           . "'";
+        $parts[] = "firma1='"            . $nalezHledaniAut['firma1']           . "'";
         $parts[] = "firma2='"           . $nalezHledaniAut['firma2']          . "'";
         $parts[] = "cislo='"            . $nalezHledaniAut['cislo']           . "'";
         $parts[] = "nazev='"            . $nalezHledaniAut['nazev']           . "'";
@@ -44,7 +44,7 @@ function Smaz ($radek, $connection){
 
 			
         $parts[] = "Kde byly před smazáním editovány tyto údaje:";
-        $parts[] = "firma='"            . $_REQUEST['inputfirmy']           . "'";
+        $parts[] = "firma1='"            . $_REQUEST['inputfirmy1']           . "'";
 		$parts[] = "firma2='"           . $_REQUEST['inputfirmy2']          . "'";
 		$parts[] = "cislo='"            . $_REQUEST['inputcisla']           . "'";
 		$parts[] = "nazev='"            . $_REQUEST['inputnazev']           . "'";

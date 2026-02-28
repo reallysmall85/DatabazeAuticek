@@ -97,14 +97,14 @@ if (isset($_GET['duplikace'])) {
 
     mysqli_query($connection, "
       INSERT INTO auta (
-        id,firma,firma2,cislo,nazev,upresneni,
+        id,firma1,firma2,cislo,nazev,upresneni,
         barva1,barva2,barva3,barva4,barva5,
         serie,zavod,startovnicislo,tym,reklama,
         jezdec1,jezdec2,jezdec3,rok,cena,popis,
         poznamka,umisteniauta,umistenikrabicky,mame,pridano
       )
       SELECT
-        '$novaPolozka', firma,firma2,cislo,nazev,upresneni,
+        '$novaPolozka', firma1,firma2,cislo,nazev,upresneni,
         barva1,barva2,barva3,barva4,barva5,
         serie,zavod,startovnicislo,tym,reklama,
         jezdec1,jezdec2,jezdec3,rok,cena,popis,
@@ -625,7 +625,7 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
 
         $parts = [];
         $parts[] = "Byl načten záznam:";
-        $parts[] = "firma='"            . $nalezHledaniAut['firma']           . "'";
+        $parts[] = "firma1='"            . $nalezHledaniAut['firma1']           . "'";
         $parts[] = "firma2='"           . $nalezHledaniAut['firma2']          . "'";
         $parts[] = "cislo='"            . $nalezHledaniAut['cislo']           . "'";
         $parts[] = "nazev='"            . $nalezHledaniAut['nazev']           . "'";
@@ -684,13 +684,13 @@ echo "<td rowspan=\"2\"><select name=\"selectfirmy\">";
         echo "<option value=\"" .$nalezHledaniFirmy["firma"] ."\">".$nalezHledaniFirmy["firma"]."</option>";
     }
 echo "</select></td>";
-echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputfirmy.value=document.formularauta.selectfirmy.value;\"></td>";
-if (isset($_REQUEST["inputfirmy"]) && $_REQUEST["inputfirmy"]) {
-    echo "<td><textarea name=\"inputfirmy\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputfirmy"] . "</textarea></td>";
-} elseif ($nalezHledaniAut["firma"]) {
-    echo "<td><textarea name=\"inputfirmy\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["firma"] . "</textarea></td>";
+echo "<td><input type=\"Button\" value=\"načíst ->\" onclick=\"document.formularauta.inputfirmy1.value=document.formularauta.selectfirmy.value;\"></td>";
+if (isset($_REQUEST["inputfirmy1"]) && $_REQUEST["inputfirmy1"]) {
+    echo "<td><textarea name=\"inputfirmy1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $_REQUEST["inputfirmy1"] . "</textarea></td>";
+} elseif ($nalezHledaniAut["firma1"]) {
+    echo "<td><textarea name=\"inputfirmy1\" oninput=\"this.value = this.value.slice(0,80);\" style=\"width:300px; height:25px;\">" . $nalezHledaniAut["firma1"] . "</textarea></td>";
 } else {
-    echo "<td><textarea name=\"inputfirmy\" oninput=\"this.value = this.value.slice(0,80;\" style=\"width:300px; height:25px;\"></textarea></td>";
+    echo "<td><textarea name=\"inputfirmy1\" oninput=\"this.value = this.value.slice(0,80;\" style=\"width:300px; height:25px;\"></textarea></td>";
 }
 echo "</tr>";
 

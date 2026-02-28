@@ -38,7 +38,8 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 /** ================= Pomocné funkce ================= */
 
 /** Normalizuje název sloupce: diakritika pryč, malá písmena, vše mimo [a-z0-9_] -> '_' */
-function normalizeHeaderName(string $s): string {
+function normalizeHeaderName(string $s): string
+{
     $s = trim($s);
     if ($s === '') return '';
 
@@ -75,17 +76,14 @@ function normalizeHeaderName(string $s): string {
              'z','z','z','z','z','z'];
     $s = str_replace($from, $to, $s);
 
-    // odstraň případné kombinační znaky
+    // odstraň případné kombinační znaky (pro jistotu)
     $s = preg_replace('/\p{M}+/u', '', $s);
 
-    // vše mimo [a-z0-9_] -> _
-    $s = preg_replace('/[^a-z0-9_]+/u', '_', $s);
+    // vše mimo [a-z0-9] odstranit (slepení slov)
+    $s = preg_replace('/[^a-z0-9]+/u', '', $s);
 
-    // zredukuj více podtržítek a ořež okraje
-    $s = preg_replace('/_+/', '_', $s);
-    $s = trim($s, '_');
-
-    return $s;
+    return $s; 
+    
 }
 
 /** Rozřeže složené barvy podle kořenů a vrátí až 5 pojmenovaných barev v pořadí výskytu. */
@@ -98,32 +96,124 @@ function extrahujBarvyZTextu(?string $text): array {
     $s = str_replace(['/', '\\', ',', ';', '+', '|'], ' ', $s);
 
     $map = [
-        'azur'   => 'azurová',
-        'béž'    => 'béžová',
-        'bíl'    => 'bílá',
-        'bronz'  => 'bronzová',
-        'carbon' => 'carbon', 'carb'=>'carbon','karb'=>'carbon',
-        'čern'   => 'černá',
-        'červ'   => 'červená',
-        'fial'   => 'fialová',
-        'hněd'   => 'hnědá',
-        'chrom'  => 'chromová',
-        'krém'   => 'krémová',
-        'lesk'   => 'lesklá',
-        'mat'    => 'matná',
-        'mix'    => 'mix barev', 'více'=>'mix barev','duh'=>'mix barev',
-        'mod'    => 'modrá',
-        'oranž'  => 'oranžová',
-        'růž'    => 'růžová',
-        'stří'   => 'stříbrná',
-        'svět'   => 'světlá',
-        'šed'    => 'šedá',
-        'tmav'   => 'tmavá',
-        'tyrky'  => 'tyrkysová',
-        'zel'    => 'zelená',
-        'zlat'   => 'zlatá',
-        'žlu'    => 'žlutá',
+    // --- MODIFIKÁTORY ODSTÍNU / INTENZITY (často slepené: bleděmodrá, sytězelená, pastelově růžová) ---
+    'bled'     => 'bledá',          // bledě-, bledá
+    'syt'      => 'sytá',           // sytě-, sytá
+    'jasn'     => 'jasná',          // jasně-, jasná
+    'pastel'   => 'pastelová',      // pastelově-, pastelová
+    'neon'     => 'neonová',        // neonová, neonově-
+    'fluor'    => 'fluorescenční',  // fluorescenční, fluor-
+    'křiklav'  => 'křiklavá',
+    'kriklav'  => 'křiklavá',
+    'výrazn'   => 'výrazná',
+    'vyrazn'   => 'výrazná',
+
+    // --- POVRCH / EFEKT ---
+    'perleť'   => 'perleťová',
+    'perlet'   => 'perleťová',
+    'metalí'   => 'metalíza',       // metalíza/metalíza
+    'metali'   => 'metalíza',
+    'metal'    => 'metalíza',
+    'třpyt'    => 'třpytivá',
+    'trpyt'    => 'třpytivá',
+    'glitter'  => 'třpytivá',
+    'glit'     => 'třpytivá',
+    'satén'    => 'saténová',
+    'saten'    => 'saténová',
+    'chrom'    => 'chromová',
+    'carbon'   => 'carbon',
+    'carb'     => 'carbon',
+    'karb'     => 'carbon',
+    'lesk'     => 'lesklá',
+    'mat'      => 'matná',
+    'transparent' => 'průhledná',
+    'transp'      => 'průhledná',
+    'průhled'     => 'průhledná',
+    'pruhled'     => 'průhledná',
+
+    // --- MIX / VÍCEBAREVNÉ ---
+    'mix'      => 'mix barev',
+    'více'     => 'mix barev',
+    'vice'     => 'mix barev',
+    'duh'      => 'mix barev',
+    'multi'    => 'mix barev',
+
+    // --- „POJMENOVANÉ“ BARVY / ODSTÍNY (časté v popisech) ---
+    'antracit' => 'antracitová',
+    'grafit'   => 'grafitová',
+    'khaki'    => 'khaki',
+    'oliv'     => 'olivová',
+    'petrol'   => 'petrolejová',
+    'mentol'   => 'mentolová',
+    'mint'     => 'mentolová',
+    'písk'     => 'písková',
+    'pisk'     => 'písková',
+    'měd'      => 'měděná',
+    'med'      => 'měděná',
+    'copper'   => 'měděná',
+    'smaragd'  => 'smaragdová',
+    'kobalt'   => 'kobaltová',
+    'indig'    => 'indigová',
+
+    // --- ZÁKLADNÍ BARVY (původní + doplněné varianty) ---
+    'azur'     => 'azurová',
+    'béž'      => 'béžová',
+    'bez'      => 'béžová',
+    'bíl'      => 'bílá',
+    'bil'      => 'bílá',
+    'bronz'    => 'bronzová',
+    'čern'     => 'černá',
+    'cern'     => 'černá',
+    'červ'     => 'červená',
+
+    'vín'      => 'vínová',
+    'vin'      => 'vínová',
+    'bord'     => 'bordó',
+    'burgund'  => 'bordó',
+
+    'fial'     => 'fialová',
+    'purpur'   => 'purpurová',
+    'lila'     => 'lila',
+
+    'hněd'     => 'hnědá',
+    'hned'     => 'hnědá',
+
+    'krém'     => 'krémová',
+    'krem'     => 'krémová',
+
+    'mod'      => 'modrá',
+
+    'oranž'    => 'oranžová',
+    'oranz'    => 'oranžová',
+
+    'růž'      => 'růžová',
+    'ruz'      => 'růžová',
+    'pink'     => 'růžová',
+    'fuch'     => 'fuchsiová',
+
+    'stří'     => 'stříbrná',
+    'stri'     => 'stříbrná',
+    'silver'   => 'stříbrná',
+
+    'svět'     => 'světlá',
+    'svetl'    => 'světlá',
+    'tmav'     => 'tmavá',
+
+    'šed'      => 'šedá',
+    'sed'      => 'šedá',
+
+    'tyrky'    => 'tyrkysová',
+    'turkys'   => 'tyrkysová',
+
+    'zel'      => 'zelená',
+
+    'zlat'     => 'zlatá',
+    'gold'     => 'zlatá',
+
+    'žlu'      => 'žlutá',
+    'zlu'      => 'žlutá',
     ];
+
 
     foreach (['mix','více','duh'] as $mx) {
         if (mb_strpos($s, $mx) !== false) return ['mix barev'];
@@ -162,6 +252,23 @@ function extrahujJezdceZTextu(?string $text): array {
         if ($p === '') continue;
         $out[] = $p;
         if (count($out) >= 3) break; // max 3
+    }
+    return $out;
+}
+
+/** Rozdělí jména firem podle , ; : / \ _ (mezery okolo se ignorují), vrátí max 2 položky. */
+function extrahujFirmyZTextu(?string $text): array {
+    if ($text === null) return [];
+    $s = trim((string)$text);
+    if ($s === '') return [];
+    // oddělovače: , ; : / \ _
+    $parts = preg_split('/\s*(?:,|;|:|\/|\\\\|_)\s*/u', $s, -1, PREG_SPLIT_NO_EMPTY);
+    $out = [];
+    foreach ($parts as $p) {
+        $p = trim($p);
+        if ($p === '') continue;
+        $out[] = $p;
+        if (count($out) >= 2) break; // max 2
     }
     return $out;
 }
@@ -299,13 +406,14 @@ if (isset($_POST['import'])) {
 
         $sheet = $excel->getActiveSheet();
 
-        // 8) Hlavičky (1. řádek) – normalizace + speciální "barva/barvy" a "jezdec/jezdci"
+        // 8) Hlavičky (1. řádek) – normalizace + speciální "firma"/"firmy", "barva/barvy" a "jezdec/jezdci"
         $highestColumn      = $sheet->getHighestColumn();
         $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
 
         $headers               = []; // normalizovaná jména (pro SQL)
         $headerColumns         = []; // 1-based indexy ve vstupu (0 = odvozené/konstantní)
         $cisloSloupceRokIndex  = -1;
+        $firmySourceFileCol   = 0;  // 1-based index "firma/firmy" ve vstupu, 0 = není
         $barvaSourceFileCol    = 0;  // 1-based index "barva/barvy" ve vstupu, 0 = není
         $jezdecSourceFileCol   = 0;  // 1-based index "jezdec/jezdci" ve vstupu, 0 = není
 
@@ -322,13 +430,20 @@ if (isset($_POST['import'])) {
                     . '. Po normalizaci je prázdný. Uprav prosím hlavičku.</div></td></tr></table>';
                 exit();
             }
+            
+            // 2a) "firma"/"firmy" – jen zapamatuj zdroj, NEpřidávej do $headers
+            if ($name === 'firma' || $name === 'firmy') {
+                $firmySourceFileCol = $col;
+                continue;
+            }
 
-            // 2) "barva"/"barvy" – jen zapamatuj zdroj, NEpřidávej do $headers
+
+            // 2b) "barva"/"barvy" – jen zapamatuj zdroj, NEpřidávej do $headers
             if ($name === 'barva' || $name === 'barvy') {
                 $barvaSourceFileCol = $col;
                 continue;
             }
-            // 2b) "jezdec"/"jezdci" – jen zapamatuj zdroj, NEpřidávej do $headers
+            // 2c) "jezdec"/"jezdci" – jen zapamatuj zdroj, NEpřidávej do $headers
             if ($name === 'jezdec' || $name === 'jezdci') {
                 $jezdecSourceFileCol = $col;
                 continue;
@@ -356,6 +471,20 @@ if (isset($_POST['import'])) {
             echo '<table class="tabulka-hlaska"><tr><td><div class="error">Soubor nemá žádné použitelné hlavičky v prvním řádku.</div></td></tr></table>';
             exit();
         }
+        
+        // === FIRMY: pokud je ve vstupu "firma/firmy", doplň odvozené firma1, firma2
+        $derivedFirmyMap = []; // index v $headers -> pořadí 1..2
+        if ($firmySourceFileCol > 0) {
+            for ($n = 1; $n <= 2; $n++) {
+                $nm = 'firma' . $n;
+                if (!in_array($nm, $headers, true)) {
+                    $headers[]       = $nm;
+                    $headerColumns[] = 0; // 0 = odvozené
+                    $derivedFirmyMap[count($headers)-1] = $n;
+                }
+            }
+        }
+
 
         // === BARVY: pokud je ve vstupu "barva/barvy", doplň odvozené barva1..barva5 (nejsou v excelu)
         $derivedBarvaMap = []; // index v $headers -> pořadí 1..5
@@ -455,6 +584,17 @@ if (isset($_POST['import'])) {
         for ($row = 2; $row <= $highestRow; $row++) {
             $values = [];
             $allBlank = true;
+            
+            // Předpočítání firem pro řádek
+            $parsedFirmy = [];
+            if ($firmySourceFileCol > 0) {
+                $addrFirmy = Coordinate::stringFromColumnIndex($firmySourceFileCol) . $row;
+                $valFirmy  = $sheet->getCell($addrFirmy)->getValue();
+                $parsedFirmy = extrahujFirmyZTextu((string)$valFirmy);
+                if (!empty(array_filter($parsedFirmy, fn($v)=>$v!==null && $v!==''))) {
+                    $allBlank = false;
+                }
+            }
 
             // Předpočítání barev pro řádek
             $parsedBarvy = [];
@@ -486,6 +626,12 @@ if (isset($_POST['import'])) {
                     // odvozené barva1..barva5
                     $n   = $derivedBarvaMap[$i]; // 1..5
                     $val = $parsedBarvy[$n - 1] ?? '';
+                    if ($val !== '') $allBlank = false;
+                    
+                } elseif (isset($derivedFirmyMap[$i]) && $headerColumns[$i] === 0) {
+                    // odvozené firma1..firma2
+                    $n   = $derivedFirmyMap[$i]; // 1..2
+                    $val = $parsedFirmy[$n - 1] ?? '';
                     if ($val !== '') $allBlank = false;
 
                 } elseif (isset($derivedJezdecMap[$i]) && $headerColumns[$i] === 0) {

@@ -17,7 +17,7 @@ if (!$connection) {
 mysqli_set_charset($connection, "utf8");
 
 // Získání filtrů z GET parametrů
-$firmaFilter  = $_GET['firma']   ?? '';
+$firmaFilter  = $_GET['firma1']   ?? '';
 $firma2Filter = $_GET['firma2']  ?? '';
 $cisloFilter  = $_GET['cislo']   ?? '';
 $nazevFilter  = $_GET['nazev']   ?? '';
@@ -116,7 +116,7 @@ if (isset($dupQueryPart)) {
         $or = [];
         foreach ($tokensFirma as $tok) {
             $w = mysqli_real_escape_string($connection, $tok);
-            $or[] = "(COALESCE(firma,'') LIKE '%$w%' OR COALESCE(firma2,'') LIKE '%$w%')";
+            $or[] = "(COALESCE(firma1,'') LIKE '%$w%' OR COALESCE(firma2,'') LIKE '%$w%')";
         }
         $where .= " AND (" . implode(" OR ", $or) . ")";
     }
@@ -222,7 +222,7 @@ if (isset($dupQueryPart)) {
         foreach ($words as $word) {
             $w = mysqli_real_escape_string($connection, $word);
             $where .= " AND (
-                COALESCE(firma,'')            LIKE '%$w%' OR 
+                COALESCE(firma1,'')            LIKE '%$w%' OR 
                 COALESCE(firma2,'')           LIKE '%$w%' OR 
                 COALESCE(cislo,'')            LIKE '%$w%' OR 
                 COALESCE(nazev,'')            LIKE '%$w%' OR 
@@ -247,7 +247,7 @@ if (isset($dupQueryPart)) {
     }
 
     $baseQuery  = "FROM auta $where";
-    $srovnani   = $_GET['srovnani'] ?? "firma";
+    $srovnani   = $_GET['srovnani'] ?? "firma1";
     $query      = "SELECT * " . $baseQuery . " ORDER BY " . $srovnani . " , nazev ";
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
 }
@@ -268,18 +268,18 @@ $totalPages    = (int)ceil($totalRecords / $limit);
 $query .= " LIMIT $limit OFFSET $offset";
 $result = mysqli_query($connection, $query);
 ?>
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 1199px)">
-	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 1200px)">
+	<link rel="stylesheet" href="desktop-styly.css">
     <title>Databaze aut</title>
     <script>
     function applyFilters() {
-        var firma           = document.getElementById('selectfirma').value;
+        var firma1           = document.getElementById('selectfirma1').value;
         var firma2          = document.getElementById('selectfirma2').value;
         var cislo           = document.getElementById('selectcislo').value;
         var nazev           = document.getElementById('selectnazev').value;
@@ -295,7 +295,7 @@ $result = mysqli_query($connection, $query);
         var poznamka        = document.getElementById('selectpoznamka').value;
 
         var url = 'Auta-main.php?stranka=1';
-        if(firma)          url += '&firma='           + encodeURIComponent(firma);
+        if(firma1)          url += '&firma1='           + encodeURIComponent(firma1);
         if(firma2)         url += '&firma2='          + encodeURIComponent(firma2);
         if(cislo)          url += '&cislo='           + encodeURIComponent(cislo);
         if(nazev)          url += '&nazev='           + encodeURIComponent(nazev);
@@ -397,6 +397,36 @@ $result = mysqli_query($connection, $query);
         }
       });
     })();
+    
+document.addEventListener('DOMContentLoaded', () => {
+  const wrap = document.querySelector('.hlavnitabulka-wrap');
+  if (!wrap) return;
+
+  // obnov stav hintu v rámci session (volitelné)
+  if (sessionStorage.getItem('hintDismissed') === '1') {
+    wrap.classList.add('hint-dismissed');
+  }
+
+  wrap.addEventListener('wheel', (e) => {
+    const allowTableScroll = e.ctrlKey || e.metaKey; // Ctrl / Cmd
+
+    if (allowTableScroll) {
+      // zabrání Ctrl+wheel zoomu stránky a scrolluj tabulku ručně
+      e.preventDefault();
+      wrap.scrollTop  += e.deltaY;
+      wrap.scrollLeft += e.deltaX;
+
+      // poprvé použito -> schovej hint
+      wrap.classList.add('hint-dismissed');
+      sessionStorage.setItem('hintDismissed', '1');
+      return;
+    }
+
+    // Bez modifikátoru: tabulka se nehne, scrolluj stránku
+    e.preventDefault();
+    window.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
+  }, { passive: false });
+});
     </script>
 </head>
 <body>
@@ -596,11 +626,12 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
 ?>
 
 <a href="#konec" class="fixed-arrow-dolu"><img src="sipka_dolu.jpg" width="30" height="30" title="Posun na konec stránky" style="opacity: 0.5;"></a>
-
+<div class="hlavnitabulka-wrap">
+<div class="scroll-hint" id="scrollHint">Pro posun tabulky drž ctrl/cmd</div>
 <table class="hlavnitabulka">
     <thead>
     <tr>
-        <th>Firma <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=firma'\">";?></th>
+        <th>Firma <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=firma1'\">";?></th>
         <th>Číslo <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=cislo'\">";?></th>
         <th>Název <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=nazev'\">";?></th>
         <th>Upřesnění</th>
@@ -612,7 +643,7 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
         <th>Cena</th>
         <th>QR <button onclick="skryvaniQR()">Skrýt/Zobrazit</button></th>
         <th>Tisk QR</th>
-        <?php if ($prihlasenOpravneni <= 2 ) { echo "<th>EDIT</th>"; } ?>
+        <?php if ($prihlasenOpravneni <= 2 ) { echo "<th class='col-edit'>EDIT</th>"; } ?>
     </tr>
     </thead>
     <tbody>
@@ -625,7 +656,7 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
         }
 
         echo "<td>";
-            $firmy = array_filter([$row['firma'], $row['firma2']]);
+            $firmy = array_filter([$row['firma1'], $row['firma2']]);
             echo implode(", ", $firmy);
         echo "</td>";
 
@@ -669,7 +700,7 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
         echo "<td><input class='zaoblene-tlacitko' type='button' value='Tisk QR' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\"  onclick=\"printQR('{$cestaQRauta}')\"></td>";
 
         if ($prihlasenOpravneni <= 2 ){
-            echo "<td style=\"word-wrap: normal; word-break: normal; white-space: nowrap;\"><div>
+            echo "<td class='col-edit' style=\"word-wrap: normal; word-break: normal; white-space: nowrap;\"><div>
                 <input class='zaoblene-tlacitko' type='button' value='EDIT' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" onclick=\"window.open('Auta-edit.php?polozka={$row['id']}', '_blank');\">
                 <input class='zaoblene-tlacitko' type='button' value='COPY' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" onclick=\"window.open('Auta-edit.php?polozka={$row['id']}&duplikace=1', '_blank');\">
                 <input class='zaoblene-tlacitko-cervene' type='button' value='DEL' onmouseover=\"this.style.backgroundColor='darkred';\" onmouseout=\"this.style.backgroundColor='red';\" onclick=\"dotazkmazani({$row['id']});\">
@@ -680,6 +711,7 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
     ?>
     </tbody>
 </table>
+</div>
 
 <a href="#zacatek" class="fixed-arrow-nahoru"><img src="sipka_nahoru.jpg" width="30" height="30" title="Posun na začátek stránky" style="opacity: 0.5;"></a>
 

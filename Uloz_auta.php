@@ -16,7 +16,7 @@ function Uloz ($radekAuta, $connection, $prihlasenId){
 
 			mysqli_query($connection, "
     UPDATE auta 
-    SET firma = '".$_REQUEST["inputfirmy"]."',
+    SET firma1 = '".$_REQUEST["inputfirmy1"]."',
   		firma2 = '".$_REQUEST["inputfirmy2"]."',
         cislo = '".$_REQUEST["inputcisla"]."',
         nazev = '".$_REQUEST["inputnazev"]."',
@@ -46,7 +46,7 @@ function Uloz ($radekAuta, $connection, $prihlasenId){
 
 $parts = [];
 $parts[] = "Do tabulky auta bylo změněno:";
-$parts[] = "firma='"            . $_REQUEST['inputfirmy']           . "'";
+$parts[] = "firma1='"            . $_REQUEST['inputfirmy1']           . "'";
 $parts[] = "firma2='"           . $_REQUEST['inputfirmy2']          . "'";
 $parts[] = "cislo='"            . $_REQUEST['inputcisla']           . "'";
 $parts[] = "nazev='"            . $_REQUEST['inputnazev']           . "'";
@@ -101,30 +101,30 @@ foreach ($nalezeneFotkyTemp as $fotka) {
 	
 
 # ------------ FIRMY --------------
-	$hodnotaHledaniFirmy=mysqli_query($connection, "SELECT * FROM autafirmy WHERE id IS NOT NULL ORDER BY id");
+	$hodnotaHledaniFirmy=mysqli_query($connection, "SELECT * FROM autafirmy WHERE id IS NOT NULL ORDER BY firma");
 	$existenceFirmy1 = "neexistuje";
 	$existenceFirmy2 = "neexistuje";
 	while ($nalezHledaniFirmy = mysqli_fetch_array($hodnotaHledaniFirmy)){
-		if ($nalezHledaniFirmy["firma"] == $_REQUEST["inputfirmy"]){
+		if ($nalezHledaniFirmy["firma"] == $_REQUEST["inputfirmy1"]){
 			$existenceFirmy1 = "existuje";
 		}
 		if ($nalezHledaniFirmy["firma"] == $_REQUEST["inputfirmy2"]){
 			$existenceFirmy2 = "existuje";
 		}
 	}
-	if ($existenceFirmy1 == "neexistuje" and $_REQUEST["inputfirmy"] != ""){
+	if ($existenceFirmy1 == "neexistuje" and $_REQUEST["inputfirmy1"] != ""){
 	$kodnovefirmy1 = Time() +1;
 	mysqli_query($connection, "INSERT INTO autafirmy (id) values ('$kodnovefirmy1')"); #zalozi radek
-	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy"]."' WHERE id='$kodnovefirmy1'");
+	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy1"]."' WHERE id='$kodnovefirmy1'");
 	$parts = [];
 	$parts[] = "Do tabulky autafirmy bylo změněno:";
-	$parts[] = "firma='"            . $_REQUEST['inputfirmy']           . "'";
+	$parts[] = "firma='"            . $_REQUEST['inputfirmy1']           . "'";
 	$parts[] = "id='"              . $kodnovefirmy1            . "'";
 	// spojím oddělovačem a pošlu do logu
 	zapisDoLogu(implode(', ', $parts));
 
 	}
-	if ($existenceFirmy2 == "neexistuje" and $_REQUEST["inputfirmy2"] != "" and $_REQUEST["inputfirmy"] != $_REQUEST["inputfirmy2"]){
+	if ($existenceFirmy2 == "neexistuje" and $_REQUEST["inputfirmy2"] != "" and $_REQUEST["inputfirmy1"] != $_REQUEST["inputfirmy2"]){
 	$kodnovefirmy2 = Time() +2;
 	mysqli_query($connection, "INSERT INTO autafirmy (id) values ('$kodnovefirmy2')"); #zalozi radek
 	mysqli_query($connection, "UPDATE autafirmy SET firma= '".$_REQUEST["inputfirmy2"]."' WHERE id='$kodnovefirmy2'");

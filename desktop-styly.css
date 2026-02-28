@@ -18,35 +18,206 @@
  			 text-decoration: none; /* vypne podtržení */
  			 color: black;          /* nastaví barvu textu na černou */
 		}
+		
+.hlavnitabulka-wrap{
+    max-width: 100%;
+    
+    position: relative;
+    
+    overflow-x: auto;
+    overflow-y: auto;  
+    -webkit-overflow-scrolling: touch;
+    
+    overscroll-behavior: contain;
+    
+    max-height: calc(100vh - 140px);
+
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 8px;
+
+    border-radius: 6px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+    background-color: rgba(255, 255, 255, 1);
+}
+/* hint (default: skrytý) */
+.scroll-hint{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 999;                 /* nad tabulkou i sticky prvky */
+  font-size: 30px;
+  line-height: 1.2;
+
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.25);
+  border-radius: 6px;
+  pointer-events: none;
+
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease-in-out;
+}
+
+/* zobrazuj jen na desktopu (kde dává smysl Ctrl/Cmd) */
+@media (hover: hover) and (pointer: fine){
+  .hlavnitabulka-wrap:hover .scroll-hint{ opacity: 1; }
+}
+
+/* když hint “odklikneme” (viz JS), tak už se nezobrazuje */
+.hlavnitabulka-wrap.hint-dismissed .scroll-hint{
+  display: none;
+}
+
+.hlavnitabulka{
+    border-collapse: separate;
+    border-spacing: 0;
+
+    width: max-content;
+    min-width: 100%;
+
+    table-layout: fixed;
+    background-color: transparent;
+    font-size: 16px;
+
+  --w-standardni: clamp(30px, 10vw, 110px);
+  --w-firma:      clamp(30px, 10vw, 200px);
+  --w-cislo:      clamp(30px, 12vw, 150px);
+  --w-nazev:      clamp(30px, 18vw, 260px);
+  --w-edit:       clamp(20px, 14vw, 240px);
+
+}
+
+@media (max-width: 420px){
+  /* na mobilu na výšku nebude vidět COPY/DEL, ale jen EDIT */
+  .hlavnitabulka td.col-edit input[value="COPY"],
+  .hlavnitabulka td.col-edit input[value="DEL"]{ display:none; }
+
+  .hlavnitabulka td.col-edit .zaoblene-tlacitko,
+  .hlavnitabulka td.col-edit .zaoblene-tlacitko-cervene{
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+}
 
 
-        .hlavnitabulka {
-            max-width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background-color: rgba(255, 255, 255, 0.9);
-            margin-left: auto; 
-            margin-right: auto; 
-            margin-top: 8px;
-            font-size: 16px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-   			border-radius: 6px;
-   			overflow: hidden; 
-            border: none; 
-        }
-        .hlavnitabulka th,
-        .hlavnitabulka td {
-            padding: 8px;
-            border: none;
-            word-wrap: break-word;
-        }
-        .hlavnitabulka td + td,
-        .hlavnitabulka th + th {
-            border-left: 1px solid black;
-        }
-        .hlavnitabulka tr + tr td {
-            border-top: 1px solid black;
-        }
+/* zvýraznění/oddělení buněk 
+.hlavnitabulka td + td,
+.hlavnitabulka th + th{
+    border-left: 1px solid black;
+}*/
+
+.hlavnitabulka tr + tr td{
+    border-top: 1px solid black;
+}
+
+/* hlavička obecně výš než body */
+.hlavnitabulka thead th{
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255,250,240,1);
+}
+.hlavnitabulka thead th:nth-child(1),
+.hlavnitabulka thead th:nth-child(2),
+.hlavnitabulka thead th:nth-child(3),
+.hlavnitabulka thead th.col-edit{
+  z-index: 30;
+  background: rgba(255,250,240,1);
+}
+
+.hlavnitabulka th, .hlavnitabulka td{
+    box-shadow: inset -1px 0 0 #000;
+    box-sizing: border-box;
+    padding: 8px;
+    
+}
+
+.hlavnitabulka th:last-child, .hlavnitabulka td:last-child{
+  box-shadow: none;
+}
+
+/* 1) Firma */
+.hlavnitabulka th:nth-child(1),
+.hlavnitabulka td:nth-child(1){
+    position: sticky;
+    left: 0;
+    width: var(--w-firma);
+    min-width: var(--w-firma);
+    z-index: 6;
+       /*background: #fff;*/
+}
+
+/* 2) Číslo */
+.hlavnitabulka th:nth-child(2),
+.hlavnitabulka td:nth-child(2){
+    position: sticky;
+    left: var(--w-firma);
+    width: var(--w-cislo);
+    min-width: var(--w-cislo);
+    z-index: 5;
+        /*background: #fff;*/
+}
+
+/* 3) Název */
+.hlavnitabulka th:nth-child(3),
+.hlavnitabulka td:nth-child(3){
+    position: sticky;
+    left: calc(var(--w-firma) + var(--w-cislo));
+    width: var(--w-nazev);
+    min-width: var(--w-nazev);
+    z-index: 4;
+        /*background: #fff;*/
+
+    box-shadow: inset -1px 0 0 rgba(0,0,0,0.25);
+    
+}
+
+/* standardní šířka pro sloupce 4..12 */
+.hlavnitabulka th:nth-child(4),  .hlavnitabulka td:nth-child(4),
+.hlavnitabulka th:nth-child(5),  .hlavnitabulka td:nth-child(5),
+.hlavnitabulka th:nth-child(6),  .hlavnitabulka td:nth-child(6),
+.hlavnitabulka th:nth-child(7),  .hlavnitabulka td:nth-child(7),
+.hlavnitabulka th:nth-child(8),  .hlavnitabulka td:nth-child(8),
+.hlavnitabulka th:nth-child(9),  .hlavnitabulka td:nth-child(9),
+.hlavnitabulka th:nth-child(10), .hlavnitabulka td:nth-child(10),
+.hlavnitabulka th:nth-child(11), .hlavnitabulka td:nth-child(11),
+.hlavnitabulka th:nth-child(12), .hlavnitabulka td:nth-child(12){
+  width: var(--w-standardni);
+  min-width: var(--w-standardni);
+}
+
+/* EDIT vpravo */
+.hlavnitabulka th.col-edit,
+.hlavnitabulka td.col-edit{
+    position: sticky;
+    right: 0;
+    width: var(--w-edit);
+    min-width: var(--w-edit);
+    z-index: 7;
+   /* background: #fff;*/
+
+    box-shadow: inset 1px 0 0 rgba(0,0,0,0.25);
+}
+
+/* společný podklad pro sticky (aby nepřesvítaly sloupce pod tím) */
+.hlavnitabulka th:nth-child(1),
+.hlavnitabulka td:nth-child(1),
+.hlavnitabulka th:nth-child(2),
+.hlavnitabulka td:nth-child(2),
+.hlavnitabulka th:nth-child(3),
+.hlavnitabulka td:nth-child(3),
+.hlavnitabulka th.col-edit,
+.hlavnitabulka td.col-edit{
+  background: rgba(255,255,255,1); /* toto je poloprůhledné, takže to lehce prosvítá */
+  background-clip: padding-box;
+}
+
+
+
 
 
 /* Obal: už ne fixed – ať může přirozeně zabrat viewport */
@@ -148,7 +319,7 @@
 
 
 		.tabulka-hledani{
-            position: sticky;    /* zůstane přilepené nahoře při scrollu */
+           /*  position: sticky;    zůstane přilepené nahoře při scrollu */
             top: 8px;
             z-index: 1000;
 
@@ -631,12 +802,12 @@ textarea.unsaved {
 
 
         /* žádný horizontální scrollbar kvůli přetaženým prvkům */
-html, body { margin: 0; padding: 0; overflow-x: hidden; }
+html, body { margin: 0; padding: 0; overflow-x: clip; }
 
 /* pro jistotu: všechny obrázky responsivní */
 img { max-width: 100%; height: auto; }
 
-/* fixní horní prvek a malé boxy nikdy nepřes 100% */
+/* fixní horní prvek a malé boxy nikdy ne přes 100% */
 .tabulka-prihlasen,
 .tabulka-ikony,
 .tabulka-hledani {
