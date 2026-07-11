@@ -88,7 +88,20 @@
   --w-cislo:      clamp(30px, 12vw, 150px);
   --w-nazev:      clamp(30px, 18vw, 260px);
   --w-edit:       clamp(20px, 14vw, 240px);
+  
 
+}
+
+
+.hlavnitabulka tbody tr:hover td {
+    
+    box-shadow:
+        inset 0 0 0 1000px rgba(255, 220, 80, 0.20),
+        0 -2px 5px rgba(0, 0, 0, 0.15),
+        0 2px 5px rgba(0, 0, 0, 0.15);
+
+    
+    
 }
 
 @media (max-width: 420px){

@@ -1,3 +1,42 @@
+<?php
+// Připojení k databázi (mysqli)
+include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
+
+$connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
+if (!$connection) {
+    die("Nepodařilo se připojit k databázi: " . mysqli_connect_error());
+}
+mysqli_set_charset($connection, "utf8");
+
+// Načtení aktivních druhů vstupenek
+$vstupenky = [];
+
+$sqlVstupenky = "
+    SELECT id, nazev, cena, popis, aktivni
+    FROM druhyvstupenekdelta
+    WHERE LOWER(TRIM(aktivni)) = 'ano'
+    ORDER BY id ASC
+";
+
+$resultVstupenky = mysqli_query($connection, $sqlVstupenky);
+if (!$resultVstupenky) {
+    die("Chyba při načítání vstupenek: " . mysqli_error($connection));
+}
+
+while ($row = mysqli_fetch_assoc($resultVstupenky)) {
+    $vstupenky[] = [
+        'id'      => (int)$row['id'],
+        'nazev'   => (string)$row['nazev'],
+        'cena'    => (float)$row['cena'],
+        'popis'   => (string)$row['popis'],
+        'aktivni' => (string)$row['aktivni'],
+    ];
+}
+
+mysqli_free_result($resultVstupenky);
+?>
+
+
 <!doctype html>
 <html lang="cs">
 <head>
@@ -230,6 +269,143 @@
     .gallery-item { aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; border: 1px solid #eef0f2; background: #f8fafc; display: grid; place-items: center; color: #64748b; font-weight: 600; }
     .gallery-item img {width: 100%; height: 100%; object-fit: cover; display: block; }
 
+    /* ===== Vstupenky (interaktivní karty) ===== */
+.vstupenky-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ticket-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 260px;
+}
+
+.ticket-card h3 {
+  margin: 0;
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.25;
+}
+
+.ticket-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.ticket-price {
+  margin: 0;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text);
+}
+
+.ticket-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.qty-btn:hover {
+  transform: translateY(-1px);
+  background: #f8fafc;
+  box-shadow: 0 6px 14px rgba(15,23,42,0.08);
+}
+
+.qty-input {
+  width: 72px;
+  height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+  background: #fff;
+}
+
+.qty-input:focus {
+  outline: 2px solid rgba(37,99,235,0.18);
+  border-color: var(--accent);
+}
+
+.add-cart-btn {
+  margin-top: auto;
+  width: 100%;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.add-cart-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(37,99,235,0.28);
+}
+
+.add-cart-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ticket-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 860px) {
+  .vstupenky-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ticket-cart-bar{
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+  align-items: start;
+}
+
+.ticket-cart-main-btn{
+  max-width: 340px;
+}
+
+@media (max-width: 860px){
+  .ticket-cart-main-btn{
+    max-width: none;
+    width: 100%;
+  }
+}
+
     /* Footer spacer */
     footer { text-align: center; color: #64748b; padding: 40px 16px 60px; }
 
@@ -271,6 +447,66 @@
       nav ul{ display:none; }
       .menu-toggle{ display:inline-flex; }
     }
+
+    /* Košík v horní liště */
+.cart-btn {
+  gap: 8px;
+}
+
+.cart-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.cart-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(220,38,38,0.25);
+}
+
+.mobile-cart-link {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mobile-cart-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Košík tlačítko – nepodtrhávat ikonu/badge, jen text */
+.cart-btn:hover {
+  text-decoration: none;
+}
+
+.cart-btn:hover > span:not(.cart-icon):not(.cart-badge) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+
   </style>
 </head>
 <body>
@@ -290,6 +526,13 @@
           <li><a class="lista-btn" href="#onas">O nás</a></li>
           <li><a class="lista-btn" href="#kontakt">Kontakt</a></li>
           <li><a class="lista-btn lista-btn-red" href="#vstupenky">Vstupenky</a></li>
+          <li>
+          <a class="lista-btn cart-btn" href="kosik.php" aria-label="Košík">
+           <span class="cart-icon" aria-hidden="true">🛒</span>
+           <span>Košík</span>
+           <span class="cart-badge" id="cart-count-badge" hidden>0</span>
+          </a>
+          </li>
         </ul>
       </nav>
     </div>
@@ -303,6 +546,12 @@
       <li><a href="#onas">O nás</a></li>
       <li><a href="#kontakt">Kontakt</a></li>
       <li><a href="#vstupenky">Vstupenky</a></li>
+      <li>
+  <a href="kosik.php" class="mobile-cart-link">
+    <span>Košík</span>
+    <span class="mobile-cart-badge" id="cart-count-badge-mobile" hidden>0</span>
+  </a>
+</li>
     </ul>
   </div>
 
@@ -394,17 +643,88 @@
   </section>
 
   <!-- Vstupenky -->
-  <section id="vstupenky">
-    <div class="container">
-      <div class="content-card stack">
-        <h2>Vstupenky</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non lorem ac mi dapibus euismod in vitae quam. Nam at sapien fermentum, faucibus sem non, facilisis felis.</p>
-        <p>Vivamus ullamcorper, dui ac dictum bibendum, neque mauris ultrices purus, non efficitur erat nibh non dolor. Cras vitae interdum est. Integer vitae mi in massa convallis venenatis.</p>
-         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non lorem ac mi dapibus euismod in vitae quam. Nam at sapien fermentum, faucibus sem non, facilisis felis.</p>
-        <p>Vivamus ullamcorper, dui ac dictum bibendum, neque mauris ultrices purus, non efficitur erat nibh non dolor. Cras vitae interdum est. Integer vitae mi in massa convallis venenatis.</p>
+<section id="vstupenky">
+  <div class="container">
+    <div class="content-card stack">
+      <h2>Vstupenky</h2>
+      <p class="muted">Vyberte typ vstupenky a počet kusů. Platbu budeme řešit v dalším kroku.</p>
+
+      <div class="vstupenky-grid">
+
+  <?php if (!empty($vstupenky)): ?>
+    <?php foreach ($vstupenky as $vstupenka): ?>
+      <?php
+        $ticketId = (int)$vstupenka['id'];
+        $ticketKey = 'id_' . $ticketId; // klíč do sessionStorage
+        $nazev = trim((string)$vstupenka['nazev']) !== '' ? (string)$vstupenka['nazev'] : ('Vstupenka #' . $ticketId);
+        $popis = trim((string)$vstupenka['popis']);
+        $cena = (float)$vstupenka['cena'];
+      ?>
+      <div class="ticket-card"
+           data-ticket-key="<?= htmlspecialchars($ticketKey, ENT_QUOTES, 'UTF-8') ?>"
+           data-ticket-id="<?= $ticketId ?>">
+
+        <h3><?= htmlspecialchars($nazev, ENT_QUOTES, 'UTF-8') ?></h3>
+
+        <p class="ticket-desc">
+          <?php if ($popis !== ''): ?>
+            <?= nl2br(htmlspecialchars($popis, ENT_QUOTES, 'UTF-8')) ?>
+          <?php else: ?>
+            Bez popisu.
+          <?php endif; ?>
+        </p>
+
+        <p class="ticket-price"><?= number_format($cena, 0, ',', ' ') ?> Kč</p>
+
+        <div class="ticket-controls">
+          <button
+            type="button"
+            class="qty-btn"
+            data-action="minus"
+            aria-label="Snížit počet vstupenek <?= htmlspecialchars($nazev, ENT_QUOTES, 'UTF-8') ?>"
+          >−</button>
+
+          <input
+            type="number"
+            class="qty-input"
+            value="0"
+            min="0"
+            max="99"
+            step="1"
+            inputmode="numeric"
+            aria-label="Počet vstupenek <?= htmlspecialchars($nazev, ENT_QUOTES, 'UTF-8') ?>"
+          />
+
+          <button
+            type="button"
+            class="qty-btn"
+            data-action="plus"
+            aria-label="Zvýšit počet vstupenek <?= htmlspecialchars($nazev, ENT_QUOTES, 'UTF-8') ?>"
+          >+</button>
+        </div>
       </div>
+    <?php endforeach; ?>
+
+  <?php else: ?>
+    <div class="ticket-card" style="grid-column: 1 / -1; min-height: auto;">
+      <h3>Vstupenky zatím nejsou k dispozici</h3>
+      <p class="ticket-desc" style="min-height:auto;">
+        V nabídce v tuto chvíli nemáme žádné vstupenky, omlouváme se.
+      </p>
     </div>
-  </section>
+  <?php endif; ?>
+
+</div>
+
+<div class="ticket-cart-bar">
+  <p class="ticket-note" id="ticket-summary">Vybráno celkem: 0 vstupenek</p>
+  <button type="button" class="add-cart-btn ticket-cart-main-btn" id="go-to-cart-btn" disabled>
+    Přejít do košíku
+  </button>
+</div>
+    </div>
+  </div>
+</section>
 
   <footer>
     © <span id="year"></span> Autíčkárium
@@ -467,6 +787,207 @@
         if (!within) closeMenu();
       });
     }
+
+  // ===== Vstupenky: ukládání do sessionStorage + 1 společné tlačítko (dynamicky z DB) =====
+const KOSIK_URL = 'kosik.php';
+const TICKET_STORAGE_KEY = 'autickarium_ticket_selection_v1';
+
+function sanitizeQty(value) {
+  const cleaned = String(value).replace(/[^\d]/g, '');
+  let n = parseInt(cleaned, 10);
+  if (Number.isNaN(n) || n < 0) n = 0;
+  if (n > 99) n = 99;
+  return n;
+}
+
+function getTicketCards() {
+  return Array.from(document.querySelectorAll('.ticket-card[data-ticket-key]'));
+}
+
+function getTicketKeys() {
+  return getTicketCards()
+    .map(card => card.dataset.ticketKey)
+    .filter(Boolean);
+}
+
+function createEmptyTicketState() {
+  const state = {};
+  getTicketKeys().forEach((key) => {
+    state[key] = 0;
+  });
+  return state;
+}
+
+function readTicketState() {
+  const emptyState = createEmptyTicketState();
+
+  try {
+    const raw = sessionStorage.getItem(TICKET_STORAGE_KEY);
+    if (!raw) return emptyState;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return emptyState;
+
+    const normalized = { ...emptyState };
+    Object.keys(normalized).forEach((key) => {
+      normalized[key] = sanitizeQty(parsed[key] ?? 0);
+    });
+
+    return normalized;
+  } catch (e) {
+    return emptyState;
+  }
+}
+
+function writeTicketState(state) {
+  sessionStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(state));
+}
+
+function getTotalTickets(state) {
+  return Object.values(state).reduce((sum, qty) => sum + sanitizeQty(qty), 0);
+}
+
+function updateTicketSummary(state) {
+  const summaryEl = document.getElementById('ticket-summary');
+  const goToCartBtn = document.getElementById('go-to-cart-btn');
+  if (!summaryEl || !goToCartBtn) return;
+
+  const total = getTotalTickets(state);
+
+  if (getTicketKeys().length === 0) {
+    summaryEl.textContent = 'Aktuálně nejsou dostupné žádné vstupenky.';
+    goToCartBtn.disabled = true;
+    return;
+  }
+
+  summaryEl.textContent = `Vybráno celkem: ${total} ${
+    total === 1 ? 'vstupenka' : (total >= 2 && total <= 4 ? 'vstupenky' : 'vstupenek')
+  }`;
+  goToCartBtn.disabled = (total === 0);
+}
+
+function syncInputsFromState(state) {
+  getTicketCards().forEach((card) => {
+    const ticketKey = card.dataset.ticketKey;
+    const input = card.querySelector('.qty-input');
+    if (!input || !ticketKey) return;
+    input.value = sanitizeQty(state[ticketKey] ?? 0);
+  });
+}
+
+function setTicketQty(ticketKey, qty) {
+  const state = readTicketState();
+  state[ticketKey] = sanitizeQty(qty);
+  writeTicketState(state);
+  updateTicketSummary(state);
+  updateCartBadges();
+  return state;
+}
+
+// Inicializace po načtení stránky
+(function initTicketCards() {
+  const cards = getTicketCards();
+
+  const initialState = readTicketState();
+  syncInputsFromState(initialState);
+  updateTicketSummary(initialState);
+
+  if (!cards.length) {
+    updateCartBadges();
+    return;
+  }
+
+  cards.forEach((card) => {
+    const ticketKey = card.dataset.ticketKey;
+    const minusBtn = card.querySelector('[data-action="minus"]');
+    const plusBtn = card.querySelector('[data-action="plus"]');
+    const qtyInput = card.querySelector('.qty-input');
+
+    if (!ticketKey || !minusBtn || !plusBtn || !qtyInput) return;
+
+    minusBtn.addEventListener('click', () => {
+      const current = sanitizeQty(qtyInput.value);
+      const next = Math.max(0, current - 1);
+      qtyInput.value = next;
+      setTicketQty(ticketKey, next);
+    });
+
+    plusBtn.addEventListener('click', () => {
+      const current = sanitizeQty(qtyInput.value);
+      const next = Math.min(99, current + 1);
+      qtyInput.value = next;
+      setTicketQty(ticketKey, next);
+    });
+
+    qtyInput.addEventListener('input', () => {
+      const next = sanitizeQty(qtyInput.value);
+      qtyInput.value = next;
+      setTicketQty(ticketKey, next);
+    });
+
+    qtyInput.addEventListener('blur', () => {
+      const next = sanitizeQty(qtyInput.value);
+      qtyInput.value = next;
+      setTicketQty(ticketKey, next);
+    });
+  });
+
+  const goToCartBtn = document.getElementById('go-to-cart-btn');
+  if (goToCartBtn) {
+    goToCartBtn.addEventListener('click', () => {
+      const state = readTicketState();
+      if (getTotalTickets(state) <= 0) return;
+
+      // Jen přejdeme na košík – data už tam budou v sessionStorage
+      window.location.href = KOSIK_URL;
+    });
+  }
+})();
+
+
+// ===== Badge košíku (sessionStorage) =====
+function sanitizeCartQty(value) {
+  let n = parseInt(value, 10);
+  if (!Number.isFinite(n) || n < 0) n = 0;
+  if (n > 99) n = 99;
+  return n;
+}
+
+function getCartCountFromSession() {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(TICKET_STORAGE_KEY)) || {};
+    if (!parsed || typeof parsed !== 'object') return 0;
+
+    return Object.values(parsed).reduce((sum, value) => {
+      return sum + sanitizeCartQty(value);
+    }, 0);
+  } catch (e) {
+    return 0;
+  }
+}
+
+function updateCartBadges() {
+  const count = getCartCountFromSession();
+  const badges = [
+    document.getElementById('cart-count-badge'),
+    document.getElementById('cart-count-badge-mobile')
+  ].filter(Boolean);
+
+  badges.forEach((badge) => {
+    badge.textContent = count;
+    badge.hidden = count <= 0;
+  });
+}
+
+// inicializace
+updateCartBadges();
+
+// když se uživatel vrátí na stránku
+window.addEventListener('pageshow', updateCartBadges);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') updateCartBadges();
+});
+
   </script>
 </body>
 </html>

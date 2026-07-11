@@ -326,44 +326,88 @@ $result = mysqli_query($connection, $query);
             cell.style.display = (cell.style.display === 'none') ? '' : 'none';
         });
     }
-    // jednoduchá pojistka proti smyčkám (reload <= 5 s)
-  const RELOAD_COOLDOWN_MS = 5000;
-  let lastReload = Number(sessionStorage.getItem('lastReload') || 0);
+let reloadInProgress = false;
+let autoReloadEnabled = false;
 
-  function safeReload(reason = '') {
-    const now = Date.now();
-    if (now - lastReload < RELOAD_COOLDOWN_MS) return;
-    lastReload = now;
-    sessionStorage.setItem('lastReload', String(now));
-    // location.reload(true) je deprecated – používej prostý reload
-    location.reload();
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+function safeReload(reason = '') {
+
+  // Během načítání a obnovování pozice reload nepovolíme
+  if (!autoReloadEnabled) {
+    return;
   }
 
-  // 1) Když se karta znovu zobrazí (přepnutí záložek / návrat z jiné app)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') safeReload('visibility');
-  });
+  // Zabrání vícenásobnému reloadu
+  if (reloadInProgress) {
+    return;
+  }
 
-  // 2) Když okno/tab získá focus (uživatel se vrátí klikem/Alt+Tab)
-  window.addEventListener('focus', () => {
-    safeReload('focus');
-  });
+  reloadInProgress = true;
 
-  // 3) Když se stránka vrátí z BFCache (zpět/vpřed nebo iOS návrat z pozadí)
-  window.addEventListener('pageshow', (e) => {
-    // e.persisted === true => načteno z BFCache
-    if (e.persisted) safeReload('pageshow-bfcache');
-  });
+  // Uložit pozici celé stránky
+  sessionStorage.setItem(
+    'pageScrollY',
+    String(window.scrollY)
+  );
 
-  // 4) Chrome Page Lifecycle – obnova z „freeze“ stavu
-  document.addEventListener?.('resume', () => {
-    safeReload('resume');
-  });
+  // Uložit pozici scrollu tabulky
+  const wrap = document.querySelector('.hlavnitabulka-wrap');
 
-  // 5) Když se vrátí konektivita (uživatel byl offline)
-  window.addEventListener('online', () => {
-    safeReload('online');
-  });
+  if (wrap) {
+    sessionStorage.setItem(
+      'tableScrollTop',
+      String(wrap.scrollTop)
+    );
+
+    sessionStorage.setItem(
+      'tableScrollLeft',
+      String(wrap.scrollLeft)
+    );
+  }
+
+  // Označení, že po reloadu chceme obnovit pozici
+  sessionStorage.setItem('restoreScroll', '1');
+
+  location.reload();
+}
+
+
+// 1) Návrat do karty
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    safeReload('visibility');
+  }
+});
+
+
+// 2) Focus okna
+window.addEventListener('focus', () => {
+  safeReload('focus');
+});
+
+
+// 3) BFCache
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    safeReload('pageshow-bfcache');
+  }
+});
+
+
+// 4) Chrome resume
+document.addEventListener?.('resume', () => {
+  safeReload('resume');
+});
+
+
+// 5) Návrat internetu
+window.addEventListener('online', () => {
+  safeReload('online');
+});
+
     function dotazkmazani(id){
         if (window.confirm("Opravdu chcete smazat záznam?")) {
             window.open('Auta-edit.php?polozka=' + id + '&smazpolozku=1', '_blank');
@@ -399,41 +443,145 @@ $result = mysqli_query($connection, $query);
     })();
     
 document.addEventListener('DOMContentLoaded', () => {
-  const wrap = document.querySelector('.hlavnitabulka-wrap');
-  if (!wrap) return;
 
-  // obnov stav hintu v rámci session (volitelné)
+  const wrap = document.querySelector('.hlavnitabulka-wrap');
+
+  if (!wrap) {
+    return;
+  }
+
+
+  // Obnov stav hintu
   if (sessionStorage.getItem('hintDismissed') === '1') {
     wrap.classList.add('hint-dismissed');
   }
 
+
+  // Ovládání scrollu tabulky
   wrap.addEventListener('wheel', (e) => {
-    const allowTableScroll = e.ctrlKey || e.metaKey; // Ctrl / Cmd
+
+    const allowTableScroll = e.ctrlKey || e.metaKey;
 
     if (allowTableScroll) {
-      // zabrání Ctrl+wheel zoomu stránky a scrolluj tabulku ručně
+
       e.preventDefault();
-      wrap.scrollTop  += e.deltaY;
+
+      wrap.scrollTop += e.deltaY;
       wrap.scrollLeft += e.deltaX;
 
-      // poprvé použito -> schovej hint
       wrap.classList.add('hint-dismissed');
-      sessionStorage.setItem('hintDismissed', '1');
+
+      sessionStorage.setItem(
+        'hintDismissed',
+        '1'
+      );
+
       return;
     }
 
-    // Bez modifikátoru: tabulka se nehne, scrolluj stránku
+
     e.preventDefault();
-    window.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
-  }, { passive: false });
+
+    window.scrollBy({
+      top: e.deltaY,
+      left: 0,
+      behavior: 'auto'
+    });
+
+  }, {
+    passive: false
+  });
+
 });
+
+window.addEventListener('load', () => {
+
+  const restoreScroll =
+    sessionStorage.getItem('restoreScroll') === '1';
+
+  const savedPageScrollY =
+    parseInt(
+      sessionStorage.getItem('pageScrollY') || '0',
+      10
+    );
+
+  const savedTableScrollTop =
+    parseInt(
+      sessionStorage.getItem('tableScrollTop') || '0',
+      10
+    );
+
+  const savedTableScrollLeft =
+    parseInt(
+      sessionStorage.getItem('tableScrollLeft') || '0',
+      10
+    );
+
+
+  const wrap =
+    document.querySelector('.hlavnitabulka-wrap');
+
+
+  if (restoreScroll) {
+
+    const restorePosition = () => {
+
+      window.scrollTo(
+        0,
+        savedPageScrollY
+      );
+
+      if (wrap) {
+        wrap.scrollTop = savedTableScrollTop;
+        wrap.scrollLeft = savedTableScrollLeft;
+      }
+
+    };
+
+
+    // Obnovit ihned
+    restorePosition();
+
+    // A ještě několikrát po dosednutí layoutu
+    setTimeout(restorePosition, 50);
+    setTimeout(restorePosition, 150);
+    setTimeout(restorePosition, 300);
+
+
+    setTimeout(() => {
+
+      sessionStorage.removeItem('restoreScroll');
+      sessionStorage.removeItem('pageScrollY');
+      sessionStorage.removeItem('tableScrollTop');
+      sessionStorage.removeItem('tableScrollLeft');
+
+      // Teprve nyní povolit automatické reloady
+      autoReloadEnabled = true;
+
+    }, 500);
+
+  } else {
+
+    // Normální otevření stránky
+    setTimeout(() => {
+      autoReloadEnabled = true;
+    }, 500);
+
+  }
+
+});
+
+
     </script>
 </head>
 <body>
 <?php 
 include("phpqrcode/qrlib.php");
 
-echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+echo "<table class=\"tabulka-prihlasen\"><tr><td><div>
+<a href=\"Prihlaseni.php\"><img width=\"50\" height=\"50\" src=\"Logout.png\" title=\"Odhlásit se\"></a>
+<a href=\"Uvodni.php\"><img width=\"50\" height=\"50\" src=\"Home.png\" title=\"Zpět na úvodní stránku\"></a>
+Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
 switch ($prihlasenOpravneni){
     case 1: echo "admin"; break;
     case 2: echo "moderator"; break;
@@ -444,16 +592,7 @@ switch ($prihlasenOpravneni){
 echo "</span></div></td></tr></table>";
 ?>
 
-<table class="tabulka-ikony" id="zacatek">
-<tr>
-<td>
-<div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" title="Zpět na úvodní stránku"></a>
-</div>
-</td>
-</tr>
-</table>
+
 
 <?php
 if ($prihlasenOpravneni <= 2 ){
@@ -627,7 +766,7 @@ if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('
 
 <a href="#konec" class="fixed-arrow-dolu"><img src="sipka_dolu.jpg" width="30" height="30" title="Posun na konec stránky" style="opacity: 0.5;"></a>
 <div class="hlavnitabulka-wrap">
-<div class="scroll-hint" id="scrollHint">Pro posun tabulky drž ctrl/cmd</div>
+<div class="scroll-hint" id="scrollHint">Pro posun tabulky drž ctrl/cmd při scrollování kolečkem myši</div>
 <table class="hlavnitabulka">
     <thead>
     <tr>

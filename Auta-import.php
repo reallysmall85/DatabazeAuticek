@@ -137,6 +137,7 @@ function extrahujBarvyZTextu(?string $text): array {
     'vice'     => 'mix barev',
     'duh'      => 'mix barev',
     'multi'    => 'mix barev',
+    'flower'    => 'mix barev',
 
     // --- „POJMENOVANÉ“ BARVY / ODSTÍNY (časté v popisech) ---
     'antracit' => 'antracitová',
