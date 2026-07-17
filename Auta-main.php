@@ -615,15 +615,49 @@ if ($prihlasenOpravneni <= 2 ){
     <div> do: <input type="date" class="date-input" name="datumdo" placeholder="Datum do" value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>" autocomplete="off"> </div>
   </div>
 
-<details class="filtry-hledani-pozitivni">
-<summary title="Zobrazit/skrýt filtry">Filtry (klikni pro zobrazení)</summary>
+<?php
+$zapnuteFiltry = [];
 
-  <div class="filters-grid">
-    <div class="filter-field">
-      <i>Do kolonek zadávej výrazy jen s mezerami</i>
+$prehledFiltru = [
+    'firma'                   => $filtraceSloupecFirma,
+    'číslo'                   => $filtraceSloupecCislo,
+    'název'                   => $filtraceSloupecNazev,
+    'upřesnění'               => $filtraceSloupecUpresneni,
+    'barva'                   => $filtraceSloupecBarva,
+    'závody'                  => $filtraceSloupecZavody,
+    'série'                   => $filtraceSloupecSerie,
+    'start. č./tým/reklama'   => $filtraceSloupecStartTymReklama,
+    'jezdec'                  => $filtraceSloupecJezdec,
+    'rok'                     => $filtraceSloupecRok
+];
+
+foreach ($prehledFiltru as $nazevFiltru => $hodnotaFiltru) {
+    $hodnotaFiltru = trim((string)$hodnotaFiltru);
+
+    if ($hodnotaFiltru !== '') {
+        $zapnuteFiltry[] =
+            htmlspecialchars($nazevFiltru, ENT_QUOTES, 'UTF-8')
+            . "='"
+            . htmlspecialchars($hodnotaFiltru, ENT_QUOTES, 'UTF-8')
+            . "'";
+    }
+}
+
+
+?>
+
+<details class="filtry-hledani-pozitivni">
+    <summary title="Zobrazit/skrýt filtry">
+        Filtry (klikni pro zobrazení)
+    </summary>
+
+    <div class="filters-grid">
+        <div class="filter-field">
+            <i>Do kolonek zadávej výrazy jen s mezerami</i>
+        </div>
     </div>
-</div>
-<div class="filters-grid">
+
+    <div class="filters-grid">
     <!-- Firma -->
     <div class="filter-field">
       <input id="filtrfirma" type="search" class="date-input" name="filtrfirma" placeholder="Filtr firem" value="<?php echo htmlspecialchars($_GET['filtrfirma'] ?? ''); ?>" autocomplete="off"/>
@@ -762,6 +796,12 @@ $queryString = http_build_query($queryParams);
 
 echo "<div style=\"font-size: 14px; text-align: left; padding-top: 0px;\">Počet nálezů: <b>" .$totalRecords ."</b>";
 if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('d.m.Y', $datumod) ."</b> až <b>".date('d.m.Y', $datumdo)."</b></div>";}
+if (!empty($zapnuteFiltry)) {
+    echo '<div class="zapnute-filtry">';
+    echo '<strong>Zapnuté filtry:</strong> ';
+    echo implode(', ', $zapnuteFiltry);
+    echo '</div>';
+}
 ?>
 
 <a href="#konec" class="fixed-arrow-dolu"><img src="sipka_dolu.jpg" width="30" height="30" title="Posun na konec stránky" style="opacity: 0.5;"></a>

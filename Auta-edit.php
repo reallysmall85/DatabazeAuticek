@@ -934,12 +934,13 @@ if (isset($_REQUEST["inputjezdec3"]) && $_REQUEST["inputjezdec3"]) {
 echo "</tr>";
 
 # ----------- ROK ---------------
-$rok = date("Y");			
+$rok = date("Y");
+$rokzacatek = 1970;			
 echo "<tr class=\"barevnost2\">";
 echo "<td>Rok:</td>";
 echo "<td><select name=\"selectroku\">";
     echo "<option value=\"\">---vyber si položku---</option>";
-    for($rokfor = 1970; $rokfor <= $rok; $rokfor++){
+    for($rokfor = $rok; $rokfor >= $rokzacatek; $rokfor--){
         echo "<option value=\"" .$rokfor ."\">".$rokfor."</option>";
     }
 echo "</select></td>";

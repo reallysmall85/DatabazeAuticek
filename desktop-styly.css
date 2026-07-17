@@ -351,7 +351,11 @@
 /* ať se vnitřek drží šířky boxu */
 .search-box { max-width: 100%; }
 
-
+.zapnute-filtry {
+    color: red;
+    font-size: 14px;
+    margin: 6px 0 10px 0;
+}
         
         .fixed-arrow-nahoru {
             position: fixed;
@@ -570,7 +574,7 @@
     margin-left: auto; 
     margin-right: auto; 
     margin-top: auto;
-    font-size: 16px;
+    font-size: 18px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.5);
        border-radius: 6px;
        overflow: hidden; 
@@ -628,6 +632,10 @@
 
 #drop-area.hover {
     border-color: #333;
+}
+
+textarea {
+    font-size: 16px;
 }
 
 textarea.unsaved {
