@@ -22,55 +22,32 @@
 .hlavnitabulka-wrap{
     max-width: 100%;
     
-    position: relative;
+    position: fixed;
+
+    top: calc(var(--vyska-horni-listy) + 8px);
+    bottom: var(--vyska-spodni-listy);
+    left: 0;
+    right: 0;
     
     overflow-x: auto;
     overflow-y: auto;  
+
+    box-sizing: border-box;
+
     -webkit-overflow-scrolling: touch;
-    
     overscroll-behavior: contain;
     
-    max-height: calc(100vh - 140px);
-
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 8px;
+    max-width: 100%;
+    max-height: none;
+    margin: 0;
+    
 
     border-radius: 6px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.5);
     background-color: rgba(255, 255, 255, 1);
-}
-/* hint (default: skrytý) */
-.scroll-hint{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  z-index: 999;                 /* nad tabulkou i sticky prvky */
-  font-size: 30px;
-  line-height: 1.2;
-
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(0,0,0,0.25);
-  border-radius: 6px;
-  pointer-events: none;
-
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .15s ease-in-out;
+    
 }
 
-/* zobrazuj jen na desktopu (kde dává smysl Ctrl/Cmd) */
-@media (hover: hover) and (pointer: fine){
-  .hlavnitabulka-wrap:hover .scroll-hint{ opacity: 1; }
-}
-
-/* když hint “odklikneme” (viz JS), tak už se nezobrazuje */
-.hlavnitabulka-wrap.hint-dismissed .scroll-hint{
-  display: none;
-}
 
 .hlavnitabulka{
     border-collapse: separate;
@@ -353,22 +330,10 @@
 
 .zapnute-filtry {
     color: red;
-    font-size: 14px;
+    
     margin: 6px 0 10px 0;
 }
         
-        .fixed-arrow-nahoru {
-            position: fixed;
-            bottom: 120px; /* Vzdálenost od spodního okraje */
-            left: 20px;  /* Vzdálenost od levého okraje */
-            z-index: 1000; /* Zajišťuje, že bude nad ostatním obsahem */
-        }
-        .fixed-arrow-dolu {
-            position: fixed;
-            top: 250px; /* Vzdálenost od horního okraje */
-            left: 20px;  /* Vzdálenost od levého okraje */
-            z-index: 1000; /* Zajišťuje, že bude nad ostatním obsahem */
-        }
         
         .zelenePozadi {
             background-color: #f0fff0;
@@ -425,15 +390,55 @@
   display: grid;
   grid-template-areas:
     "q"
-    "dates"
-    "filters"
-    "actions";
+    "filters";
   gap: 12px;
   align-items: start;
 }
 
 /* fulltext přes celou šířku */
-.search-main{ grid-area: q; }
+.search-main {
+    grid-area: q;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.search-main label {
+    flex: 0 0 auto;
+}
+
+.search-main .search-input {
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.filtry-tlacitko {
+    flex: 0 0 auto;
+    padding: 8px 15px;
+    background-color: lightgrey;
+    border: 1px solid black;
+    color: black;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-right: 2px;
+    margin-left: 2px;
+
+
+}
+
+.filtry-tlacitko:hover {
+    background-color: grey;
+}
+
+.filtry-skryte-summary {
+    display: none;
+}
 
 /* datumy vedle sebe */
 .dates{
@@ -463,14 +468,27 @@
   gap: 6px;
 }
 
-/* tlačítko vpravo dole */
-.actions {
-    grid-area: actions;        /* zůstává, pokud to používáš v parent gridu */
+/*Radek pridano od do*/
+.datum-filtr-row {
     display: flex;
-    flex-direction: column;    /* pod sebe */
-    align-items: flex-end;     /* zarovnání doprava */
-    gap: 0.5rem;               /* mezera mezi tlačítky */
-  }
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+
+
+.actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+}
 
 /* drobná úprava šířek inputů, ať se roztahují */
 .search-input, .date-input{ width: 100%; }
@@ -527,7 +545,55 @@
 
 
 /* výška jednoho řádku – uprav dle tvé tabulky */
-:root { --filtr-row-h: 36px; }
+:root {
+    --filtr-row-h: 36px; 
+    --vyska-horni-listy: 0px;
+    --vyska-spodni-listy: 0px;
+    }
+
+
+.spodni-strankovani {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 2000;
+
+    box-sizing: border-box;
+    min-height: var(--vyska-spodni-listy);
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 6px 12px;
+
+    background-color: rgba(255, 254, 235, 0.97);
+    border-top: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
+
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.strankovani-popis {
+    flex: 0 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.strankovani-tlacitka {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+
 
 /* malé rozbalovací tlačítko */
 .filtr-toggle{
@@ -767,6 +833,7 @@ textarea.unsaved {
             border-radius: 6px;
             margin-right: 2px;
             margin-left: 2px;
+            font-size: 14px;
         }
 
         .zaoblene-tlacitko-cervene {
@@ -780,6 +847,7 @@ textarea.unsaved {
             border-radius: 6px;
             margin-right: 2px;
             margin-left: 2px;
+            font-size: 14px;
         }
 
         .zaoblene-tlacitko-zelene {
@@ -793,6 +861,7 @@ textarea.unsaved {
             border-radius: 6px;
             margin-right: 2px;
             margin-left: 2px;
+            font-size: 14px;
         }
 
         .zaoblene-tlacitko-fialove {
@@ -806,6 +875,7 @@ textarea.unsaved {
             border-radius: 6px;
             margin-right: 2px;
             margin-left: 2px;
+            font-size: 14px;
         }
 
         .zaoblene-tlacitko-oranzove {
@@ -819,6 +889,13 @@ textarea.unsaved {
             border-radius: 6px;
             margin-right: 2px;
             margin-left: 2px;
+            font-size: 14px;
+        }
+
+        .tlacitko-tisk {
+            font-size: 20px;
+            padding: 5px 10px;
+            line-height: 1;
         }
 
 
@@ -834,4 +911,102 @@ img { max-width: 100%; height: auto; }
 .tabulka-hledani {
   max-width: 100%;            /* ne 100vw (to na desktopu zahrnuje i scrollbar) */
 }
-  
+
+
+/* =========================================================
+   FIXNÍ HORNÍ PANEL – tři samostatné segmenty
+   ========================================================= */
+
+.horni-fixni-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3000;
+
+    display: grid;
+    grid-template-columns:
+        minmax(120px, 1fr)
+        minmax(320px, 1100px)
+        minmax(120px, 1fr);
+    align-items: start;
+    gap: 8px;
+
+    box-sizing: border-box;
+    width: 100%;
+    padding: 5px;
+
+    pointer-events: none;
+}
+
+.horni-segment {
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+.horni-segment-akce {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    white-space: nowrap;
+}
+
+.horni-segment-hledani {
+    justify-self: stretch;
+    min-width: 0;
+}
+
+.horni-segment-navigace {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    white-space: nowrap;
+}
+
+.horni-segment-navigace a,
+.horni-segment-navigace img {
+    display: block;
+}
+
+.horni-segment-navigace img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.horni-segment-hledani .tabulka-hledani {
+    position: static;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.horni-fixni-panel-spacer {
+    width: 100%;
+    min-height: 1px;
+}
+
+@media (max-width: 800px) {
+    .horni-fixni-panel {
+        grid-template-columns: max-content minmax(300px, 1fr) max-content;
+        overflow-x: auto;
+    }
+
+    .horni-segment-akce {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .horni-segment-navigace img {
+        width: 40px;
+        height: 40px;
+    }
+}

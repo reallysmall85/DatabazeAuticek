@@ -424,12 +424,59 @@ window.addEventListener('online', () => {
         try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
       }
       document.addEventListener('click', function (e) {
-        var row = e.target.closest('.filtr-row'); if (!row) return;
-        if (row.dataset.firma) addToken('filtrfirma', row.dataset.firma);
-        if (row.dataset.barva) addToken('filtrbarva', row.dataset.barva);
-        if (row.dataset.serie) addToken('filtrserie', row.dataset.serie);
-        if (row.dataset.zavody) addToken('filtrzavody', row.dataset.zavody);
-      });
+            var row = e.target.closest('.filtr-row');
+
+            if (row) {
+                if (row.dataset.firma) {
+                    addToken('filtrfirma', row.dataset.firma);
+                }
+
+                if (row.dataset.barva) {
+                    addToken('filtrbarva', row.dataset.barva);
+                }
+
+                if (row.dataset.serie) {
+                    addToken('filtrserie', row.dataset.serie);
+                }
+
+                if (row.dataset.zavody) {
+                    addToken('filtrzavody', row.dataset.zavody);
+                }
+
+                // Zavře roletku, ze které byla položka vybrána
+                var otevrenaRoletka = row.closest('.filtr-panel');
+
+                if (otevrenaRoletka) {
+                    otevrenaRoletka.open = false;
+                }
+
+                return;
+            }
+
+            // Kliknutí mimo kteroukoliv roletku zavře všechny otevřené roletky
+            if (!e.target.closest('.filtr-panel')) {
+                document.querySelectorAll('.filtr-panel[open]').forEach(function (panel) {
+                    panel.open = false;
+                });
+            }
+        });
+      document.addEventListener('toggle', function (e) {
+          var otevrenyPanel = e.target;
+
+          if (
+              !otevrenyPanel.matches ||
+              !otevrenyPanel.matches('.filtr-panel') ||
+              !otevrenyPanel.open
+          ) {
+              return;
+          }
+
+          document.querySelectorAll('.filtr-panel[open]').forEach(function (panel) {
+              if (panel !== otevrenyPanel) {
+                  panel.open = false;
+              }
+          });
+      }, true);
       document.addEventListener('keydown', function (e) {
         var row = e.target.closest('.filtr-row'); if (!row) return;
         if (e.key === 'Enter' || e.key === ' ') {
@@ -457,40 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // Ovládání scrollu tabulky
-  wrap.addEventListener('wheel', (e) => {
-
-    const allowTableScroll = e.ctrlKey || e.metaKey;
-
-    if (allowTableScroll) {
-
-      e.preventDefault();
-
-      wrap.scrollTop += e.deltaY;
-      wrap.scrollLeft += e.deltaX;
-
-      wrap.classList.add('hint-dismissed');
-
-      sessionStorage.setItem(
-        'hintDismissed',
-        '1'
-      );
-
-      return;
-    }
-
-
-    e.preventDefault();
-
-    window.scrollBy({
-      top: e.deltaY,
-      left: 0,
-      behavior: 'auto'
-    });
-
-  }, {
-    passive: false
-  });
+  
 
 });
 
@@ -572,204 +586,326 @@ window.addEventListener('load', () => {
 });
 
 
-    </script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const filtryToggle = document.getElementById('filtryToggle');
+    const filtryDetails = document.getElementById('filtryDetails');
+
+    if (!filtryToggle || !filtryDetails) {
+        return;
+    }
+
+    function updateFiltryButton() {
+        const jsouOtevrene = filtryDetails.open;
+
+        filtryToggle.setAttribute(
+            'aria-expanded',
+            String(jsouOtevrene)
+        );
+
+        filtryToggle.textContent = jsouOtevrene
+            ? 'Skrýt filtry'
+            : 'Zobrazit filtry';
+    }
+
+    filtryToggle.addEventListener('click', () => {
+        filtryDetails.open = !filtryDetails.open;
+        updateFiltryButton();
+    });
+
+    filtryDetails.addEventListener('toggle', updateFiltryButton);
+
+    updateFiltryButton();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const horniLista = document.getElementById('horniFixniPanel');
+    const spodniLista = document.getElementById('spodniLista');
+
+    function aktualizovatVyskyList() {
+        const vyskaHorniListy = horniLista
+            ? Math.ceil(horniLista.getBoundingClientRect().height)
+            : 0;
+
+        const vyskaSpodniListy = spodniLista
+            ? Math.ceil(spodniLista.getBoundingClientRect().height)
+            : 0;
+
+        document.documentElement.style.setProperty(
+            '--vyska-horni-listy',
+            vyskaHorniListy + 'px'
+        );
+
+        document.documentElement.style.setProperty(
+            '--vyska-spodni-listy',
+            vyskaSpodniListy + 'px'
+        );
+    }
+
+    aktualizovatVyskyList();
+
+    window.addEventListener('resize', aktualizovatVyskyList);
+
+    if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(aktualizovatVyskyList);
+
+        if (horniLista) {
+            observer.observe(horniLista);
+        }
+
+        if (spodniLista) {
+            observer.observe(spodniLista);
+        }
+    }
+});
+
+</script>
 </head>
 <body>
-<?php 
+
+<?php
 include("phpqrcode/qrlib.php");
-
-echo "<table class=\"tabulka-prihlasen\"><tr><td><div>
-<a href=\"Prihlaseni.php\"><img width=\"50\" height=\"50\" src=\"Logout.png\" title=\"Odhlásit se\"></a>
-<a href=\"Uvodni.php\"><img width=\"50\" height=\"50\" src=\"Home.png\" title=\"Zpět na úvodní stránku\"></a>
-Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
-switch ($prihlasenOpravneni){
-    case 1: echo "admin"; break;
-    case 2: echo "moderator"; break;
-    case 3: echo "uživatel"; break;
-    case 4: echo "veřejnost"; break;
-    default: echo "úrovně č.: " .$prihlasenOpravneni; break;
-}
-echo "</span></div></td></tr></table>";
 ?>
 
+<div class="horni-fixni-panel" id="horniFixniPanel">
 
+    <div class="horni-segment horni-segment-akce">
+        <?php if ($prihlasenOpravneni <= 2): ?>
+            <input
+                class="zaoblene-tlacitko"
+                type="button"
+                value="NOVÁ POLOŽKA"
+                onmouseover="this.style.backgroundColor='grey';"
+                onmouseout="this.style.backgroundColor='lightgrey';"
+                onclick="window.open('Auta-edit.php?polozka=nova', '_blank');"
+            >
 
-<?php
-if ($prihlasenOpravneni <= 2 ){
-    echo "<table class=\"tabulka-ikony\"><tr><td><div style=\"margin-top: 2px; margin-bottom: 2px\"><input class='zaoblene-tlacitko' type='button' value='NOVÁ POLOŽKA' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" 
-                  onclick=\"window.open('Auta-edit.php?polozka=nova', '_blank');\">";
-    echo "<input class='zaoblene-tlacitko' type='button' value='IMPORT' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\" 
-                  onclick=\"window.open('Auta-import.php', '_blank');\"></div></td></tr></table>";
-}
-?>
+            <input
+                class="zaoblene-tlacitko"
+                type="button"
+                value="IMPORT"
+                onmouseover="this.style.backgroundColor='grey';"
+                onmouseout="this.style.backgroundColor='lightgrey';"
+                onclick="window.open('Auta-import.php', '_blank');"
+            >
+        <?php endif; ?>
+    </div>
 
-<div class="tabulka-hledani">
-<div class="search-box">
-  <form class="search-form" method="get" action="Auta-main.php" autocomplete="off">
-  <div class="search-main">Hledání:
-    <input type="search" class="search-input" name="q" placeholder="Sem zadej klíčová slova (nebo 'duplicity')" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" autocomplete="off">
-  </div>
+    <div class="horni-segment horni-segment-hledani">
+      <div class="tabulka-hledani">
+        <div class="search-box">
+          <form class="search-form" method="get" action="Auta-main.php" autocomplete="off">
+            <div class="search-main">
+              <label for="hlavniHledani">Hledání:</label>
 
-  <div class="dates">Datum přidání:
-    <div> od: <input type="date" class="date-input" name="datumod" placeholder="Datum od" value="<?php echo htmlspecialchars($_GET['datumod'] ?? ''); ?>" autocomplete="off"> </div>
-    <div> do: <input type="date" class="date-input" name="datumdo" placeholder="Datum do" value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>" autocomplete="off"> </div>
-  </div>
+              <input
+                id="hlavniHledani"
+                type="search"
+                class="search-input"
+                name="q"
+                placeholder="Sem zadej klíčová slova (nebo 'duplicity')"
+                value="<?php echo htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                autocomplete="off"
+              >
 
-<?php
-$zapnuteFiltry = [];
+              <button
+                type="button"
+                class="filtry-tlacitko"
+                id="filtryToggle"
+                aria-expanded="false"
+                aria-controls="filtryDetails"
+              >
+                Zobrazit filtry
+              </button>
+                <div class="actions">
+                  <input
+                    type="hidden"
+                    name="zobrazpozadavky"
+                    value="<?php echo htmlspecialchars($zobrazujpozadavky); ?>"
+                  >
+                  <button
+                    type="submit"
+                    class="zaoblene-tlacitko-zelene"
+                    onmouseover="this.style.backgroundColor='darkgreen';"
+                    onmouseout="this.style.backgroundColor='green';"
+                  >
+                  HLEDEJ
+                  </button>
+                  <input
+                    type="button"
+                    class="zaoblene-tlacitko"
+                    value="Hledej vše"
+                    onmouseover="this.style.backgroundColor='grey';"
+                    onmouseout="this.style.backgroundColor='lightgrey';"
+                    onclick="window.location.replace('Auta-main.php?stranka=1');"
+                  >
+                </div>
+    
+            </div>
 
-$prehledFiltru = [
-    'firma'                   => $filtraceSloupecFirma,
-    'číslo'                   => $filtraceSloupecCislo,
-    'název'                   => $filtraceSloupecNazev,
-    'upřesnění'               => $filtraceSloupecUpresneni,
-    'barva'                   => $filtraceSloupecBarva,
-    'závody'                  => $filtraceSloupecZavody,
-    'série'                   => $filtraceSloupecSerie,
-    'start. č./tým/reklama'   => $filtraceSloupecStartTymReklama,
-    'jezdec'                  => $filtraceSloupecJezdec,
-    'rok'                     => $filtraceSloupecRok
-];
+                <?php
+                $zapnuteFiltry = [];
 
-foreach ($prehledFiltru as $nazevFiltru => $hodnotaFiltru) {
-    $hodnotaFiltru = trim((string)$hodnotaFiltru);
+                $prehledFiltru = [
+                    'firma'                   => $filtraceSloupecFirma,
+                    'číslo'                   => $filtraceSloupecCislo,
+                    'název'                   => $filtraceSloupecNazev,
+                    'upřesnění'               => $filtraceSloupecUpresneni,
+                    'barva'                   => $filtraceSloupecBarva,
+                    'závody'                  => $filtraceSloupecZavody,
+                    'série'                   => $filtraceSloupecSerie,
+                    'start. č./tým/reklama'   => $filtraceSloupecStartTymReklama,
+                    'jezdec'                  => $filtraceSloupecJezdec,
+                    'rok'                     => $filtraceSloupecRok
+                ];
 
-    if ($hodnotaFiltru !== '') {
-        $zapnuteFiltry[] =
-            htmlspecialchars($nazevFiltru, ENT_QUOTES, 'UTF-8')
-            . "='"
-            . htmlspecialchars($hodnotaFiltru, ENT_QUOTES, 'UTF-8')
-            . "'";
-    }
-}
+                foreach ($prehledFiltru as $nazevFiltru => $hodnotaFiltru) {
+                    $hodnotaFiltru = trim((string)$hodnotaFiltru);
 
+                    if ($hodnotaFiltru !== '') {
+                        $zapnuteFiltry[] =
+                            htmlspecialchars($nazevFiltru, ENT_QUOTES, 'UTF-8')
+                            . "='"
+                            . htmlspecialchars($hodnotaFiltru, ENT_QUOTES, 'UTF-8')
+                            . "'";
+                    }
+                }
+                ?>
+            <details
+              class="filtry-hledani-pozitivni"
+              id="filtryDetails"
+            >
+              <summary class="filtry-skryte-summary">
+                  Filtry
+              </summary>
+                <div class="filters-grid">
+                    <div class="filter-field">
+                        <i>Do kolonek zadávej výrazy jen s mezerami</i>
+                    </div>
+                </div>
+                <div class="datum-filtr-row">
+                  <span>Datum přidání od:</span>
+                  <input
+                      type="date"
+                      class="date-input"
+                      name="datumod"
+                      value="<?php echo htmlspecialchars($_GET['datumod'] ?? ''); ?>"
+                      autocomplete="off"
+                  >
+                  <span>do:</span>
+                  <input
+                    type="date"
+                    class="date-input"
+                    name="datumdo"
+                    value="<?php echo htmlspecialchars($_GET['datumdo'] ?? ''); ?>"
+                    autocomplete="off"
+                  >
+                </div>
+                <div class="filters-grid">  
+                  <!-- Firma -->
+                  <div class="filter-field">
+                    <input id="filtrfirma" type="search" class="date-input" name="filtrfirma" placeholder="Filtr firem" value="<?php echo htmlspecialchars($_GET['filtrfirma'] ?? ''); ?>" autocomplete="off"/>
+                    <details class="filtr-panel">
+                      <summary class="filtr-toggle" title="Zobrazit/skrýt výpis firem">Výběr firem</summary>
+                      <div class="filtracni-scroll">
+                        <table class="filtracnitabulka">
+                          <?php while ($row = mysqli_fetch_assoc($resultFiltrFirma)): 
+                            $firma    = (string)$row['firma'];
+                            $firmaTxt = htmlspecialchars($firma, ENT_NOQUOTES, 'UTF-8');
+                            $firmaAttr= htmlspecialchars($firma, ENT_QUOTES,   'UTF-8'); ?>
+                            <tr class="filtr-row" data-firma="<?php echo $firmaAttr; ?>"><td><?php echo $firmaTxt; ?></td></tr>
+                          <?php endwhile; ?>
+                        </table>
+                      </div>
+                    </details>
+                  </div>
+                  <!-- Číslo -->
+                  <div class="filter-field">
+                    <input id="filtrcislo" type="search" class="date-input" name="filtrcislo" placeholder="Filtr čísla" value="<?php echo htmlspecialchars($_GET['filtrcislo'] ?? ''); ?>" autocomplete="off" />
+                  </div>
 
-?>
+                  <!-- Název -->
+                  <div class="filter-field">
+                    <input id="filtrnazev" type="search" class="date-input" name="filtrnazev" placeholder="Filtr názvu" value="<?php echo htmlspecialchars($_GET['filtrnazev'] ?? ''); ?>" autocomplete="off" />
+                  </div>
 
-<details class="filtry-hledani-pozitivni">
-    <summary title="Zobrazit/skrýt filtry">
-        Filtry (klikni pro zobrazení)
-    </summary>
+                  <!-- Upřesnění -->
+                  <div class="filter-field">
+                    <input id="filtrupresneni" type="search" class="date-input" name="filtrupresneni" placeholder="Filtr upřesnění" value="<?php echo htmlspecialchars($_GET['filtrupresneni'] ?? ''); ?>" autocomplete="off" />
+                  </div>
 
-    <div class="filters-grid">
-        <div class="filter-field">
-            <i>Do kolonek zadávej výrazy jen s mezerami</i>
+                  <!-- Barvy + menu -->
+                  <div class="filter-field">
+                    <input id="filtrbarva" type="search" class="date-input" name="filtrbarva" placeholder="Filtr barev" value="<?php echo htmlspecialchars($_GET['filtrbarva'] ?? ''); ?>" autocomplete="off" />
+                    <details class="filtr-panel">
+                      <summary class="filtr-toggle" title="Zobrazit/skrýt výpis barev">Výběr barev</summary>
+                      <div class="filtracni-scroll">
+                        <table class="filtracnitabulka">
+                          <?php while ($row = mysqli_fetch_assoc($resultFiltrBarva)): 
+                            $barva    = (string)$row['barva'];
+                            $barvaTxt = htmlspecialchars($barva, ENT_NOQUOTES, 'UTF-8');
+                            $barvaAttr= htmlspecialchars($barva, ENT_QUOTES,   'UTF-8'); ?>
+                            <tr class="filtr-row" data-barva="<?php echo $barvaAttr; ?>"><td><?php echo $barvaTxt; ?></td></tr>
+                          <?php endwhile; ?>
+                        </table>
+                      </div>
+                    </details>
+                  </div>
+
+                  <!-- Série + menu -->
+                  <div class="filter-field">
+                    <input id="filtrserie" type="search" class="date-input" name="filtrserie" placeholder="Filtr série" value="<?php echo htmlspecialchars($_GET['filtrserie'] ?? ''); ?>" autocomplete="off" />
+                    <details class="filtr-panel">
+                      <summary class="filtr-toggle" title="Zobrazit/skrýt výpis serií">Výběr serií</summary>
+                      <div class="filtracni-scroll">
+                        <table class="filtracnitabulka">
+                          <?php while ($row = mysqli_fetch_assoc($resultFiltrSerie)):
+                            $serie    = (string)$row['serie'];
+                            $serieTxt = htmlspecialchars($serie, ENT_NOQUOTES, 'UTF-8');
+                            $serieAttr= htmlspecialchars($serie, ENT_QUOTES,   'UTF-8'); ?>
+                            <tr class="filtr-row" data-serie="<?php echo $serieAttr; ?>"><td><?php echo $serieTxt; ?></td></tr>
+                          <?php endwhile; ?>
+                        </table>
+                      </div>
+                    </details>
+                  </div>
+
+                  <!-- Závody + menu -->
+                  <div class="filter-field">
+                    <input id="filtrzavody" type="search" class="date-input" name="filtrzavody" placeholder="Filtr závodů" value="<?php echo htmlspecialchars($_GET['filtrzavody'] ?? ''); ?>" autocomplete="off" />
+                    <details class="filtr-panel">
+                      <summary class="filtr-toggle" title="Zobrazit/skrýt výpis závodů">Výběr závodů</summary>
+                      <div class="filtracni-scroll">
+                        <table class="filtracnitabulka">
+                          <?php while ($row = mysqli_fetch_assoc($resultFiltrZavody)):
+                            $zavod    = (string)$row['zavod'];
+                            $zavodTxt = htmlspecialchars($zavod, ENT_NOQUOTES, 'UTF-8');
+                            $zavodAttr= htmlspecialchars($zavod, ENT_QUOTES,   'UTF-8'); ?>
+                            <tr class="filtr-row" data-zavody="<?php echo $zavodAttr; ?>"><td><?php echo $zavodTxt; ?></td></tr>
+                          <?php endwhile; ?>
+                        </table>
+                      </div>
+                    </details>
+                  </div>
+
+                  <!-- Start.č./Tým/Reklama -->
+                  <div class="filter-field">
+                    <input id="filtrstarttymreklama" type="search" class="date-input" name="filtrstarttymreklama" placeholder="Filtr st.č./tým/reklama" value="<?php echo htmlspecialchars($_GET['filtrstarttymreklama'] ?? ''); ?>" autocomplete="off" />
+                  </div>
+
+                  <!-- Jezdec -->
+                  <div class="filter-field">
+                    <input id="filtrjezdec" type="search" class="date-input" name="filtrjezdec" placeholder="Filtr jezdec" value="<?php echo htmlspecialchars($_GET['filtrjezdec'] ?? ''); ?>" autocomplete="off" />
+                  </div>
+
+                  <!-- Rok -->
+                  <div class="filter-field">
+                    <input id="filtrrok" type="search" class="date-input" name="filtrrok" placeholder="Filtr rok" value="<?php echo htmlspecialchars($_GET['filtrrok'] ?? ''); ?>" autocomplete="off" />
+                  </div>
+              </div>
+            </details>
+          </form>
         </div>
-    </div>
-
-    <div class="filters-grid">
-    <!-- Firma -->
-    <div class="filter-field">
-      <input id="filtrfirma" type="search" class="date-input" name="filtrfirma" placeholder="Filtr firem" value="<?php echo htmlspecialchars($_GET['filtrfirma'] ?? ''); ?>" autocomplete="off"/>
-      <details class="filtr-panel">
-        <summary class="filtr-toggle" title="Zobrazit/skrýt výpis firem">Výběr firem</summary>
-        <div class="filtracni-scroll">
-          <table class="filtracnitabulka">
-            <?php while ($row = mysqli_fetch_assoc($resultFiltrFirma)): 
-              $firma    = (string)$row['firma'];
-              $firmaTxt = htmlspecialchars($firma, ENT_NOQUOTES, 'UTF-8');
-              $firmaAttr= htmlspecialchars($firma, ENT_QUOTES,   'UTF-8'); ?>
-              <tr class="filtr-row" data-firma="<?php echo $firmaAttr; ?>"><td><?php echo $firmaTxt; ?></td></tr>
-            <?php endwhile; ?>
-          </table>
-        </div>
-      </details>
-    </div>
-
-    <!-- Číslo -->
-    <div class="filter-field">
-      <input id="filtrcislo" type="search" class="date-input" name="filtrcislo" placeholder="Filtr čísla" value="<?php echo htmlspecialchars($_GET['filtrcislo'] ?? ''); ?>" autocomplete="off" />
-    </div>
-
-    <!-- Název -->
-    <div class="filter-field">
-      <input id="filtrnazev" type="search" class="date-input" name="filtrnazev" placeholder="Filtr názvu" value="<?php echo htmlspecialchars($_GET['filtrnazev'] ?? ''); ?>" autocomplete="off" />
-    </div>
-
-    <!-- Upřesnění -->
-    <div class="filter-field">
-      <input id="filtrupresneni" type="search" class="date-input" name="filtrupresneni" placeholder="Filtr upřesnění" value="<?php echo htmlspecialchars($_GET['filtrupresneni'] ?? ''); ?>" autocomplete="off" />
-    </div>
-
-    <!-- Barvy + menu -->
-    <div class="filter-field">
-      <input id="filtrbarva" type="search" class="date-input" name="filtrbarva" placeholder="Filtr barev" value="<?php echo htmlspecialchars($_GET['filtrbarva'] ?? ''); ?>" autocomplete="off" />
-      <details class="filtr-panel">
-        <summary class="filtr-toggle" title="Zobrazit/skrýt výpis barev">Výběr barev</summary>
-        <div class="filtracni-scroll">
-          <table class="filtracnitabulka">
-            <?php while ($row = mysqli_fetch_assoc($resultFiltrBarva)): 
-              $barva    = (string)$row['barva'];
-              $barvaTxt = htmlspecialchars($barva, ENT_NOQUOTES, 'UTF-8');
-              $barvaAttr= htmlspecialchars($barva, ENT_QUOTES,   'UTF-8'); ?>
-              <tr class="filtr-row" data-barva="<?php echo $barvaAttr; ?>"><td><?php echo $barvaTxt; ?></td></tr>
-            <?php endwhile; ?>
-          </table>
-        </div>
-      </details>
-    </div>
-
-    <!-- Série + menu -->
-    <div class="filter-field">
-      <input id="filtrserie" type="search" class="date-input" name="filtrserie" placeholder="Filtr série" value="<?php echo htmlspecialchars($_GET['filtrserie'] ?? ''); ?>" autocomplete="off" />
-      <details class="filtr-panel">
-        <summary class="filtr-toggle" title="Zobrazit/skrýt výpis serií">Výběr serií</summary>
-        <div class="filtracni-scroll">
-          <table class="filtracnitabulka">
-            <?php while ($row = mysqli_fetch_assoc($resultFiltrSerie)):
-              $serie    = (string)$row['serie'];
-              $serieTxt = htmlspecialchars($serie, ENT_NOQUOTES, 'UTF-8');
-              $serieAttr= htmlspecialchars($serie, ENT_QUOTES,   'UTF-8'); ?>
-              <tr class="filtr-row" data-serie="<?php echo $serieAttr; ?>"><td><?php echo $serieTxt; ?></td></tr>
-            <?php endwhile; ?>
-          </table>
-        </div>
-      </details>
-    </div>
-
-    <!-- Závody + menu -->
-    <div class="filter-field">
-      <input id="filtrzavody" type="search" class="date-input" name="filtrzavody" placeholder="Filtr závodů" value="<?php echo htmlspecialchars($_GET['filtrzavody'] ?? ''); ?>" autocomplete="off" />
-      <details class="filtr-panel">
-        <summary class="filtr-toggle" title="Zobrazit/skrýt výpis závodů">Výběr závodů</summary>
-        <div class="filtracni-scroll">
-          <table class="filtracnitabulka">
-            <?php while ($row = mysqli_fetch_assoc($resultFiltrZavody)):
-              $zavod    = (string)$row['zavod'];
-              $zavodTxt = htmlspecialchars($zavod, ENT_NOQUOTES, 'UTF-8');
-              $zavodAttr= htmlspecialchars($zavod, ENT_QUOTES,   'UTF-8'); ?>
-              <tr class="filtr-row" data-zavody="<?php echo $zavodAttr; ?>"><td><?php echo $zavodTxt; ?></td></tr>
-            <?php endwhile; ?>
-          </table>
-        </div>
-      </details>
-    </div>
-
-    <!-- Start.č./Tým/Reklama -->
-    <div class="filter-field">
-      <input id="filtrstarttymreklama" type="search" class="date-input" name="filtrstarttymreklama" placeholder="Filtr st.č./tým/reklama" value="<?php echo htmlspecialchars($_GET['filtrstarttymreklama'] ?? ''); ?>" autocomplete="off" />
-    </div>
-
-    <!-- Jezdec -->
-    <div class="filter-field">
-      <input id="filtrjezdec" type="search" class="date-input" name="filtrjezdec" placeholder="Filtr jezdec" value="<?php echo htmlspecialchars($_GET['filtrjezdec'] ?? ''); ?>" autocomplete="off" />
-    </div>
-
-    <!-- Rok -->
-    <div class="filter-field">
-      <input id="filtrrok" type="search" class="date-input" name="filtrrok" placeholder="Filtr rok" value="<?php echo htmlspecialchars($_GET['filtrrok'] ?? ''); ?>" autocomplete="off" />
-    </div>
-  </div>
-</details>
-
-  <div class="actions">
-    <input type="hidden" name="zobrazpozadavky" value="<?php echo htmlspecialchars($zobrazujpozadavky); ?>">
-    <button type="submit" class="zaoblene-tlacitko-zelene" onmouseover="this.style.backgroundColor='darkgreen';" onmouseout="this.style.backgroundColor='green';">HLEDEJ</button>
-    <input type="button" class="zaoblene-tlacitko" value="Hledej vše" onmouseover="this.style.backgroundColor='grey';" onmouseout="this.style.backgroundColor='lightgrey';" onclick="window.location.replace('Auta-main.php?stranka=1');">
-  </div>
-</form>
-</div>
-</div>
 
 <?php
 $queryParams = [];
@@ -794,19 +930,53 @@ $queryParams['filtrrok'] = $filtraceSloupecRok;
 
 $queryString = http_build_query($queryParams);
 
-echo "<div style=\"font-size: 14px; text-align: left; padding-top: 0px;\">Počet nálezů: <b>" .$totalRecords ."</b>";
-if (isset($datumod) && isset($datumdo)){echo " a zobrazené období: <b>".date('d.m.Y', $datumod) ."</b> až <b>".date('d.m.Y', $datumdo)."</b></div>";}
-if (!empty($zapnuteFiltry)) {
-    echo '<div class="zapnute-filtry">';
-    echo '<strong>Zapnuté filtry:</strong> ';
-    echo implode(', ', $zapnuteFiltry);
-    echo '</div>';
-}
 ?>
 
-<a href="#konec" class="fixed-arrow-dolu"><img src="sipka_dolu.jpg" width="30" height="30" title="Posun na konec stránky" style="opacity: 0.5;"></a>
+<div class="prehled-vysledku">
+
+    <div class="pocet-nalezu">
+        Počet nálezů:
+        <b><?php echo $totalRecords; ?></b>
+
+        <?php if (isset($datumod) && isset($datumdo)): ?>
+            a zobrazené období:
+            <b><?php echo date('d.m.Y', $datumod); ?></b>
+            až
+            <b><?php echo date('d.m.Y', $datumdo); ?></b>
+        <?php endif; ?>
+    </div>
+
+    <?php if (!empty($zapnuteFiltry)): ?>
+        <div class="zapnute-filtry">
+            Zapnuté filtry:
+            <b><?php echo implode(', ', $zapnuteFiltry); ?></b>
+        </div>
+    <?php endif; ?>
+
+</div>
+
+
+      </div>
+    </div>
+    <div class="horni-segment horni-segment-navigace">
+        <a href="Uvodni.php" title="Zpět na úvodní stránku">
+            <img width="50" height="50" src="Home.png" alt="Domů">
+        </a>
+
+        <a href="Prihlaseni.php" title="Odhlásit se">
+            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+        </a>
+    </div>
+
+</div>
+
+
+
+
+
+
 <div class="hlavnitabulka-wrap">
-<div class="scroll-hint" id="scrollHint">Pro posun tabulky drž ctrl/cmd při scrollování kolečkem myši</div>
+
 <table class="hlavnitabulka">
     <thead>
     <tr>
@@ -876,7 +1046,16 @@ if (!empty($zapnuteFiltry)) {
             QRcode::png($row['id'], $cestaQRauta);
         }
         echo "<td><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\" style=\"display: none;\"></td>";
-        echo "<td><input class='zaoblene-tlacitko' type='button' value='Tisk QR' onmouseover=\"this.style.backgroundColor='grey';\" onmouseout=\"this.style.backgroundColor='lightgrey';\"  onclick=\"printQR('{$cestaQRauta}')\"></td>";
+        echo "<td>
+              <button
+                type='button'
+                class='zaoblene-tlacitko tlacitko-tisk'
+                title='Tisk QR'
+                onmouseover=\"this.style.backgroundColor='grey';\"
+                onmouseout=\"this.style.backgroundColor='lightgrey';\"
+                onclick=\"printQR('{$cestaQRauta}')\"
+              >🖨</button>
+              </td>";
 
         if ($prihlasenOpravneni <= 2 ){
             echo "<td class='col-edit' style=\"word-wrap: normal; word-break: normal; white-space: nowrap;\"><div>
@@ -892,12 +1071,12 @@ if (!empty($zapnuteFiltry)) {
 </table>
 </div>
 
-<a href="#zacatek" class="fixed-arrow-nahoru"><img src="sipka_nahoru.jpg" width="30" height="30" title="Posun na začátek stránky" style="opacity: 0.5;"></a>
 
-<div style="text-align: center; margin: 20px;" id="konec">
-STRÁNKY:
-<br>
-<?php
+<div class="spodni-strankovani" id="spodniLista">
+    <span class="strankovani-popis">STRÁNKY:</span>
+
+    <div class="strankovani-tlacitka">
+        <?php
 $queryParams = [];
 if (!empty($searchQuery)) { $queryParams['q'] = $searchQuery; }
 $queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
@@ -934,6 +1113,7 @@ for ($a = 1; $a <= $totalPages; $a++) {
     }
 }
 ?>
+</div>
 </div>
 </body>
 </html>
