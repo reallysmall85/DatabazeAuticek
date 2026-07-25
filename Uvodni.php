@@ -13,8 +13,7 @@ if (!isset($_SESSION['uzivatel'])) {
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 1199px)">
-	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 1200px)">
+	<link rel="stylesheet" href="desktop-styly.css">
 	<title>Uvodni stranka</title>
 
 
@@ -67,31 +66,38 @@ if (isset($_SESSION['uzivatel'])) {
 
 <table class="tabulka-uvodni" role="presentation">
 <tr>
-  <td colspan="3">
+  <td>
     <div class="menu-grid">
-      <div class="tile">
-        <a href="Auta-main.php?stranka=1">
-          <img src="seznam.png" alt="Seznam aut">
-          <div>SEZNAM AUT</div>
-        </a>
-      </div>
+  <div class="tile">
+    <a href="Auta-main.php?stranka=1">
+      <img src="Ikony/seznam.png" alt="Seznam aut">
+      <div>SEZNAM AUT</div>
+    </a>
+  </div>
 
-      <?php if ($prihlasenOpravneni <= 2): ?>
-      <div class="tile">
-        <a href="Auta-main.php?stranka=1&zobrazpozadavky=ano">
-          <img src="pozadavky.png" alt="Seznam požadavků">
-          <div>SEZNAM POŽADAVKŮ</div>
-        </a>
-      </div>
-      <?php endif; ?>
-
-      <div class="tile">
-        <a href="Uzivatele.php">
-          <img src="uzivatele.png" alt="Uživatelé">
-          <div>UŽIVATELÉ</div>
-        </a>
-      </div>
+  <?php if ($prihlasenOpravneni <= 2): ?>
+    <div class="tile">
+      <a href="Auta-main.php?stranka=1&amp;zobrazpozadavky=ano">
+        <img src="Ikony/pozadavky.png" alt="Seznam požadavků">
+        <div>SEZNAM POŽADAVKŮ</div>
+      </a>
     </div>
+
+    <div class="tile">
+      <a href="Pomocne-databaze.php">
+        <img src="Ikony/pomocne-databaze.png" alt="Pomocné databáze">
+        <div>POMOCNÉ DATABÁZE</div>
+      </a>
+    </div>
+  <?php endif; ?>
+
+  <div class="tile">
+    <a href="Uzivatele.php">
+      <img src="Ikony/uzivatele.png" alt="Uživatelé">
+      <div>UŽIVATELÉ</div>
+    </a>
+  </div>
+</div>
   </td>
 </tr>
 
