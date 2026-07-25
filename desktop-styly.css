@@ -81,6 +81,8 @@
     
 }
 
+
+
 @media (max-width: 420px){
   /* na mobilu na výšku nebude vidět COPY/DEL, ale jen EDIT */
   .hlavnitabulka td.col-edit input[value="COPY"],
@@ -207,7 +209,18 @@
 }
 
 
+/* QR je standardně skrytý */
+.hlavnitabulka .bunkaQR {
+    display: none;
+    width: 100%;
+    max-width: 100px;
+    height: auto;
+}
 
+/* Po najetí na řádek se zobrazí pouze jeho QR */
+.hlavnitabulka tbody tr:hover .bunkaQR {
+    display: block;
+}
 
 
 /* Obal: už ne fixed – ať může přirozeně zabrat viewport */
@@ -417,9 +430,9 @@
 .filtry-tlacitko {
     flex: 0 0 auto;
     padding: 8px 15px;
-    background-color: lightgrey;
+    background-color: green; 
+    color: white; 
     border: 1px solid black;
-    color: black;
     border: none;
     box-sizing: border-box;
     border-radius: 6px;
@@ -433,7 +446,7 @@
 }
 
 .filtry-tlacitko:hover {
-    background-color: grey;
+    background-color: darkgreen;
 }
 
 .filtry-skryte-summary {
@@ -994,19 +1007,80 @@ img { max-width: 100%; height: auto; }
     min-height: 1px;
 }
 
-@media (max-width: 800px) {
+/* Tablet a menší notebook */
+@media (max-width: 1600px) {
+
     .horni-fixni-panel {
-        grid-template-columns: max-content minmax(300px, 1fr) max-content;
-        overflow-x: auto;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "akce navigace"
+            "hledani hledani";
+
+        align-items: start;
     }
 
     .horni-segment-akce {
-        flex-direction: column;
-        align-items: stretch;
+        grid-area: akce;
+
+        min-width: 0;
+        justify-self: start;
     }
 
-    .horni-segment-navigace img {
-        width: 40px;
-        height: 40px;
+    .horni-segment-navigace {
+        grid-area: navigace;
+
+        min-width: 0;
+        justify-self: end;
+    }
+
+    .horni-segment-hledani {
+        grid-area: hledani;
+
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        justify-self: stretch;
+    }
+
+    .search-main {
+        flex-wrap: wrap;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-main .search-input {
+        flex: 1 1 300px;
+        min-width: 200px;
+        max-width: none;
+    }
+
+    .actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .search-main label {
+        width: 100%;
+    }
+
+    .search-main .search-input {
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .filtry-tlacitko {
+        flex: 1 1 auto;
+    }
+
+    .actions {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .horni-segment-navigace {
+        justify-content: flex-end;
     }
 }

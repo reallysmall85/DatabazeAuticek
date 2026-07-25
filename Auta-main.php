@@ -277,7 +277,11 @@ $result = mysqli_query($connection, $query);
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="desktop-styly.css">
     <title>Databaze aut</title>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
     <script>
+
+    
+
     function applyFilters() {
         var firma1           = document.getElementById('selectfirma1').value;
         var firma2          = document.getElementById('selectfirma2').value;
@@ -313,19 +317,125 @@ $result = mysqli_query($connection, $query);
         window.location.href = url;
     }
     function printQR(imageSrc) {
-        const w = window.open('', '_blank');
-        w.document.write('<html><head><title>Tisk QR kódu</title></head><body>');
-        w.document.write('<img src="' + imageSrc + '" style="width:300px;height:300px;">');
-        w.document.write('</body></html>');
-        w.document.close();
+    const w = window.open('', '_blank', 'width=600,height=600');
+
+    if (!w) {
+        alert('Prohlížeč zablokoval vyskakovací okno.');
+        return;
+    }
+
+    w.document.write(`
+        <!DOCTYPE html>
+        <html lang="cs">
+        <head>
+            <meta charset="UTF-8">
+            <title>Tisk QR kódu</title>
+
+            <style>
+                @page {
+                    size: 50mm 50mm;
+                    margin: 0;
+                }
+
+                html,
+                body {
+                    width: 50mm;
+                    height: 50mm;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                body {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                img {
+                    width: 40mm;
+                    height: 40mm;
+                    display: block;
+                }
+            </style>
+        </head>
+
+        <body>
+            <img id="qr-image" src="${imageSrc}" alt="QR kód">
+        </body>
+        </html>
+    `);
+
+    w.document.close();
+
+    const image = w.document.getElementById('qr-image');
+
+    image.onload = function () {
+        w.focus();
         w.print();
-    }
-    function skryvaniQR() {
-        var cells = document.querySelectorAll('.bunkaQR');
-        cells.forEach(function(cell) {
-            cell.style.display = (cell.style.display === 'none') ? '' : 'none';
-        });
-    }
+    };
+
+    image.onerror = function () {
+        alert('QR kód se nepodařilo načíst.');
+        w.close();
+    };
+}
+
+function openQRLabelPDF(imageSrc) {
+    const labelWidth = 62;   // šířka štítku v mm
+    const labelHeight = 35;  // výška štítku v mm
+
+    const qrSize = 24;       // velikost jednoho QR kódu v mm
+    const gap = 4;           // mezera mezi QR kódy v mm
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: [labelWidth, labelHeight],
+        compress: true
+    });
+
+    // Celková šířka obou QR kódů včetně mezery
+    const totalWidth = (qrSize * 2) + gap;
+
+    // Vystředění celé dvojice na štítku
+    const startX = (labelWidth - totalWidth) / 2;
+    const y = (labelHeight - qrSize) / 2;
+
+    // Levý QR kód
+    pdf.addImage(
+        imageSrc,
+        'PNG',
+        startX,
+        y,
+        qrSize,
+        qrSize
+    );
+
+    // Pravý QR kód
+    pdf.addImage(
+        imageSrc,
+        'PNG',
+        startX + qrSize + gap,
+        y,
+        qrSize,
+        qrSize
+    );
+
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    window.open(pdfUrl, '_blank');
+
+    setTimeout(function () {
+        URL.revokeObjectURL(pdfUrl);
+    }, 60000);
+}
+
+
+
+
 let reloadInProgress = false;
 let autoReloadEnabled = false;
 
@@ -604,8 +714,8 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         filtryToggle.textContent = jsouOtevrene
-            ? 'Skrýt filtry'
-            : 'Zobrazit filtry';
+            ? 'SKRÝT FILTRY'
+            : 'ZOBRAZIT FILTRY';
     }
 
     filtryToggle.addEventListener('click', () => {
@@ -672,20 +782,20 @@ include("phpqrcode/qrlib.php");
     <div class="horni-segment horni-segment-akce">
         <?php if ($prihlasenOpravneni <= 2): ?>
             <input
-                class="zaoblene-tlacitko"
+                class="zaoblene-tlacitko-oranzove"
                 type="button"
                 value="NOVÁ POLOŽKA"
-                onmouseover="this.style.backgroundColor='grey';"
-                onmouseout="this.style.backgroundColor='lightgrey';"
+                onmouseover="this.style.backgroundColor='darkorange';"
+                onmouseout="this.style.backgroundColor='orange';"
                 onclick="window.open('Auta-edit.php?polozka=nova', '_blank');"
             >
 
             <input
-                class="zaoblene-tlacitko"
+                class="zaoblene-tlacitko-oranzove"
                 type="button"
                 value="IMPORT"
-                onmouseover="this.style.backgroundColor='grey';"
-                onmouseout="this.style.backgroundColor='lightgrey';"
+                onmouseover="this.style.backgroundColor='darkorange';"
+                onmouseout="this.style.backgroundColor='orange';"
                 onclick="window.open('Auta-import.php', '_blank');"
             >
         <?php endif; ?>
@@ -733,10 +843,10 @@ include("phpqrcode/qrlib.php");
                   </button>
                   <input
                     type="button"
-                    class="zaoblene-tlacitko"
-                    value="Hledej vše"
-                    onmouseover="this.style.backgroundColor='grey';"
-                    onmouseout="this.style.backgroundColor='lightgrey';"
+                    class="zaoblene-tlacitko-zelene"
+                    value="HLEDEJ VŠE"
+                    onmouseover="this.style.backgroundColor='darkgreen';"
+                    onmouseout="this.style.backgroundColor='green';"
                     onclick="window.location.replace('Auta-main.php?stranka=1');"
                   >
                 </div>
@@ -990,7 +1100,7 @@ $queryString = http_build_query($queryParams);
         <th>Jezdec</th>
         <th>Rok <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=rok'\">";?></th>
         <th>Cena</th>
-        <th>QR <button onclick="skryvaniQR()">Skrýt/Zobrazit</button></th>
+        <th>QR</th>
         <th>Tisk QR</th>
         <?php if ($prihlasenOpravneni <= 2 ) { echo "<th class='col-edit'>EDIT</th>"; } ?>
     </tr>
@@ -1045,7 +1155,7 @@ $queryString = http_build_query($queryParams);
         if (!file_exists($cestaQRauta)) {
             QRcode::png($row['id'], $cestaQRauta);
         }
-        echo "<td><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\" style=\"display: none;\"></td>";
+        echo "<td><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\"></td>";
         echo "<td>
               <button
                 type='button'
@@ -1053,7 +1163,7 @@ $queryString = http_build_query($queryParams);
                 title='Tisk QR'
                 onmouseover=\"this.style.backgroundColor='grey';\"
                 onmouseout=\"this.style.backgroundColor='lightgrey';\"
-                onclick=\"printQR('{$cestaQRauta}')\"
+                onclick=\"openQRLabelPDF('{$cestaQRauta}')\"
               >🖨</button>
               </td>";
 
