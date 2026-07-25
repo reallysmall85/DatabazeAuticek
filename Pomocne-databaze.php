@@ -39,7 +39,7 @@ if ($opravneni > 2) {
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="desktop-styly.css">
+	<link rel="stylesheet" href="desktop-styly.css?v=<?php echo filemtime(__DIR__ . '/desktop-styly.css'); ?>">
     
     <title>Pomocne databaze</title>
     

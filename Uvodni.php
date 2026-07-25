@@ -13,7 +13,7 @@ if (!isset($_SESSION['uzivatel'])) {
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="desktop-styly.css">
+	<link rel="stylesheet" href="desktop-styly.css?v=<?php echo filemtime(__DIR__ . '/desktop-styly.css'); ?>">
 	<title>Uvodni stranka</title>
 
 
@@ -64,16 +64,14 @@ if (isset($_SESSION['uzivatel'])) {
 </table>
 
 
-<table class="tabulka-uvodni" role="presentation">
-<tr>
-  <td>
+<div class="tabulka-uvodni">
     <div class="menu-grid">
-  <div class="tile">
-    <a href="Auta-main.php?stranka=1">
-      <img src="Ikony/seznam.png" alt="Seznam aut">
-      <div>SEZNAM AUT</div>
-    </a>
-  </div>
+      <div class="tile">
+        <a href="Auta-main.php?stranka=1">
+          <img src="Ikony/seznam.png" alt="Seznam aut">
+          <div>SEZNAM AUT</div>
+        </a>
+      </div>
 
   <?php if ($prihlasenOpravneni <= 2): ?>
     <div class="tile">
@@ -90,6 +88,17 @@ if (isset($_SESSION['uzivatel'])) {
       </a>
     </div>
   <?php endif; ?>
+  <?php if ($prihlasenOpravneni > 2): ?>
+    <div class="tile">
+        <img src="Ikony/pozadavky-neaktivni.png" alt="Seznam požadavků">
+        <div><i>položka neaktivní</i></div>
+    </div>
+
+    <div class="tile">
+        <img src="Ikony/pomocne-databaze-neaktivni.png" alt="Pomocné databáze">
+        <div><i>položka neaktivní</i></div>
+    </div>
+  <?php endif; ?>
 
   <div class="tile">
     <a href="Uzivatele.php">
@@ -98,10 +107,7 @@ if (isset($_SESSION['uzivatel'])) {
     </a>
   </div>
 </div>
-  </td>
-</tr>
-
-</table>
+  </div>
 
 
 

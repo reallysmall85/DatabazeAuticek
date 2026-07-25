@@ -11,8 +11,7 @@ error_reporting(E_ALL);
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 1199px)">
-	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 1200px)">
+	<link rel="stylesheet" href="desktop-styly.css?v=<?php echo filemtime(__DIR__ . '/desktop-styly.css'); ?>">
 	<title>Prihlaseni</title>
 
 

@@ -281,8 +281,7 @@ function extrahujFirmyZTextu(?string $text): array {
     <meta charset="UTF-8" />
     <meta name="author" content="martin" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="mobile-styly.css" media="(max-width: 1199px)">
-	<link rel="stylesheet" href="desktop-styly.css" media="(min-width: 1200px)">
+	<link rel="stylesheet" href="desktop-styly.css?v=<?php echo filemtime(__DIR__ . '/desktop-styly.css'); ?>">
     <title>Import tabulky do databáze</title>
     <style>
         .header { margin-bottom: 15px; }
