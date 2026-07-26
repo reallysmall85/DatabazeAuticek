@@ -88,17 +88,17 @@ function zapisDoLogu($textzaznamu) {
 }
 ?>
 
+<div class="horni-fixni-panel" id="horniFixniPanel">
+    <div class="horni-segment horni-segment-navigace">
+        <a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+        <a href="Prihlaseni.php" title="Odhlásit se">
+            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+        </a>
+    </div>
 
-<table class="tabulka-ikony">
-<tr>
-<td>
-<div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
 </div>
-</td>
-</tr>
-</table>
+
+
 
 
 <?php

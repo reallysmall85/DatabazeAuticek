@@ -75,14 +75,14 @@ mysqli_query($connection, "SET CHARACTER SET utf8");
 
 <body>
 
-
+<div class="horni-fixni-panel" id="horniFixniPanel">
 <?php include("phpqrcode/qrlib.php");
 if (isset($_SESSION['uzivatel'])) {
     $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
     $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
     $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
-    echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
+    echo "<div class=\"horni-segment horni-segment-uzivatel\"><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span></div><div>Oprávnění: <span style='color:green;'>";
         switch ($prihlasenOpravneni){
             case 1:
                 echo "admin ";
@@ -101,20 +101,19 @@ if (isset($_SESSION['uzivatel'])) {
                 break;
 
         }
-         echo "</span><a href=\"Zmena-hesla.php\" onclick=\"window.open(this.href, '_blank', 'noopener'); return false;\"><input type=\"button\" name=\"zmenaHesla\" value=\"Změnit heslo\"></a></div></td></tr></table>";
+         echo "</span><a href=\"Zmena-hesla.php\" onclick=\"window.open(this.href, '_blank', 'noopener'); return false;\"><input type=\"button\" name=\"zmenaHesla\" value=\"Změnit heslo\"></a></div></div>";
 
 }
 ?>
-<table class="tabulka-ikony">
-<tr>
-<td>
-<div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+
+    <div class="horni-segment horni-segment-navigace">
+        <a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+        <a href="Prihlaseni.php" title="Odhlásit se">
+            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+        </a>
+    </div>
+
 </div>
-</td>
-</tr>
-</table>
 
 
 <?php

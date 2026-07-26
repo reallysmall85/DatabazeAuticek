@@ -43,36 +43,47 @@ mysqli_query($connection, "SET CHARACTER SET utf8");
 </head>
 <body>
 
+<div class="horni-fixni-panel" id="horniFixniPanel">
 <?php include("phpqrcode/qrlib.php");
 if (isset($_SESSION['uzivatel'])) {
     $prihlasenId        = isset($_SESSION['uzivatel']['id']) ? $_SESSION['uzivatel']['id'] : 1234;
     $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
     $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
-	$prihlasenHeslo = isset($_SESSION['uzivatel']['heslo']) ? $_SESSION['uzivatel']['heslo'] : 'Chyba hesla';
-	echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
-	switch ($prihlasenOpravneni){
-		case 1:
-			echo "admin";
-			break;
-		case 2:
-			echo "moderator";
-			break;
-		case 3:
-			echo "uživatel";
-			break;
-		case 4:
-			echo "veřejnost";
-			break;    
-		default:
-			echo "úrovně č.: " .$prihlasenOpravneni;
-			break;
+    echo "<div class=\"horni-segment horni-segment-uzivatel\"><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span></div><div>Oprávnění: <span style='color:green;'>";
+        switch ($prihlasenOpravneni){
+            case 1:
+                echo "admin ";
+                break;
+            case 2:
+                echo "moderator ";
+                break;
+            case 3:
+                echo "uživatel ";
+                break;
+            case 4:
+                echo "veřejnost ";
+                break;    
+            default:
+                echo "úrovně č.: " .$prihlasenOpravneni;
+                break;
 
-	}
-	 echo "</span></div></td></tr></table>";
+        }
+         echo "</span></div></div>";
 
 }
+?>
 
+    <div class="horni-segment horni-segment-navigace">
+        <a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+        <a href="Prihlaseni.php" title="Odhlásit se">
+            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+        </a>
+    </div>
+
+</div>
+
+<?php
 function zapisDoLogu($textzaznamu) {
     // složka pro logy
     $logDir = __DIR__ . '/Logy';
@@ -110,20 +121,7 @@ function zapisDoLogu($textzaznamu) {
 $vypisDatUzivatele=mysqli_query($connection, "SELECT * FROM autauzivatele WHERE id='$prihlasenId'");
 		$nactenaDataUzivatele = mysqli_fetch_array($vypisDatUzivatele);
 
-?>
 
-<table class="tabulka-ikony">
-<tr>
-<td>
-<div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
-</div>
-</td>
-</tr>
-</table>
-
-<?php
 
 
 if ($_REQUEST["potvrzeni"]){
