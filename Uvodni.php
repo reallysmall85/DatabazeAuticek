@@ -38,7 +38,7 @@ if (isset($_SESSION['uzivatel'])) {
         
 
         <a href="Prihlaseni.php" title="Odhlásit se">
-            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+            <img width="50" height="50" src="Ikony/Logout.png" alt="Odhlásit se">
         </a>
     </div>
 

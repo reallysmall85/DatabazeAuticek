@@ -302,19 +302,7 @@ if (isset($_SESSION['uzivatel'])) {
     $prihlasenPrijmeni  = $_SESSION['uzivatel']['prijmeni']  ?? 'Příjmení';
     $prihlasenOpravneni = $_SESSION['uzivatel']['opravneni'] ?? 4;
 
-    if ($prihlasenOpravneni <= 2 ){
-        echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
-        switch ($prihlasenOpravneni){
-            case 1:  echo "admin"; break;
-            case 2:  echo "moderator"; break;
-            case 3:  echo "uživatel"; break;
-            case 4:  echo "veřejnost"; break;    
-            default: echo "úrovně č.: " .$prihlasenOpravneni; break;
-        }
-        echo "</span></div></td></tr></table>";
-    } else {
-        header("Location: Prihlaseni.php");
-    }
+    
 }
 
 function zapisDoLogu($textzaznamu) {
@@ -329,22 +317,22 @@ function zapisDoLogu($textzaznamu) {
 }
 ?>
 
-<table class="tabulka-ikony">
-<tr><td><div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" title="Zpět na úvodní stránku"></a>
-</div></td></tr>
-</table>
-<table class="tabulka-ikony">
-    <tr>
-        <td>
-            <div style="margin-top: 2px; margin-bottom: 2px">
-            <input type="button" class="zaoblene-tlacitko" value="Zavřít tuto stránku" onmouseover="this.style.backgroundColor='grey';" onmouseout="this.style.backgroundColor='lightgrey';" onclick="window.close();">
-            </div>
-        </td>
-    </tr>
-</table>
+<div class="horni-fixni-panel" id="horniFixniPanel">
+    <div class="horni-segment horni-segment-navigace">
+        <a href="Uvodni.php"><img width="50" height="50" src="Ikony/Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+        <a href="Prihlaseni.php" title="Odhlásit se">
+            <img width="50" height="50" src="Ikony/Logout.png" alt="Odhlásit se">
+        </a>
+    </div>
 
+
+
+<div class="horni-segment horni-segment-import">
+   
+            <input type="button" class="zaoblene-tlacitko" value="Zavřít tuto stránku" onmouseover="this.style.backgroundColor='grey';" onmouseout="this.style.backgroundColor='lightgrey';" onclick="window.close();">
+
+</div>
+</div>
 
 
 <table class="tabulka-import">

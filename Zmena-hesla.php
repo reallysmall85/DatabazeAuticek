@@ -75,9 +75,9 @@ if (isset($_SESSION['uzivatel'])) {
 ?>
 
     <div class="horni-segment horni-segment-navigace">
-        <a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+        <a href="Uvodni.php"><img width="50" height="50" src="Ikony/Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
         <a href="Prihlaseni.php" title="Odhlásit se">
-            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+            <img width="50" height="50" src="Ikony/Logout.png" alt="Odhlásit se">
         </a>
     </div>
 

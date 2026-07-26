@@ -470,31 +470,7 @@ if (isset($_SESSION['uzivatel'])) {
     $prihlasenJmeno     = isset($_SESSION['uzivatel']['jmeno']) ? $_SESSION['uzivatel']['jmeno'] : 'Jméno';
     $prihlasenPrijmeni  = isset($_SESSION['uzivatel']['prijmeni']) ? $_SESSION['uzivatel']['prijmeni'] : 'Příjmení';
     $prihlasenOpravneni = isset($_SESSION['uzivatel']['opravneni']) ? $_SESSION['uzivatel']['opravneni'] : 4;
-    if ($prihlasenOpravneni <= 2){
-        echo "<table class=\"tabulka-prihlasen\"><tr><td><div>Přihlášen: <span style='color:green;'>".$prihlasenJmeno." ".$prihlasenPrijmeni."</span> s oprávněním: <span style='color:green;'>";
-        switch ($prihlasenOpravneni){
-            case 1:
-                echo "admin";
-                break;
-            case 2:
-                echo "moderator";
-                break;
-            case 3:
-                echo "uživatel";
-                break;
-            case 4:
-                echo "veřejnost";
-                break;    
-            default:
-                echo "úrovně č.: " .$prihlasenOpravneni;
-                break;
-
-        }
-        echo "</span></div></td></tr></table>";
-    }
-    else {
-        header("Location: Prihlaseni.php");
-    }
+    
    
 
 }
@@ -534,16 +510,15 @@ function zapisDoLogu($textzaznamu) {
 ?>
 
 
-<table class="tabulka-ikony">
-<tr>
-<td>
-<div>
-<a href="Prihlaseni.php"><img width="50" height="50" src="Logout.png" name="Prihlasovaci stranka" title="Odhlásit se"></a>
-<a href="Uvodni.php"><img width="50" height="50" src="Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+<div class="horni-fixni-panel" id="horniFixniPanel">
+    <div class="horni-segment horni-segment-navigace">
+        <a href="Uvodni.php"><img width="50" height="50" src="Ikony/Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
+        <a href="Prihlaseni.php" title="Odhlásit se">
+            <img width="50" height="50" src="Ikony/Logout.png" alt="Odhlásit se">
+        </a>
+    </div>
+
 </div>
-</td>
-</tr>
-</table>
 
 
 <?php

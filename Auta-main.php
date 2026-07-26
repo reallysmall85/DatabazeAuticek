@@ -1070,11 +1070,11 @@ $queryString = http_build_query($queryParams);
     </div>
     <div class="horni-segment horni-segment-navigace">
         <a href="Uvodni.php" title="Zpět na úvodní stránku">
-            <img width="50" height="50" src="Home.png" alt="Domů">
+            <img width="50" height="50" src="Ikony/Home.png" alt="Domů">
         </a>
 
         <a href="Prihlaseni.php" title="Odhlásit se">
-            <img width="50" height="50" src="Logout.png" alt="Odhlásit se">
+            <img width="50" height="50" src="Ikony/Logout.png" alt="Odhlásit se">
         </a>
     </div>
 
