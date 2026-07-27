@@ -991,6 +991,37 @@ img { max-width: 100%; height: auto; }
     pointer-events: none;
 }
 
+.horni-fixni-panel > .horni-segment {
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+/* Levá část panelu */
+.horni-fixni-panel > .horni-segment-akce,
+.horni-fixni-panel > .horni-segment-uzivatel,
+.horni-fixni-panel > .horni-segment-import {
+    grid-column: 1;
+    justify-self: start;
+}
+
+/* Prostřední část panelu */
+.horni-fixni-panel > .horni-segment-hledani {
+    grid-column: 2;
+    justify-self: stretch;
+    width: 100%;
+    min-width: 0;
+}
+
+/* Pravá část panelu */
+.horni-fixni-panel > .horni-segment-navigace {
+    grid-column: 3;
+    justify-self: end;
+}
+
+
 .horni-segment {
     box-sizing: border-box;
     background: #fff;
@@ -1065,35 +1096,39 @@ img { max-width: 100%; height: auto; }
 /* Tablet a menší notebook */
 @media (max-width: 1600px) {
 
-    .horni-fixni-panel {
-        grid-template-columns: 1fr auto;
+    .horni-fixni-panel:has(> .horni-segment-hledani) {
+        grid-template-columns: minmax(0, 1fr) auto;
         grid-template-areas:
-            "akce navigace"
+            "leva navigace"
             "hledani hledani";
 
         align-items: start;
     }
 
-    .horni-segment-akce {
-        grid-area: akce;
-
+    .horni-fixni-panel:has(> .horni-segment-hledani)
+    > .horni-segment-akce {
+        grid-area: leva;
         min-width: 0;
         justify-self: start;
     }
 
-    .horni-segment-navigace {
+    .horni-fixni-panel:has(> .horni-segment-hledani)
+    > .horni-segment-navigace {
         grid-area: navigace;
-
         min-width: 0;
         justify-self: end;
     }
 
-    .horni-segment-hledani {
+    .horni-fixni-panel:has(> .horni-segment-hledani)
+    > .horni-segment-hledani {
         grid-area: hledani;
+        grid-column: 1 / -1;
 
+        box-sizing: border-box;
         width: 100%;
         min-width: 0;
-        max-width: 100%;
+        max-width: none;
+
         justify-self: stretch;
     }
 
@@ -1116,14 +1151,128 @@ img { max-width: 100%; height: auto; }
 
 @media (max-width: 700px) {
 
+    /* =====================================================
+       3 SEGMENTY: akce + hledání + navigace
+       ===================================================== */
+
+    .horni-fixni-panel:has(> .horni-segment-hledani) {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "navigace"
+            "akce"
+            "hledani";
+
+        gap: 5px;
+    }
+
+    .horni-fixni-panel:has(> .horni-segment-hledani)
+    > .horni-segment-navigace {
+        grid-area: navigace;
+        grid-column: 1;
+
+        justify-self: end;
+        justify-content: flex-end;
+    }
+
+    .horni-fixni-panel:has(> .horni-segment-hledani)
+    > .horni-segment-akce {
+        grid-area: akce;
+        grid-column: 1;
+
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+
+        white-space: normal;
+    }
+
+    .horni-fixni-panel:has(> .horni-segment-hledani)
+    > .horni-segment-hledani {
+        grid-area: hledani;
+        grid-column: 1;
+
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+
+
+    /* =====================================================
+       2 SEGMENTY: první vlevo, druhý vpravo
+       ===================================================== */
+
+    .horni-fixni-panel:not(:has(> .horni-segment-hledani)):has(
+    > .horni-segment:nth-child(2):last-child
+) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "leva prava";
+    align-items: start;
+}
+
+.horni-fixni-panel:not(:has(> .horni-segment-hledani)):has(
+    > .horni-segment:nth-child(2):last-child
+) > .horni-segment:first-child {
+    grid-area: leva;
+    grid-column: 1;
+    justify-self: start;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+}
+
+.horni-fixni-panel:not(:has(> .horni-segment-hledani)):has(
+    > .horni-segment:nth-child(2):last-child
+) > .horni-segment:last-child {
+    grid-area: prava;
+    grid-column: 2;
+    justify-self: end;
+    min-width: 0;
+}
+
+
+    /* =====================================================
+       1 SEGMENT: vždy úplně vpravo
+       ===================================================== */
+
+    .horni-fixni-panel:has(> .horni-segment:only-child) {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: ". prava";
+    }
+
+    .horni-fixni-panel > .horni-segment:only-child {
+        grid-area: prava;
+        grid-column: 2;
+
+        justify-self: end;
+    }
+
+
+    /* =====================================================
+       VNITŘEK VYHLEDÁVÁNÍ
+       ===================================================== */
+
+    .search-main {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        min-width: 0;
+    }
+
     .search-main label {
         width: 100%;
     }
 
     .search-main .search-input {
         flex: 1 1 100%;
+        box-sizing: border-box;
         width: 100%;
         min-width: 0;
+        max-width: none;
     }
 
     .filtry-tlacitko {
@@ -1131,11 +1280,10 @@ img { max-width: 100%; height: auto; }
     }
 
     .actions {
+        display: flex;
         flex: 1 1 100%;
+        flex-wrap: wrap;
         width: 100%;
-    }
-
-    .horni-segment-navigace {
-        justify-content: flex-end;
+        min-width: 0;
     }
 }
