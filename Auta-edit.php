@@ -642,6 +642,7 @@ echo "<form method=\"post\" action=\"Auta-edit.php?polozka=".$polozka."\" name=\
 
 # -----------NADPIS----------
 
+echo "<div class=\"hlavnitabulkaeditace-wrap\">";
 echo "<table class=\"hlavnitabulkaeditace\">";
 echo "<tr>";
 echo "<th colspan=\"4\">EDITACE ZÁZNAMU (vytvořen: ". $nalezHledaniAut['pridano'] .")</th>";
@@ -1155,7 +1156,8 @@ echo "<div align=\"right\"><input type=\"Submit\" class=\"zaoblene-tlacitko-zele
 	
     </td>
     </tr>
-    <table>
+</table>
+</div>
 		
 </form>
 <?php
