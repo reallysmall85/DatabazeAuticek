@@ -443,59 +443,108 @@ if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
 
-function safeReload(reason = '') {
-
-  // Během načítání a obnovování pozice reload nepovolíme
-  if (!autoReloadEnabled) {
-    return;
-  }
-
-  // Zabrání vícenásobnému reloadu
-  if (reloadInProgress) {
-    return;
-  }
-
-  reloadInProgress = true;
-
-  // Uložit pozici celé stránky
-  sessionStorage.setItem(
-    'pageScrollY',
-    String(window.scrollY)
-  );
-
-  // Uložit pozici scrollu tabulky
-  const wrap = document.querySelector('.hlavnitabulka-wrap');
-
-  if (wrap) {
-    sessionStorage.setItem(
-      'tableScrollTop',
-      String(wrap.scrollTop)
-    );
+function saveCurrentPosition() {
 
     sessionStorage.setItem(
-      'tableScrollLeft',
-      String(wrap.scrollLeft)
+        'pageScrollY',
+        String(window.scrollY)
     );
-  }
 
-  // Označení, že po reloadu chceme obnovit pozici
-  sessionStorage.setItem('restoreScroll', '1');
+    const wrap = document.querySelector('.hlavnitabulka-wrap');
 
-  location.reload();
+    if (wrap) {
+        sessionStorage.setItem(
+            'tableScrollTop',
+            String(wrap.scrollTop)
+        );
+
+        sessionStorage.setItem(
+            'tableScrollLeft',
+            String(wrap.scrollLeft)
+        );
+    }
+
+    sessionStorage.setItem('restoreScroll', '1');
 }
+
+
+function safeReload(
+    reason = '',
+    force = false,
+    useSavedPosition = false
+) {
+
+    if (!force && !autoReloadEnabled) {
+        return;
+    }
+
+    if (reloadInProgress) {
+        return;
+    }
+
+    reloadInProgress = true;
+
+    /*
+     * Při běžném reloadu pozici uložíme nyní.
+     * Při mazání použijeme pozici uloženou před otevřením okna.
+     */
+    if (!useSavedPosition) {
+        saveCurrentPosition();
+    } else {
+        sessionStorage.setItem('restoreScroll', '1');
+    }
+
+    location.reload();
+}
+
+window.addEventListener('message', function (event) {
+
+    if (event.origin !== window.location.origin) {
+        return;
+    }
+
+    if (
+        !event.data ||
+        event.data.type !== 'auta-data-changed'
+    ) {
+        return;
+    }
+
+    deleteWindowOpen = false;
+
+    if (deleteWindowCheck !== null) {
+        window.clearInterval(deleteWindowCheck);
+        deleteWindowCheck = null;
+    }
+
+    safeReload(
+        event.data.action || 'edit-window',
+        true,
+        true
+    );
+});
 
 
 // 1) Návrat do karty
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    safeReload('visibility');
-  }
+
+    if (
+        document.visibilityState === 'visible' &&
+        !deleteWindowOpen
+    ) {
+        safeReload('visibility');
+    }
+
 });
 
 
 // 2) Focus okna
 window.addEventListener('focus', () => {
-  safeReload('focus');
+
+    if (!deleteWindowOpen) {
+        safeReload('focus');
+    }
+
 });
 
 
@@ -518,11 +567,65 @@ window.addEventListener('online', () => {
   safeReload('online');
 });
 
-    function dotazkmazani(id){
-        if (window.confirm("Opravdu chcete smazat záznam?")) {
-            window.open('Auta-edit.php?polozka=' + id + '&smazpolozku=1', '_blank');
-        }
+    let deleteWindowOpen = false;
+let deleteWindowCheck = null;
+
+function dotazkmazani(id) {
+
+    if (!window.confirm("Opravdu chcete smazat záznam?")) {
+        return;
     }
+
+    /*
+     * Pozici uložíme ještě před otevřením nové karty,
+     * kdy je hlavní stránka aktivní.
+     */
+    saveCurrentPosition();
+
+    deleteWindowOpen = true;
+
+    const editWindow = window.open(
+        'Auta-edit.php?polozka=' +
+            encodeURIComponent(id) +
+            '&smazpolozku=1',
+        '_blank'
+    );
+
+    if (!editWindow) {
+        deleteWindowOpen = false;
+
+        window.alert(
+            'Prohlížeč zablokoval otevření okna.'
+        );
+
+        return;
+    }
+
+    /*
+     * Pojistka pro případ, že postMessage nebude doručeno.
+     */
+    deleteWindowCheck = window.setInterval(function () {
+
+        if (!editWindow.closed) {
+            return;
+        }
+
+        window.clearInterval(deleteWindowCheck);
+        deleteWindowCheck = null;
+
+        if (!reloadInProgress) {
+            deleteWindowOpen = false;
+
+            safeReload(
+                'delete-window-closed',
+                true,
+                true
+            );
+        }
+
+    }, 300);
+}
+
     (function () {
       function addToken(inputId, token) {
         var inp = document.getElementById(inputId);
@@ -1216,7 +1319,20 @@ for ($a = 1; $a <= $totalPages; $a++) {
         echo "<input type='button' value='{$a}' style='background-color: darkgrey; color: orange; border: 1px solid black; padding: 8px; cursor: pointer;'
       onmouseover=\"this.style.color='darkorange';\" onmouseout=\"this.style.color='orange';\" 
       onclick=\"window.location.href='Auta-main.php?{$queryString}'\">";
-    } else {
+    } 
+    elseif (
+    ($a != 1) &&
+    ($a != $totalPages) &&
+    (($a < ($stranka - 10)) || ($a > ($stranka + 10)))
+) {
+    echo "<div
+        style=\"display:inline-block; cursor:pointer;\"
+        onclick=\"window.location.href='Auta-main.php?{$queryString}'\"
+        onmouseover=\"this.textContent='{$a}'\"
+        onmouseout=\"this.textContent='.'\"
+    >.</div>";
+}
+    else {
         echo "<input type='button' value='{$a}' style='background-color: grey; color: white; border: none; padding: 5px; cursor: pointer;'
       onmouseover=\"this.style.color='orange';\" onmouseout=\"this.style.color='white';\" 
       onclick=\"window.location.href='Auta-main.php?{$queryString}'\">";

@@ -512,6 +512,7 @@ function zapisDoLogu($textzaznamu) {
 
 <div class="horni-fixni-panel" id="horniFixniPanel">
     <div class="horni-segment horni-segment-navigace">
+        <img width="50" height="50" src="Ikony/Back.png" title="Zpět na seznam" style="cursor: pointer;" onclick="window.close();">
         <a href="Uvodni.php"><img width="50" height="50" src="Ikony/Home.png" name="Uvodni stranka" title="Zpět na úvodní stránku"></a>
         <a href="Prihlaseni.php" title="Odhlásit se">
             <img width="50" height="50" src="Ikony/Logout.png" alt="Odhlásit se">
@@ -564,20 +565,55 @@ if (isset($_REQUEST["uloz"])) {
 
 }
 
-elseif (isset($_REQUEST["smaz"]) || isset($_GET['smazpolozku'])){
+elseif (
+    isset($_REQUEST["smaz"]) ||
+    isset($_GET["smazpolozku"])
+) {
+    $potvrzenoFormularem =
+        isset($_REQUEST["potvrzeniMazani"]) &&
+        $_REQUEST["potvrzeniMazani"] === "potvrzeno";
 
-	if (($_REQUEST["potvrzeniMazani"] == "potvrzeno") || isset($_GET['smazpolozku'])){
-		Smaz ($polozka, $connection);
-		?><script>window.alert("Mazání bylo úspěšně provedeno.");</script>
-		<?php
-		echo "<script>window.close();</script>";
-		}
-		else{?><script>window.alert("Mazání bylo zrušeno.");</script>
-		<?php
-		ZobrazeniFormulare ($prihlasenId, $prihlasenOpravneni, $polozka, $connection);
-		}	
+    $smazaniPresOdkaz =
+        isset($_GET["smazpolozku"]);
 
+    if ($potvrzenoFormularem || $smazaniPresOdkaz) {
 
+        Smaz($polozka, $connection);
+        ?>
+
+        <script>
+            window.alert("Mazání bylo úspěšně provedeno.");
+
+            if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(
+                    {
+                        type: 'auta-data-changed',
+                        action: 'delete',
+                        id: <?php echo json_encode((string)$polozka); ?>
+                    },
+                    window.location.origin
+                );
+            }
+
+            window.close();
+        </script>
+
+        <?php
+    } else {
+        ?>
+
+        <script>
+            window.alert("Mazání bylo zrušeno.");
+        </script>
+
+        <?php
+        ZobrazeniFormulare(
+            $prihlasenId,
+            $prihlasenOpravneni,
+            $polozka,
+            $connection
+        );
+    }
 }
 
 else{

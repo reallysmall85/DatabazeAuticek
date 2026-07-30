@@ -1,3 +1,14 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
 
         body {
             width: 100%;
@@ -994,7 +1005,7 @@ img { max-width: 100%; height: auto; }
     grid-template-columns:
         minmax(120px, 1fr)
         minmax(320px, 1100px)
-        minmax(120px, 1fr);
+        minmax(180px, 1fr);
     align-items: start;
     gap: 8px;
 
@@ -1145,6 +1156,7 @@ img { max-width: 100%; height: auto; }
 
         justify-self: stretch;
     }
+    
 
     .search-main {
         flex-wrap: wrap;
