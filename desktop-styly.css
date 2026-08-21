@@ -1337,10 +1337,12 @@ img { max-width: 100%; height: auto; }
 
 
 .pomocna-databaze {
+    
     display: inline-block;
     vertical-align: top;
     margin: 10px;
     padding: 10px;
+    padding-bottom: 60px;
 
     background: rgba(255,255,255,0.95);
 
@@ -1374,9 +1376,6 @@ img { max-width: 100%; height: auto; }
     padding-top: 12px;
 }
 
-.pomocne-ulozit {
-    margin: 20px 10px;
-}
 
 .ulozeno-hlaska {
     margin: 10px;
@@ -1387,4 +1386,16 @@ img { max-width: 100%; height: auto; }
 
     background: white;
     border-radius: 6px;
+}
+
+.pomocna-popis-nacti {
+    width: 300px;
+    max-width: 300px;
+    min-width: 300px;
+
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    line-height: 1.3;
 }

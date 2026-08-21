@@ -645,6 +645,8 @@ function vypisPomocnouDatabazi(
                 name=\"" . $smazatTlacitkoNazev . "\"
                 value=\"" . $id . "\"
                 class=\"zaoblene-tlacitko-cervene\"
+                onmouseover=\"this.style.backgroundColor='darkred';\"
+                onmouseout=\"this.style.backgroundColor='red';\"
                 onclick=\"return confirm('Opravdu chcete tuto položku smazat?');\"
               >
                 DEL
@@ -684,6 +686,8 @@ function vypisPomocnouDatabazi(
             name=\"" . $pridatTlacitkoNazev . "\"
             value=\"1\"
             class=\"zaoblene-tlacitko\"
+            onmouseover=\"this.style.backgroundColor='grey';\"
+            onmouseout=\"this.style.backgroundColor='lightgrey';\"
           >
             PŘIDAT
           </button>";
@@ -702,9 +706,9 @@ if ($tabulka === "autafirmy") {
 
     echo "<tr class=\"pomocna-nacist-vse\">";
 
-    echo "<td>
-            Načíst všechny výskyty v databázi
-          </td>";
+   echo "<td class=\"pomocna-popis-nacti\">
+        Pokud v seznamu výše něco z firem chybí a v celkové databázi aut to je, dej Načti
+      </td>";
 
     echo "<td>
             <button
@@ -712,6 +716,8 @@ if ($tabulka === "autafirmy") {
                 name=\"nacistvsechnyfirmy\"
                 value=\"1\"
                 class=\"zaoblene-tlacitko\"
+                onmouseover=\"this.style.backgroundColor='grey';\"
+                onmouseout=\"this.style.backgroundColor='lightgrey';\"
                 onclick=\"return confirm('Načíst všechny chybějící firmy z databáze aut?');\"
             >
                 NAČTI
@@ -834,13 +840,15 @@ vypisPomocnouDatabazi(
 
 ?>
 
-<div class="pomocne-ulozit">
+<div class="spodni-strankovani">
 
     <button
         type="submit"
         name="ulozitpomocne"
         value="1"
-        class="zaoblene-tlacitko"
+        class="zaoblene-tlacitko-zelene"
+        onmouseover="this.style.backgroundColor='darkgreen';"
+        onmouseout="this.style.backgroundColor='green';"
     >
         ULOŽIT ZMĚNY
     </button>
