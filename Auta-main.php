@@ -1258,7 +1258,7 @@ $queryString = http_build_query($queryParams);
         if (!file_exists($cestaQRauta)) {
             QRcode::png($row['id'], $cestaQRauta);
         }
-        echo "<td><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\"></td>";
+        echo "<td class=\"bunkaQR-obal\"><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\"></td>";
         echo "<td>
               <button
                 type='button'

@@ -45,6 +45,8 @@ textarea {
 
     box-sizing: border-box;
 
+    padding-bottom: 60px;
+
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     
@@ -220,15 +222,34 @@ textarea {
 }
 
 
-/* QR je standardně skrytý */
-.hlavnitabulka .bunkaQR {
-    display: none;
-    width: 100%;
-    max-width: 100px;
-    height: auto;
+/* Buňka slouží pouze jako kotevní bod pro QR */
+.hlavnitabulka .bunkaQR-obal {
+    position: relative;
+    overflow: visible;
 }
 
-/* Po najetí na řádek se zobrazí pouze jeho QR */
+/* QR je standardně skrytý a neovlivňuje výšku řádku */
+.hlavnitabulka .bunkaQR {
+    display: none;
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 100px;
+    height: 100px;
+
+    background: white;
+    padding: 3px;
+    box-sizing: content-box;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+
+    z-index: 100;
+}
+
+/* Po najetí na řádek QR zobraz */
 .hlavnitabulka tbody tr:hover .bunkaQR {
     display: block;
 }

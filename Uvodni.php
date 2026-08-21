@@ -17,7 +17,13 @@ if (!isset($_SESSION['uzivatel'])) {
 	<title>Uvodni stranka</title>
 
 
-	 
+	  <link rel="preload" as="image" href="Ikony/Logout.png">
+    <link rel="preload" as="image" href="Ikony/seznam.png">
+    <link rel="preload" as="image" href="Ikony/pozadavky.png">
+    <link rel="preload" as="image" href="Ikony/pomocne-databaze.png">
+    <link rel="preload" as="image" href="Ikony/pozadavky-neaktivni.png">
+    <link rel="preload" as="image" href="Ikony/pomocne-databaze-neaktivni.png">
+    <link rel="preload" as="image" href="Ikony/uzivatele.png">
 
 
 </head>
