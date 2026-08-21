@@ -8,13 +8,7 @@ if (!isset($_SESSION['uzivatel'])) {
 }
 
 // 2) Připojení k databázi (mysqli)
-include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
-
-$connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
-if (!$connection) {
-    die("Nepodařilo se připojit k databázi: " . mysqli_connect_error());
-}
-mysqli_set_charset($connection, "utf8");
+require_once __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
 // Získání filtrů z GET parametrů
 $firmaFilter  = $_GET['firma1']   ?? '';

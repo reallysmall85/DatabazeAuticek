@@ -9,13 +9,7 @@ if (!isset($_SESSION['uzivatel'])) {
 }
 
 // 2) Připojení k databázi (mysql­i)
-include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
-
-$connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
-if (!$connection) {
-    die("Nepodařilo se připojit k databázi: " . mysqli_connect_error());
-}
-mysqli_set_charset($connection, "utf8");
+require_once __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
 // 3) Kontrola oprávnění
 $opravneni = isset($_SESSION['uzivatel']['opravneni']) 

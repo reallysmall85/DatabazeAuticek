@@ -1,12 +1,6 @@
 <?php
 // Připojení k databázi (mysqli)
-include __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
-
-$connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
-if (!$connection) {
-    die("Nepodařilo se připojit k databázi: " . mysqli_connect_error());
-}
-mysqli_set_charset($connection, "utf8");
+require_once __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
 // Načtení aktivních druhů vstupenek
 $vstupenky = [];

@@ -21,21 +21,7 @@ if (!isset($_SESSION['uzivatel'])) {
 
 #Pripojeni souboru s pripojovacimi daty k databazi. Diky tomu, ze je to v PHP to nikdo nemuze cist pres WEB.
 
-include ("Pripojeni/pripojeniDatabaze.php");
-
-
-
-// Create a database connection
-$connection = mysqli_connect(SQL_HOST, SQL_USERNAME, SQL_PASSWORD, SQL_DBNAME);
-
-// Check if the connection was successful
-if (!$connection) {
-    die("Database connection failed: " . mysqli_connect_error());
-}
-
-mysqli_query($connection, "SET CHARACTER SET utf8");
-
-#Ten set character set utf8 zajisti, ze se bude v databazi (phpmyadminu) dobre zobrazovat diakritika.
+require_once __DIR__ . "/Pripojeni/pripojeniDatabaze.php";
 
 ?>
 
