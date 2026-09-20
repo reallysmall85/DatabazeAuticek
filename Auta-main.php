@@ -38,14 +38,14 @@ $limit  = 100;
 $offset = ($stranka - 1) * $limit;
 
 // Počet záznamů
-$countResult   = mysqli_query($connection, $countQuery);
+$countResult   = autaProvestDotaz($connection, $countQuery, $hledaniParametry);
 $countRow      = mysqli_fetch_assoc($countResult);
 $totalRecords  = (int)$countRow['total'];
 $totalPages    = (int)ceil($totalRecords / $limit);
 
 // Data pro stránku
 $query .= " LIMIT $limit OFFSET $offset";
-$result = mysqli_query($connection, $query);
+$result = autaProvestDotaz($connection, $query, $hledaniParametry);
 ?>
 
 <!DOCTYPE html>
@@ -695,7 +695,8 @@ include("phpqrcode/qrlib.php");
                 type="search"
                 class="search-input"
                 name="q"
-                placeholder="Sem zadej klíčová slova (nebo 'duplicity')"
+                placeholder="Zadej výraz k hledání (výraz &quot;XY&quot;:sloupec hledá jen v tomto sloupci), X*Y hledá XY, X Y, X-Y apod."
+                
                 value="<?php echo htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                 autocomplete="off"
               >
@@ -901,7 +902,7 @@ include("phpqrcode/qrlib.php");
 
 <?php
 $queryParams = [];
-if (!empty($searchQuery)) { $queryParams['q'] = $searchQuery; }
+if ($searchQuery !== '') { $queryParams['q'] = $searchQuery; }
 $queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
 if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
     $queryParams['datumod'] = date('Y-m-d', $datumod);
@@ -925,12 +926,15 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
 
 ?>
 
+<?php if ($chybaHledani !== null): ?>
+    <p role="alert"><?php echo htmlspecialchars($chybaHledani, ENT_QUOTES, 'UTF-8'); ?></p>
+<?php endif; ?>
 <div class="prehled-vysledku">
 
     <div class="pocet-nalezu">
         Počet nálezů:
         <b><?php echo $totalRecords; ?></b>
-        <?php if ($prihlasenOpravneni <= 2): ?>
+        <?php if ($prihlasenOpravneni <= 2 && $chybaHledani === null): ?>
             <a class="zaoblene-tlacitko-zelene"
                href="<?php echo htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8'); ?>">
                 Export do Excelu (<?php echo $totalRecords; ?> nálezů)
@@ -1077,7 +1081,7 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
     <div class="strankovani-tlacitka">
         <?php
 $queryParams = [];
-if (!empty($searchQuery)) { $queryParams['q'] = $searchQuery; }
+if ($searchQuery !== '') { $queryParams['q'] = $searchQuery; }
 $queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
 if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
     $queryParams['datumod'] = date('Y-m-d', $datumod);

@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/Auta-hledani.php';
+$hledaniParametry = [];
+$chybaHledani = null;
 // Společná filtrace pro přehled i export; dotaz zde nemá stránkování.
 // Volající předá $connection a $prihlasenOpravneni po ověření přihlášení.
 foreach ($_GET as $hodnotaParametru) {
@@ -193,34 +196,16 @@ if (isset($dupQueryPart)) {
         $where .= " AND (" . implode(" OR ", $or) . ")";
     }
 
-    // ---- Fulltext přes více sloupců s COALESCE ----
-    if (!empty($searchQuery)) {
-        $words = preg_split('/\s+/', trim($searchQuery), -1, PREG_SPLIT_NO_EMPTY);
-        foreach ($words as $word) {
-            $w = mysqli_real_escape_string($connection, $word);
-            $where .= " AND (
-                COALESCE(firma1,'')            LIKE '%$w%' OR 
-                COALESCE(firma2,'')           LIKE '%$w%' OR 
-                COALESCE(cislo,'')            LIKE '%$w%' OR 
-                COALESCE(nazev,'')            LIKE '%$w%' OR 
-                COALESCE(upresneni,'')        LIKE '%$w%' OR 
-                COALESCE(barva1,'')           LIKE '%$w%' OR 
-                COALESCE(barva2,'')           LIKE '%$w%' OR 
-                COALESCE(barva3,'')           LIKE '%$w%' OR 
-                COALESCE(barva4,'')           LIKE '%$w%' OR 
-                COALESCE(barva5,'')           LIKE '%$w%' OR 
-                COALESCE(serie,'')            LIKE '%$w%' OR 
-                COALESCE(zavod,'')            LIKE '%$w%' OR 
-                COALESCE(startovnicislo,'')   LIKE '%$w%' OR 
-                COALESCE(tym,'')              LIKE '%$w%' OR 
-                COALESCE(reklama,'')          LIKE '%$w%' OR 
-                COALESCE(jezdec1,'')          LIKE '%$w%' OR 
-                COALESCE(jezdec2,'')          LIKE '%$w%' OR 
-                COALESCE(jezdec3,'')          LIKE '%$w%' OR 
-                COALESCE(poznamka,'')         LIKE '%$w%' OR 
-                COALESCE(CAST(rok AS CHAR),'') LIKE '%$w%'
-            )";
+    // Slova a fráze se spojují AND, sloupce uvnitř výrazu OR.
+    try {
+        [$hledaniSql, $hledaniParametry] = autaRozebratHledani($searchQuery);
+        if ($hledaniSql !== '') {
+            $where .= ' AND ' . $hledaniSql;
         }
+    } catch (InvalidArgumentException $chyba) {
+        $chybaHledani = $chyba->getMessage();
+        $where .= ' AND 1 = 0';
+        http_response_code(400);
     }
 
     $baseQuery  = "FROM auta $where";

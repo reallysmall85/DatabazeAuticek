@@ -27,8 +27,12 @@ try {
     require_once __DIR__ . '/vendor/autoload.php';
     require __DIR__ . '/Auta-filtry.php';
 
+    if ($chybaHledani !== null) {
+        throw new InvalidArgumentException($chybaHledani);
+    }
+
     // Sdílený dotaz zahrnuje všechny nálezy, bez LIMIT a OFFSET.
-    $result = mysqli_query($connection, $query);
+    $result = autaProvestDotaz($connection, $query, $hledaniParametry);
     if ($result === false) {
         throw new RuntimeException('Nepodařilo se načíst data exportu.');
     }
@@ -103,9 +107,9 @@ try {
 } catch (Throwable $chyba) {
     ob_end_clean();
     error_log('Export aut: ' . $chyba->getMessage());
-    http_response_code(500);
+    http_response_code($chyba instanceof InvalidArgumentException ? 400 : 500);
     header('Content-Type: text/plain; charset=UTF-8');
-    echo 'Export se nepodařilo vytvořit. Zkuste zúžit filtry nebo kontaktujte správce.';
+    echo $chyba instanceof InvalidArgumentException ? $chyba->getMessage() : 'Export se nepodařilo vytvořit. Zkuste zúžit filtry nebo kontaktujte správce.';
 } finally {
     if (is_string($docasnySoubor) && is_file($docasnySoubor)) {
         unlink($docasnySoubor);
