@@ -113,84 +113,7 @@ $result = autaProvestDotaz($connection, $query, $hledaniParametry);
     <meta name="author" content="martin" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	  <link rel="stylesheet" href="desktop-styly.css?v=<?php echo filemtime(__DIR__ . '/desktop-styly.css'); ?>">
-    <style>
-        .horni-segment-hledani .search-form {
-            grid-template-columns: auto minmax(200px, 1fr) max-content max-content;
-            grid-template-areas:
-                "label query search clear"
-                ". . toggle export"
-                "filters filters filters filters";
-            gap: 8px;
-            align-items: center;
-        }
-        .horni-segment-hledani .search-main,
-        .horni-segment-hledani .search-main .actions,
-        .horni-segment-hledani .search-secondary { display: contents; }
-        .horni-segment-hledani .search-main label { grid-area: label; }
-        .horni-segment-hledani .search-main .search-input {
-            grid-area: query;
-            min-width: 0;
-            max-width: none;
-            box-sizing: border-box;
-        }
-        .horni-segment-hledani .actions button[type="submit"] { grid-area: search; }
-        .horni-segment-hledani .actions input[type="button"] { grid-area: clear; }
-        .horni-segment-hledani #filtryToggle {
-            grid-area: toggle;
-            width: auto;
-        }
-        .horni-segment-hledani #filtryDetails {
-            grid-area: filters;
-            min-width: 0;
-        }
-        .horni-segment-hledani .search-secondary a {
-            grid-area: export;
-            color: white;
-            background-color: green;
-        }
-        .horni-segment-hledani .search-secondary a:hover,
-        .horni-segment-hledani .search-secondary a:focus-visible {
-            color: white;
-            background-color: darkgreen;
-        }
-        .horni-segment-hledani .actions button,
-        .horni-segment-hledani .actions input[type="button"],
-        .horni-segment-hledani .search-secondary > * {
-            justify-self: start;
-            margin: 0;
-        }
-        @media (min-width: 1001px) {
-            .horni-segment-hledani .search-main .search-input {
-                /* Z osmi pixelů mezery ponechat u tlačítka jen dva. */
-                width: calc(100% + 2px);
-            }
-        }
-        @media (max-width: 1000px) {
-            .horni-segment-hledani .search-form {
-                grid-template-columns: max-content minmax(0, 1fr);
-                grid-template-areas:
-                    "label query"
-                    "search clear"
-                    "toggle export"
-                    "filters filters";
-            }
-        }
-        .hlavnitabulka th.col-mame, .hlavnitabulka td.col-mame {
-            position: sticky;
-            right: var(--skutecna-sirka-edit, 0px);
-            min-width: 76px;
-            width: 76px;
-            z-index: 8;
-            background: #fff;
-            text-align: center;
-        }
-        .hlavnitabulka thead th.col-mame { z-index: 30; background: #fffaf0; }
-        .hlavnitabulka .mame-ano { color: #16732b; }
-        .hlavnitabulka .mame-ne { color: #c00000; }
-        .hlavnitabulka .tlacitko-mame { font-weight: bold; cursor: pointer; }
-        .hlavnitabulka .tlacitko-mame:disabled { cursor: wait; opacity: .6; }
-        .hlavnitabulka tr.zelenePozadi td { background-color: #f0fff0; }
-    </style>
+
     <title>Databaze aut</title>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
     <script>
@@ -789,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 </head>
-<body>
+<body class="auta-main">
 
 <?php
 include("phpqrcode/qrlib.php");
