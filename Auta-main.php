@@ -1,10 +1,68 @@
 <?php
 session_start();
 
+// AJAX ukládání stavu Máme obsluhuje přímo tato stránka.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akce'] ?? '') === 'ulozit-mame') {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    $odpoved = static function ($status, $data) {
+        http_response_code($status);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        exit;
+    };
+    if (!isset($_SESSION['uzivatel'])) {
+        $odpoved(401, ['chyba' => 'Přihlášení vypršelo. Přihlaste se znovu.']);
+    }
+    if (($_SESSION['uzivatel']['opravneni'] ?? 4) > 2) {
+        $odpoved(403, ['chyba' => 'Nemáte oprávnění měnit stav auta.']);
+    }
+    if (!is_string($_POST['csrf'] ?? null) || !isset($_SESSION['auta_mame_csrf'])
+        || !hash_equals($_SESSION['auta_mame_csrf'], $_POST['csrf'])) {
+        $odpoved(403, ['chyba' => 'Platnost stránky vypršela. Obnovte ji a zkuste to znovu.']);
+    }
+    $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    $mame = $_POST['mame'] ?? null;
+    if (!$id || !in_array($mame, ['ANO', 'NE'], true)) {
+        $odpoved(400, ['chyba' => 'Neplatný požadavek.']);
+    }
+    try {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        require_once __DIR__ . '/Pripojeni/pripojeniDatabaze.php';
+        $stmt = $connection->prepare('SELECT id FROM auta WHERE id = ?');
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->store_result();
+        if ($stmt->num_rows === 0) {
+            $odpoved(404, ['chyba' => 'Auto již v databázi neexistuje.']);
+        }
+        $stmt->close();
+        $stmt = $connection->prepare('UPDATE auta SET mame = ? WHERE id = ?');
+        $stmt->bind_param('si', $mame, $id);
+        $stmt->execute();
+        $stmt->close();
+    } catch (Throwable $e) {
+        error_log('Uložení mame: ' . $e->getMessage());
+        $odpoved(500, ['chyba' => 'Změnu se nepodařilo uložit. Zkuste to znovu.']);
+    }
+    $logDir = __DIR__ . '/Logy';
+    $user = str_replace(["\r", "\n"], ' ', ($_SESSION['uzivatel']['jmeno'] ?? '') . ' ' . ($_SESSION['uzivatel']['prijmeni'] ?? ''));
+    $line = '[' . date('Y-m-d H:i:s') . "] ($user) Do tabulky auta bylo změněno: mame='$mame', id='$id'" . PHP_EOL;
+    if ((!is_dir($logDir) && !@mkdir($logDir, 0777, true) && !is_dir($logDir))
+        || @file_put_contents($logDir . '/log-' . date('Y-m-d') . '.log', $line, FILE_APPEND | LOCK_EX) === false) {
+        error_log('Nepodařilo se zapsat změnu mame do logu pro auto ' . $id);
+    }
+    $odpoved(200, ['mame' => $mame]);
+}
+
+
 // 1) Kontrola přihlášení
 if (!isset($_SESSION['uzivatel'])) {
     header("Location: Prihlaseni.php");
     exit();
+}
+
+if (empty($_SESSION['auta_mame_csrf'])) {
+    $_SESSION['auta_mame_csrf'] = bin2hex(random_bytes(32));
 }
 
 // 2) Připojení k databázi (mysqli)
@@ -55,6 +113,84 @@ $result = autaProvestDotaz($connection, $query, $hledaniParametry);
     <meta name="author" content="martin" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	  <link rel="stylesheet" href="desktop-styly.css?v=<?php echo filemtime(__DIR__ . '/desktop-styly.css'); ?>">
+    <style>
+        .horni-segment-hledani .search-form {
+            grid-template-columns: auto minmax(200px, 1fr) max-content max-content;
+            grid-template-areas:
+                "label query search clear"
+                ". . toggle export"
+                "filters filters filters filters";
+            gap: 8px;
+            align-items: center;
+        }
+        .horni-segment-hledani .search-main,
+        .horni-segment-hledani .search-main .actions,
+        .horni-segment-hledani .search-secondary { display: contents; }
+        .horni-segment-hledani .search-main label { grid-area: label; }
+        .horni-segment-hledani .search-main .search-input {
+            grid-area: query;
+            min-width: 0;
+            max-width: none;
+            box-sizing: border-box;
+        }
+        .horni-segment-hledani .actions button[type="submit"] { grid-area: search; }
+        .horni-segment-hledani .actions input[type="button"] { grid-area: clear; }
+        .horni-segment-hledani #filtryToggle {
+            grid-area: toggle;
+            width: auto;
+        }
+        .horni-segment-hledani #filtryDetails {
+            grid-area: filters;
+            min-width: 0;
+        }
+        .horni-segment-hledani .search-secondary a {
+            grid-area: export;
+            color: white;
+            background-color: green;
+        }
+        .horni-segment-hledani .search-secondary a:hover,
+        .horni-segment-hledani .search-secondary a:focus-visible {
+            color: white;
+            background-color: darkgreen;
+        }
+        .horni-segment-hledani .actions button,
+        .horni-segment-hledani .actions input[type="button"],
+        .horni-segment-hledani .search-secondary > * {
+            justify-self: start;
+            margin: 0;
+        }
+        @media (min-width: 1001px) {
+            .horni-segment-hledani .search-main .search-input {
+                /* Z osmi pixelů mezery ponechat u tlačítka jen dva. */
+                width: calc(100% + 2px);
+            }
+        }
+        @media (max-width: 1000px) {
+            .horni-segment-hledani .search-form {
+                grid-template-columns: max-content minmax(0, 1fr);
+                grid-template-areas:
+                    "label query"
+                    "search clear"
+                    "toggle export"
+                    "filters filters";
+            }
+        }
+        .hlavnitabulka th.col-mame, .hlavnitabulka td.col-mame {
+            position: sticky;
+            right: var(--skutecna-sirka-edit, 0px);
+            min-width: 76px;
+            width: 76px;
+            z-index: 8;
+            background: #fff;
+            text-align: center;
+        }
+        .hlavnitabulka thead th.col-mame { z-index: 30; background: #fffaf0; }
+        .hlavnitabulka .mame-ano { color: #16732b; }
+        .hlavnitabulka .mame-ne { color: #c00000; }
+        .hlavnitabulka .tlacitko-mame { font-weight: bold; cursor: pointer; }
+        .hlavnitabulka .tlacitko-mame:disabled { cursor: wait; opacity: .6; }
+        .hlavnitabulka tr.zelenePozadi td { background-color: #f0fff0; }
+    </style>
     <title>Databaze aut</title>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
     <script>
@@ -596,8 +732,8 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         filtryToggle.textContent = jsouOtevrene
-            ? 'SKRÝT FILTRY'
-            : 'ZOBRAZIT FILTRY';
+            ? 'FILTRY ▲'
+            : 'FILTRY ▼';
     }
 
     filtryToggle.addEventListener('click', () => {
@@ -659,6 +795,32 @@ document.addEventListener('DOMContentLoaded', () => {
 include("phpqrcode/qrlib.php");
 ?>
 
+<?php
+$queryParams = [];
+if ($searchQuery !== '') { $queryParams['q'] = $searchQuery; }
+$queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
+if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
+    $queryParams['datumod'] = date('Y-m-d', $datumod);
+    $queryParams['datumdo'] = date('Y-m-d', $datumdo);
+}
+
+
+$queryParams['filtrfirma'] = $filtraceSloupecFirma;
+$queryParams['filtrcislo'] = $filtraceSloupecCislo;
+$queryParams['filtrnazev'] = $filtraceSloupecNazev;
+$queryParams['filtrupresneni'] = $filtraceSloupecUpresneni;
+$queryParams['filtrbarva'] = $filtraceSloupecBarva;
+$queryParams['filtrzavody'] = $filtraceSloupecZavody;
+$queryParams['filtrserie'] = $filtraceSloupecSerie;
+$queryParams['filtrstarttymreklama'] = $filtraceSloupecStartTymReklama;
+$queryParams['filtrjezdec'] = $filtraceSloupecJezdec;
+$queryParams['filtrrok'] = $filtraceSloupecRok;
+
+$queryString = http_build_query($queryParams);
+$exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['srovnani' => $srovnani]));
+
+?>
+
 <div class="horni-fixni-panel" id="horniFixniPanel">
 
     <div class="horni-segment horni-segment-akce">
@@ -695,21 +857,13 @@ include("phpqrcode/qrlib.php");
                 type="search"
                 class="search-input"
                 name="q"
-                placeholder="Zadej výraz k hledání (výraz &quot;XY&quot;:sloupec hledá jen v tomto sloupci), X*Y hledá XY, X Y, X-Y apod."
+                placeholder="Výraz &quot;XY&quot;:sloupec hledá jen v tomto sloupci), X*Y hledá XY, X Y, X-Y apod."
                 
                 value="<?php echo htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                 autocomplete="off"
               >
 
-              <button
-                type="button"
-                class="filtry-tlacitko"
-                id="filtryToggle"
-                aria-expanded="false"
-                aria-controls="filtryDetails"
-              >
-                Zobrazit filtry
-              </button>
+
                 <div class="actions">
                   <input
                     type="hidden"
@@ -727,13 +881,31 @@ include("phpqrcode/qrlib.php");
                   <input
                     type="button"
                     class="zaoblene-tlacitko-zelene"
-                    value="HLEDEJ VŠE"
+                    value="VYMAZAT FILTRY"
                     onmouseover="this.style.backgroundColor='darkgreen';"
                     onmouseout="this.style.backgroundColor='green';"
                     onclick="window.location.replace('Auta-main.php?stranka=1');"
                   >
                 </div>
     
+            </div>
+
+            <div class="search-secondary">
+              <button
+                type="button"
+                class="filtry-tlacitko"
+                id="filtryToggle"
+                aria-expanded="false"
+                aria-controls="filtryDetails"
+              >
+                FILTRY ▼
+              </button>
+        <?php if ($prihlasenOpravneni <= 2 && $chybaHledani === null): ?>
+            <a class="zaoblene-tlacitko-zelene"
+               href="<?php echo htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                EXPORT DO EXCELU
+            </a>
+        <?php endif; ?>
             </div>
 
                 <?php
@@ -900,31 +1072,7 @@ include("phpqrcode/qrlib.php");
           </form>
         </div>
 
-<?php
-$queryParams = [];
-if ($searchQuery !== '') { $queryParams['q'] = $searchQuery; }
-$queryParams['zobrazpozadavky'] = $zobrazujpozadavky;
-if (!empty($_GET['datumod']) && !empty($_GET['datumdo'])){
-    $queryParams['datumod'] = date('Y-m-d', $datumod);
-    $queryParams['datumdo'] = date('Y-m-d', $datumdo);
-}
 
-
-$queryParams['filtrfirma'] = $filtraceSloupecFirma;
-$queryParams['filtrcislo'] = $filtraceSloupecCislo;
-$queryParams['filtrnazev'] = $filtraceSloupecNazev;
-$queryParams['filtrupresneni'] = $filtraceSloupecUpresneni;
-$queryParams['filtrbarva'] = $filtraceSloupecBarva;
-$queryParams['filtrzavody'] = $filtraceSloupecZavody;
-$queryParams['filtrserie'] = $filtraceSloupecSerie;
-$queryParams['filtrstarttymreklama'] = $filtraceSloupecStartTymReklama;
-$queryParams['filtrjezdec'] = $filtraceSloupecJezdec;
-$queryParams['filtrrok'] = $filtraceSloupecRok;
-
-$queryString = http_build_query($queryParams);
-$exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['srovnani' => $srovnani]));
-
-?>
 
 <?php if ($chybaHledani !== null): ?>
     <p role="alert"><?php echo htmlspecialchars($chybaHledani, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -934,12 +1082,7 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
     <div class="pocet-nalezu">
         Počet nálezů:
         <b><?php echo $totalRecords; ?></b>
-        <?php if ($prihlasenOpravneni <= 2 && $chybaHledani === null): ?>
-            <a class="zaoblene-tlacitko-zelene"
-               href="<?php echo htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                Export do Excelu (<?php echo $totalRecords; ?> nálezů)
-            </a>
-        <?php endif; ?>
+
 
         <?php if (isset($datumod) && isset($datumdo)): ?>
             a zobrazené období:
@@ -995,6 +1138,7 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
         <th>Cena</th>
         <th>QR</th>
         <th>Tisk QR</th>
+        <th class="col-mame">Máme</th>
         <?php if ($prihlasenOpravneni <= 2 ) { echo "<th class='col-edit'>EDIT</th>"; } ?>
     </tr>
     </thead>
@@ -1059,6 +1203,17 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
                 onclick=\"openQRLabelPDF('{$cestaQRauta}')\"
               >🖨</button>
               </td>";
+
+        $stavMame = $row['mame'] === 'ANO' ? 'ANO' : 'NE';
+        $tridaMame = $stavMame === 'ANO' ? 'mame-ano' : 'mame-ne';
+        echo "<td class='col-mame'>";
+        if ($prihlasenOpravneni <= 2) {
+            $idAuta = (int)$row['id'];
+            echo "<button type='button' class='zaoblene-tlacitko tlacitko-mame $tridaMame' data-id='$idAuta' data-mame='$stavMame' aria-label='Máme: $stavMame. Kliknutím změnit.'>$stavMame</button>";
+        } else {
+            echo "<span class='$tridaMame'>$stavMame</span>";
+        }
+        echo "</td>";
 
         if ($prihlasenOpravneni <= 2 ){
             echo "<td class='col-edit' style=\"word-wrap: normal; word-break: normal; white-space: nowrap;\"><div>
@@ -1131,5 +1286,54 @@ for ($a = 1; $a <= $totalPages; $a++) {
 ?>
 </div>
 </div>
+<script>
+(() => {
+    const tabulka = document.querySelector('.hlavnitabulka');
+    const edit = tabulka.querySelector('th.col-edit');
+    // EDIT mění šířku podle obsahu i mobilního zobrazení.
+    if (edit) {
+        const nastavOdsazeni = () => tabulka.style.setProperty('--skutecna-sirka-edit', edit.getBoundingClientRect().width + 'px');
+        nastavOdsazeni();
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(nastavOdsazeni).observe(edit);
+        }
+        window.addEventListener('resize', nastavOdsazeni);
+    }
+    tabulka.addEventListener('click', async (event) => {
+        const tlacitko = event.target.closest('button.tlacitko-mame');
+        if (!tlacitko || tlacitko.disabled) return;
+        tlacitko.disabled = true;
+        tlacitko.setAttribute('aria-busy', 'true');
+        try {
+            const response = await fetch('Auta-main.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: new URLSearchParams({
+                    akce: 'ulozit-mame',
+                    id: tlacitko.dataset.id,
+                    mame: tlacitko.dataset.mame === 'ANO' ? 'NE' : 'ANO',
+                    csrf: <?php echo json_encode($_SESSION['auta_mame_csrf']); ?>
+                })
+            });
+            const data = await response.json();
+            if (!response.ok || !['ANO', 'NE'].includes(data.mame)) {
+                throw new Error(data.chyba || 'Server nepotvrdil uložení změny.');
+            }
+            const mame = data.mame === 'ANO';
+            tlacitko.dataset.mame = data.mame;
+            tlacitko.textContent = data.mame;
+            tlacitko.classList.toggle('mame-ano', mame);
+            tlacitko.classList.toggle('mame-ne', !mame);
+            tlacitko.setAttribute('aria-label', 'Máme: ' + data.mame + '. Kliknutím změnit.');
+            tlacitko.closest('tr').classList.toggle('zelenePozadi', mame);
+        } catch (error) {
+            alert('Změnu se nepodařilo potvrdit. ' + error.message + '\nPři potížích s připojením obnovte stránku pro ověření aktuálního stavu.');
+        } finally {
+            tlacitko.disabled = false;
+            tlacitko.removeAttribute('aria-busy');
+        }
+    });
+})();
+</script>
 </body>
 </html>

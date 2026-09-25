@@ -571,7 +571,7 @@ mysqli_free_result($resultVstupenky);
   			
   			<div style="position:relative; padding:18px;">
     			<strong>Připravujeme to!</strong>
-    			<p>Zatím na tom makáme, ale brzy tu budou super stránky :)</p>
+    			<p>Zatím na tom pracujeme, ale brzy tu budou super stránky :)</p>
   			</div>
 		</div>
       </div>

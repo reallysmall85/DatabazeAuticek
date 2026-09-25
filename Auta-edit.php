@@ -1078,7 +1078,7 @@ echo "<td><div id=\"message\" style=\"display: none; color: green; font-size: 20
     <div id=\"drop-area\">
   <h3>Přetáhněte sem soubor</h3>
   <input type=\"file\" id=\"fileElem\" multiple accept=\"*\" style=\"display:none\">
-  <label class=\"zaoblene-tlacitko-zelene\" for=\"fileElem\">Vyberte soubor ze složky</label>
+  <label class=\"zaoblene-tlacitko-zelene\" for=\"fileElem\">VYBERTE SOUBOR ZE SLOŽKY</label>
 </div></td></tr></table></td></tr><tr><td colspan=\"4\"><table class=\"tabulka-fotky\"><tr><td colspan=\"4\"><div align=\"left\">FOTKY:</div></td></tr><tr>";
 $slozkapolozky = dir("Fotky/temp/".$polozka);
 $pocetFotekKZobrazeni = 0;
@@ -1172,13 +1172,13 @@ echo "</td></tr><tr><td colspan=\"4\">";
 # ---------SUBMIT -----------
 
 echo "<table class=\"tabulka-fotky\">";
-echo "<div align=\"right\"><input type=\"Submit\" class=\"zaoblene-tlacitko-zelene\" name=\"uloz\" value=\"Uložit záznam\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
+echo "<div align=\"right\"><input type=\"Submit\" class=\"zaoblene-tlacitko-zelene\" name=\"uloz\" value=\"ULOŽIT ZÁZNAM\" onmouseover=\"this.style.backgroundColor='darkgreen';\" onmouseout=\"this.style.backgroundColor='green';\"  style=\"background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;\">";
 
 
 ?>
 
 	<input type="hidden" name="potvrzeniMazani" value="nepotvrzeno" />
-	<input type="submit" class="zaoblene-tlacitko-cervene" name="smaz" value="Smazat celou položku!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+	<input type="submit" class="zaoblene-tlacitko-cervene" name="smaz" value="SMAZAT CELOU POLOŽKU!" onclick="dotazkmazani();" onmouseover="this.style.backgroundColor='darkred';" onmouseout="this.style.backgroundColor='red';" style="background-color: red; color: white; border: none; padding: 10px 20px; cursor: pointer;">
     </div>
 </td>
 </tr>
