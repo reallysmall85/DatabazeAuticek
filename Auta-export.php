@@ -46,8 +46,11 @@ try {
         'Název' => ['nazev'],
         'Upřesnění' => ['upresneni'],
         'Barvy' => ['barva1', 'barva2', 'barva3', 'barva4', 'barva5'],
-        'Série / Závod' => ['serie', 'zavod'],
-        'Start.č. / Tým / Reklama' => ['startovnicislo', 'tym', 'reklama'],
+        'Série' => ['serie'],
+        'Závod' => ['zavod'],
+        'Startovní číslo' => ['startovnicislo'],
+        'Tým' => ['tym'],
+        'Reklama' => ['reklama'],
         'Jezdec' => ['jezdec1', 'jezdec2', 'jezdec3'],
         'Rok' => ['rok'],
     ];
@@ -69,10 +72,20 @@ try {
             $hodnoty = array_map(static function ($klic) use ($auto) {
                 return (string)($auto[$klic] ?? '');
             }, $pole);
-            // Seskupení odpovídá tabulce v přehledu.
-            $hodnota = count($pole) > 1 ? implode(', ', array_filter($hodnoty)) : $hodnoty[0];
+            // Import rozpoznává sloučené firmy, barvy a jezdce.
+            $hodnota = count($pole) > 1
+                ? implode(', ', array_filter($hodnoty, static function ($hodnota) { return $hodnota !== ''; }))
+                : $hodnoty[0];
             $typ = DataType::TYPE_STRING;
-            if ($nadpis === 'Cena' && $hodnota !== '' && is_numeric($hodnota)) {
+            if ($nadpis === 'Rok') {
+                // Import přijímá čtyřmístný rok jako číselnou buňku, ne jako text.
+                if ($hodnota !== '' && is_numeric($hodnota) && (int)$hodnota !== 0) {
+                    $hodnota = (int)$hodnota;
+                    $typ = DataType::TYPE_NUMERIC;
+                } else {
+                    $hodnota = '';
+                }
+            } elseif ($nadpis === 'Cena' && $hodnota !== '' && is_numeric($hodnota)) {
                 $hodnota = (float)$hodnota;
                 $typ = DataType::TYPE_NUMERIC;
             }
