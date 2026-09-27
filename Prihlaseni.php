@@ -120,6 +120,32 @@ function ZobrazeniFormularePrihlaseni ($hodnotaHledaniUzivatele){
 </table>
 
 </form>
+<script>
+(function () {
+    const vyberUzivatele = document.forms.kartaPrihlaseni.elements.navstevnik;
+    const klicUloziste = 'databazeAuticek.posledniUzivatelId';
+
+    try {
+        const ulozeneId = localStorage.getItem(klicUloziste);
+        const existuje = Array.from(vyberUzivatele.options).some(function (moznost) {
+            return moznost.value === ulozeneId;
+        });
+        if (existuje) {
+            vyberUzivatele.value = ulozeneId;
+        }
+    } catch (chyba) {
+        // Přihlášení funguje i při zakázaném úložišti prohlížeče.
+    }
+
+    vyberUzivatele.addEventListener('change', function () {
+        try {
+            localStorage.setItem(klicUloziste, vyberUzivatele.value);
+        } catch (chyba) {
+            // Nedostupné úložiště nesmí bránit výběru uživatele.
+        }
+    });
+})();
+</script>
 </body>
 </html>
 

@@ -636,6 +636,8 @@ if (isset($_POST['import'])) {
                     // Úprava roku (podle indexu v $headers)
                     if ($i === $cisloSloupceRokIndex) {
                         switch (true) {
+                            case $val === null || trim((string)$val) === '' || (is_numeric($val) && (float)$val == 0.0):
+                                $val = null; break;
                             case is_numeric($val) && $val < 100 && $val <= $aktualiRokDvouciferne:
                                 $val = (int)str_pad((string)$val, 2, '0', STR_PAD_LEFT) + 2000; break;
                             case is_numeric($val) && $val < 100 && $val >  $aktualiRokDvouciferne:
@@ -650,7 +652,7 @@ if (isset($_POST['import'])) {
                     }
 
                     // Textovým sloupcům dej místo NULL prázdný string
-                    if ($val === null && !empty($isTextCol[$i])) {
+                    if ($val === null && !empty($isTextCol[$i]) && $i !== $cisloSloupceRokIndex) {
                         $val = '';
                     }
 

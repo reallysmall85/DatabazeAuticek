@@ -780,7 +780,7 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
                 type="search"
                 class="search-input"
                 name="q"
-                placeholder="Výraz &quot;XY&quot;:sloupec hledá jen v tomto sloupci), X*Y hledá XY, X Y, X-Y apod."
+                placeholder="nápověda: &quot;X&quot;:Y hledá X jen ve sloupci Y, * je zástupný znak"
                 
                 value="<?php echo htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                 autocomplete="off"

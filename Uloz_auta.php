@@ -14,6 +14,12 @@ function Uloz ($radekAuta, $connection, $prihlasenId){
 }
 	
 
+    // Nezadaný nebo nulový rok ukládáme jako SQL NULL, nikoli jako prázdný řetězec.
+    $rok = trim((string)($_REQUEST['inputroku'] ?? ''));
+    $rokSql = ($rok === '' || (is_numeric($rok) && (float)$rok == 0.0))
+        ? 'NULL'
+        : "'" . mysqli_real_escape_string($connection, $rok) . "'";
+
 			mysqli_query($connection, "
     UPDATE auta 
     SET firma1 = '".$_REQUEST["inputfirmy1"]."',
@@ -34,7 +40,7 @@ function Uloz ($radekAuta, $connection, $prihlasenId){
         jezdec1 = '".$_REQUEST["inputjezdec1"]."',
         jezdec2 = '".$_REQUEST["inputjezdec2"]."',
         jezdec3 = '".$_REQUEST["inputjezdec3"]."',
-        rok = '".$_REQUEST["inputroku"]."',
+        rok = ".$rokSql.",
         cena = '".$_REQUEST["inputceny"]."',
         popis = '".$_REQUEST["inputpopis"]."',
         poznamka = '".$_REQUEST["inputpoznamka"]."',
@@ -64,7 +70,7 @@ $parts[] = "reklama='"          . $_REQUEST['inputreklama']         . "'";
 $parts[] = "jezdec1='"          . $_REQUEST['inputjezdec1']         . "'";
 $parts[] = "jezdec2='"          . $_REQUEST['inputjezdec2']         . "'";
 $parts[] = "jezdec3='"          . $_REQUEST['inputjezdec3']         . "'";
-$parts[] = "rok='"              . $_REQUEST['inputroku']            . "'";
+$parts[] = "rok=" . $rokSql;
 $parts[] = "cena='"             . $_REQUEST['inputceny']            . "'";
 $parts[] = "popis='"            . $_REQUEST['inputpopis']           . "'";
 $parts[] = "poznamka='"         . $_REQUEST['inputpoznamka']        . "'";
