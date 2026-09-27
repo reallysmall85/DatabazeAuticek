@@ -20,6 +20,8 @@ if (!isset($_SESSION['uzivatel'])) {
 	  <link rel="preload" as="image" href="Ikony/Logout.png">
     <link rel="preload" as="image" href="Ikony/seznam.png">
     <link rel="preload" as="image" href="Ikony/pozadavky.png">
+    <link rel="preload" as="image" href="Ikony/sklad.png">
+    <link rel="preload" as="image" href="Ikony/sklad-neaktivni.png">
     <link rel="preload" as="image" href="Ikony/pomocne-databaze.png">
     <link rel="preload" as="image" href="Ikony/pozadavky-neaktivni.png">
     <link rel="preload" as="image" href="Ikony/pomocne-databaze-neaktivni.png">
@@ -69,6 +71,13 @@ if (isset($_SESSION['uzivatel'])) {
     </div>
 
     <div class="tile">
+      <a href="Auta-sklad.php">
+        <img src="Ikony/sklad.png" alt="Sklad">
+        <div>SKLAD</div>
+      </a>
+    </div>
+
+    <div class="tile">
       <a href="Pomocne-databaze.php">
         <img src="Ikony/pomocne-databaze.png" alt="Pomocné databáze">
         <div>POMOCNÉ DATABÁZE</div>
@@ -78,6 +87,11 @@ if (isset($_SESSION['uzivatel'])) {
   <?php if ($prihlasenOpravneni > 2): ?>
     <div class="tile">
         <img src="Ikony/pozadavky-neaktivni.png" alt="Seznam požadavků">
+        <div><i>položka neaktivní</i></div>
+    </div>
+
+    <div class="tile">
+        <img src="Ikony/sklad-neaktivni.png" alt="Sklad">
         <div><i>položka neaktivní</i></div>
     </div>
 

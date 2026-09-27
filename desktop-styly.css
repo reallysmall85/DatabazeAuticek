@@ -258,7 +258,7 @@ textarea {
 /* Obal: už ne fixed – ať může přirozeně zabrat viewport */
 .tabulka-uvodni {
     box-sizing: border-box;
-    width: clamp(280px, 92vw, 1000px);
+    width: clamp(280px, 92vw, 1250px);
     max-height: 90dvh;
 
     position: fixed;
@@ -279,7 +279,7 @@ textarea {
   
   .menu-grid{
     display:grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap:16px;
     align-items:center;
     justify-items:center;
@@ -1485,3 +1485,23 @@ body.auta-main .hlavnitabulka .mame-ne { color: #c00000; }
 body.auta-main .hlavnitabulka .tlacitko-mame { font-weight: bold; cursor: pointer; }
 body.auta-main .hlavnitabulka .tlacitko-mame:disabled { cursor: wait; opacity: .6; }
 body.auta-main .hlavnitabulka tr.zelenePozadi td { background-color: #f0fff0; }
+
+/* Výsledky načítání a ukládání QR ve skladu. */
+.sklad-zprava {
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100% - 24px);
+    margin: 16px auto;
+    padding: 12px 18px;
+    border: 2px solid currentColor;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    overflow-wrap: anywhere;
+    color: #334155;
+    background-color: #f1f5f9;
+}
+.sklad-zprava:empty { display: none; }
+.sklad-zprava--uspech { color: #166534; background-color: #dcfce7; }
+.sklad-zprava--chyba { color: #991b1b; background-color: #fee2e2; }
