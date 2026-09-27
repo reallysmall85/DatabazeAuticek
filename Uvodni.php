@@ -73,7 +73,7 @@ if (isset($_SESSION['uzivatel'])) {
     <div class="tile">
       <a href="Auta-sklad.php">
         <img src="Ikony/sklad.png" alt="Sklad">
-        <div>SKLAD</div>
+        <div>SKLAD A VÝSTAVA</div>
       </a>
     </div>
 

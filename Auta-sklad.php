@@ -27,6 +27,26 @@ if ($opravneni > 2) {
     header('Location: Prihlaseni.php');
     exit();
 }
+// QR výstavy a skladu se generuje pouze do odpovědi, bez zápisu do databáze či souboru.
+if ((isset($_GET['qrVystava']) || isset($_GET['qrSklad'])) && !$dotazPolozky) {
+    $skladQr = isset($_GET['qrSklad']);
+    $poleQr = $skladQr ? ['sklad', 'skrin', 'krabice'] : ['sektor', 'vitrina', 'police'];
+    $prefixyQr = $skladQr ? ['SKL', 'SKR', 'KRA'] : ['SEK', 'VIT', 'POL'];
+    $hodnoty = [];
+    foreach ($poleQr as $pole) {
+        $hodnota = $_GET[$pole] ?? '';
+        if (!is_string($hodnota) || !preg_match('/^[0-9]{1,20}$/D', $hodnota)) {
+            http_response_code(400);
+            exit('Vyplň všechna tři pole číslicemi (nejvýše 20 číslic v poli).');
+        }
+        $hodnoty[] = $hodnota;
+    }
+    session_write_close();
+    require_once __DIR__ . '/phpqrcode/qrlib.php';
+    header('Cache-Control: no-store');
+    QRcode::png($prefixyQr[0] . $hodnoty[0] . '-' . $prefixyQr[1] . $hodnoty[1] . '-' . $prefixyQr[2] . $hodnoty[2], false, QR_ECLEVEL_M, 6, 4);
+    exit();
+}
 if (!isset($_SESSION['sklad_csrf'])) {
     $_SESSION['sklad_csrf'] = bin2hex(random_bytes(32));
 }
@@ -191,6 +211,44 @@ if ($dotazPolozky) {
         </tr>
     </table>
     <p id="qr-zprava" class="sklad-zprava" role="status" aria-atomic="true"></p>
+    <table class="tabulka-uzivatele" style="margin-top: 24px; margin-bottom: 24px;">
+        <tr><th colspan="2">VÝSTAVA</th></tr>
+        <tr>
+            <td><label for="vystava-sektor">Sektor:</label></td>
+            <td><textarea id="vystava-sektor" rows="1" cols="20" inputmode="numeric" maxlength="20"></textarea></td>
+        </tr>
+        <tr>
+            <td><label for="vystava-vitrina">Vitrína:</label></td>
+            <td><textarea id="vystava-vitrina" rows="1" cols="20" inputmode="numeric" maxlength="20"></textarea></td>
+        </tr>
+        <tr>
+            <td><label for="vystava-police">Police:</label></td>
+            <td><textarea id="vystava-police" rows="1" cols="20" inputmode="numeric" maxlength="20"></textarea></td>
+        </tr>
+        <tr>
+            <td><button id="vystava-generuj" type="button" class="zaoblene-tlacitko-oranzove" disabled>Generuj QR</button></td>
+            <td id="vystava-qr" aria-live="polite" style="text-align: center;"></td>
+        </tr>
+    </table>
+    <table class="tabulka-uzivatele" style="margin-top: 24px; margin-bottom: 24px;">
+        <tr><th colspan="2">SKLAD</th></tr>
+        <tr>
+            <td><label for="sklad-sklad">Sklad:</label></td>
+            <td><textarea id="sklad-sklad" rows="1" cols="20" inputmode="numeric" maxlength="20"></textarea></td>
+        </tr>
+        <tr>
+            <td><label for="sklad-skrin">Skříň:</label></td>
+            <td><textarea id="sklad-skrin" rows="1" cols="20" inputmode="numeric" maxlength="20"></textarea></td>
+        </tr>
+        <tr>
+            <td><label for="sklad-krabice">Krabice:</label></td>
+            <td><textarea id="sklad-krabice" rows="1" cols="20" inputmode="numeric" maxlength="20"></textarea></td>
+        </tr>
+        <tr>
+            <td><button id="sklad-generuj" type="button" class="zaoblene-tlacitko-oranzove" disabled>Generuj QR</button></td>
+            <td id="sklad-qr" aria-live="polite" style="text-align: center;"></td>
+        </tr>
+    </table>
     <dialog id="qr-dialog" aria-labelledby="qr-nadpis" style="width: min(90vw, 480px); padding: 16px; border: none; border-radius: 6px;">
         <h2 id="qr-nadpis">Načti QR položky</h2>
         <p>Namiř fotoaparát na QR kód v rámečku.</p>
@@ -199,5 +257,6 @@ if ($dotazPolozky) {
     </dialog>
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="auta-sklad-qr.js?v=<?php echo filemtime(__DIR__ . '/auta-sklad-qr.js'); ?>"></script>
+    <script src="auta-sklad-vystava.js?v=<?php echo filemtime(__DIR__ . '/auta-sklad-vystava.js'); ?>"></script>
 </body>
 </html>
