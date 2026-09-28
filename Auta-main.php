@@ -271,6 +271,80 @@ function openQRLabelPDF(imageSrc) {
     }, 60000);
 }
 
+async function tiskQRPresAgenta(qrText, tlacitko) {
+
+    if (!tlacitko || tlacitko.disabled) {
+        return;
+    }
+
+    const puvodniText = tlacitko.textContent;
+
+    tlacitko.disabled = true;
+    tlacitko.textContent = '…';
+    tlacitko.setAttribute('aria-busy', 'true');
+
+    try {
+
+        const response = await fetch('Tisk-pridej.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+                qr_text: String(qrText),
+                csrf: <?php echo json_encode($_SESSION['auta_mame_csrf']); ?>
+            })
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || 'Tiskovou úlohu se nepodařilo vytvořit.'
+            );
+        }
+
+
+        // Server tisk přijal
+        tlacitko.textContent = '✓';
+        tlacitko.title = 'Tisková úloha ' + data.job_id + ' byla odeslána';
+
+
+        setTimeout(function () {
+
+            tlacitko.textContent = puvodniText;
+            tlacitko.title = 'Tisk QR';
+            tlacitko.disabled = false;
+            tlacitko.removeAttribute('aria-busy');
+
+        }, 1500);
+
+
+    } catch (error) {
+
+        tlacitko.textContent = '!';
+
+        alert(
+            'QR se nepodařilo odeslat k tisku.\n\n' +
+            error.message
+        );
+
+
+        setTimeout(function () {
+
+            tlacitko.textContent = puvodniText;
+            tlacitko.title = 'Tisk QR';
+            tlacitko.disabled = false;
+            tlacitko.removeAttribute('aria-busy');
+
+        }, 1500);
+    }
+}
 
 
 
@@ -1116,16 +1190,18 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
             QRcode::png($row['id'], $cestaQRauta);
         }
         echo "<td class=\"bunkaQR-obal\"><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\"></td>";
+        $idAuta = (int)$row['id'];
+
         echo "<td>
-              <button
+            <button
                 type='button'
                 class='zaoblene-tlacitko tlacitko-tisk'
                 title='Tisk QR'
                 onmouseover=\"this.style.backgroundColor='grey';\"
                 onmouseout=\"this.style.backgroundColor='lightgrey';\"
-                onclick=\"openQRLabelPDF('{$cestaQRauta}')\"
-              >🖨</button>
-              </td>";
+                onclick=\"tiskQRPresAgenta({$idAuta}, this)\"
+            >🖨</button>
+        </td>";
 
         $stavMame = $row['mame'] === 'ANO' ? 'ANO' : 'NE';
         $tridaMame = $stavMame === 'ANO' ? 'mame-ano' : 'mame-ne';
