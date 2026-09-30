@@ -251,7 +251,7 @@ if ($dotazPolozky) {
     </table>
     <dialog id="qr-dialog" aria-labelledby="qr-nadpis" style="width: min(90vw, 480px); padding: 16px; border: none; border-radius: 6px;">
         <h2 id="qr-nadpis">Načti QR položky</h2>
-        <p>Namiř fotoaparát na QR kód v rámečku.</p>
+        <p>Namiř fotoaparát na QR kód uprostřed rámečku. Drž telefon tak daleko, aby byl kód ostrý; nemusí vyplňovat celý rámeček.</p>
         <div id="qr-kamera"></div>
         <button id="qr-zavrit" type="button" class="zaoblene-tlacitko">Zavřít fotoaparát</button>
     </dialog>

@@ -1134,7 +1134,7 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
         <th>Rok <?php echo "<input type='button' value='↓' onclick=\"window.location.href='Auta-main.php?{$queryString}&srovnani=rok'\">";?></th>
         <th>Cena</th>
         <th>QR</th>
-        <th>Tisk QR</th>
+        <th class="col-tisk">Tisk QR</th>
         <th class="col-mame">Máme</th>
         <?php if ($prihlasenOpravneni <= 2 ) { echo "<th class='col-edit'>EDIT</th>"; } ?>
     </tr>
@@ -1192,7 +1192,7 @@ $exportUrl = 'Auta-export.php?' . http_build_query(array_merge($queryParams, ['s
         echo "<td class=\"bunkaQR-obal\"><img src='{$cestaQRauta}' alt='QR kód' class=\"bunkaQR\"></td>";
         $idAuta = (int)$row['id'];
 
-        echo "<td>
+        echo "<td class='col-tisk'>
             <button
                 type='button'
                 class='zaoblene-tlacitko tlacitko-tisk'
@@ -1289,15 +1289,19 @@ for ($a = 1; $a <= $totalPages; $a++) {
 (() => {
     const tabulka = document.querySelector('.hlavnitabulka');
     const edit = tabulka.querySelector('th.col-edit');
-    // EDIT mění šířku podle obsahu i mobilního zobrazení.
-    if (edit) {
-        const nastavOdsazeni = () => tabulka.style.setProperty('--skutecna-sirka-edit', edit.getBoundingClientRect().width + 'px');
-        nastavOdsazeni();
-        if (typeof ResizeObserver !== 'undefined') {
-            new ResizeObserver(nastavOdsazeni).observe(edit);
-        }
-        window.addEventListener('resize', nastavOdsazeni);
+    const mame = tabulka.querySelector('th.col-mame');
+    // Odsazení vychází ze skutečných šířek, také při skrytém EDIT a na mobilu.
+    const nastavOdsazeni = () => {
+        tabulka.style.setProperty('--skutecna-sirka-edit', (edit ? edit.getBoundingClientRect().width : 0) + 'px');
+        tabulka.style.setProperty('--skutecna-sirka-mame', mame.getBoundingClientRect().width + 'px');
+    };
+    nastavOdsazeni();
+    if (typeof ResizeObserver !== 'undefined') {
+        const observer = new ResizeObserver(nastavOdsazeni);
+        if (edit) observer.observe(edit);
+        observer.observe(mame);
     }
+    window.addEventListener('resize', nastavOdsazeni);
     tabulka.addEventListener('click', async (event) => {
         const tlacitko = event.target.closest('button.tlacitko-mame');
         if (!tlacitko || tlacitko.disabled) return;

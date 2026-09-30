@@ -20,6 +20,8 @@
     let konec = null;
     let ukonceno = true;
     let nacitani = false;
+    let zastavitDetail = null;
+    let cisloDetailu = 0;
     const bunky = {
         cislo: 'cislo-modelu', nazev: 'nazev-modelu', upresneni: 'upresneni-modelu',
         umisteniauta: 'umisteni-modelu', umistenikrabicky: 'umisteni-krabicky'
@@ -102,9 +104,71 @@
         }
     }
 
+    // scanFile dekóduje snímek v jeho rozlišení, nikoli v rozměrech náhledu.
+    function spustitDetailniCteni(prijmout) {
+        const video = document.querySelector('#qr-kamera video');
+        if (!video) return;
+        const obal = document.createElement('div');
+        obal.id = 'qr-detail-' + (++cisloDetailu);
+        obal.hidden = true;
+        document.body.appendChild(obal);
+        let dekoder;
+        try {
+            dekoder = new Html5Qrcode(obal.id, {
+                formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false
+            });
+        } catch (chyba) {
+            obal.remove();
+            return;
+        }
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        let zruseno = false;
+        let pracuje = false;
+        let casovac;
+        function uklidit() {
+            try { dekoder.clear(); } catch (chyba) { /* Již vyčištěno. */ }
+            canvas.width = canvas.height = 0;
+            obal.remove();
+        }
+        zastavitDetail = () => {
+            zruseno = true;
+            clearTimeout(casovac);
+            if (!pracuje) uklidit();
+        };
+        async function cist() {
+            if (zruseno) return;
+            pracuje = true;
+            try {
+                if (!context || video.readyState < 2 || !video.videoWidth) return;
+                // Stejný středový čtverec jako rámeček, ale v pixelech kamery 1:1.
+                const rozmer = Math.floor(Math.min(video.videoWidth, video.videoHeight) * 0.75);
+                canvas.width = canvas.height = rozmer;
+                context.drawImage(video,
+                    (video.videoWidth - rozmer) / 2, (video.videoHeight - rozmer) / 2,
+                    rozmer, rozmer, 0, 0, rozmer, rozmer);
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (zruseno || !blob) return;
+                const obsah = await dekoder.scanFile(new File([blob], 'qr.png', { type: 'image/png' }), false);
+                if (!zruseno) prijmout(obsah);
+            } catch (chyba) {
+                // Nenalezený kód neblokuje další pokus ani běžnou čtečku.
+            } finally {
+                pracuje = false;
+                if (zruseno) uklidit();
+                else casovac = setTimeout(cist, 700);
+            }
+        }
+        casovac = setTimeout(cist, 700);
+    }
+
     function zastavit() {
         if (konec) return konec;
         ukonceno = true;
+        if (zastavitDetail) {
+            zastavitDetail();
+            zastavitDetail = null;
+        }
         dialog.close();
         // Při zavření během žádosti o oprávnění počkáme na výsledek startu.
         konec = (async () => {
@@ -129,7 +193,7 @@
     }
 
     async function otevritKameru(rezim) {
-        if (nacitani || !ukonceno || (rezim !== 'polozka' && !polozkaId)) return;
+        if (nacitani || !ukonceno || skener || (rezim !== 'polozka' && !polozkaId)) return;
         zobrazZpravu('');
         if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
             zobrazZpravu('Fotoaparát vyžaduje HTTPS a prohlížeč s podporou kamery.', 'chyba');
@@ -146,6 +210,13 @@
         document.getElementById('qr-nadpis').textContent = rezim === 'krabicka' ? 'Načti nové QR krabičky'
             : (rezim === 'model' ? 'Načti nové QR modelu' : 'Načti QR položky');
         dialog.showModal();
+        let prijato = false;
+        const prijmout = obsah => {
+            if (ukonceno || nacitani || prijato) return;
+            prijato = true;
+            if (rezim !== 'polozka') void ulozitUmisteni(obsah, rezim);
+            else void nacistPolozku(obsah);
+        };
         try {
             skener = new Html5Qrcode('qr-kamera', {
                 formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
@@ -155,20 +226,40 @@
                 { facingMode: 'environment' },
                 {
                     fps: 10,
+                    // Preferovat Full HD; slabší kamera může zvolit nižší rozlišení.
+                    videoConstraints: {
+                        facingMode: { ideal: 'environment' },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
                     qrbox: (sirka, vyska) => {
                         const rozmer = Math.floor(Math.min(sirka, vyska) * 0.75);
                         return { width: rozmer, height: rozmer };
                     }
                 },
-                obsah => {
-                    if (ukonceno) return;
-                    if (rezim !== 'polozka') void ulozitUmisteni(obsah, rezim);
-                    else void nacistPolozku(obsah);
-                },
+                prijmout,
                 () => {} // Průběžné nenalezení kódu není chyba pro uživatele.
             );
             await start;
-            if (ukonceno) await zastavit();
+            if (ukonceno) {
+                await zastavit();
+                return;
+            }
+            spustitDetailniCteni(prijmout);
+            // Ostření je volitelné: některé mobilní prohlížeče ho nezpřístupňují.
+            try {
+                const video = document.querySelector('#qr-kamera video');
+                const track = video?.srcObject?.getVideoTracks()[0];
+                const moznosti = track?.getCapabilities?.();
+                if (moznosti?.focusMode?.includes('continuous')) {
+                    await track.applyConstraints({
+                        ...track.getConstraints(),
+                        advanced: [{ focusMode: 'continuous' }]
+                    });
+                }
+            } catch (chyba) {
+                // Ponechat výchozí ostření, pokud změna selže nebo se kamera mezitím zavře.
+            }
         } catch (chyba) {
             if (!ukonceno) {
                 zobrazZpravu('Fotoaparát se nepodařilo otevřít. Povol přístup ke kameře v prohlížeči a ověř, že ji nepoužívá jiná aplikace.', 'chyba');

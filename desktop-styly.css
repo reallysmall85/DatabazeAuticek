@@ -1480,6 +1480,18 @@ body.auta-main .hlavnitabulka th.col-mame, body.auta-main .hlavnitabulka td.col-
     text-align: center;
 }
 body.auta-main .hlavnitabulka thead th.col-mame { z-index: 30; background: #fffaf0; }
+body.auta-main .hlavnitabulka th.col-tisk,
+body.auta-main .hlavnitabulka td.col-tisk {
+    position: sticky;
+    right: calc(var(--skutecna-sirka-edit, 0px) + var(--skutecna-sirka-mame, 76px));
+    z-index: 8;
+    background: #fff;
+    text-align: center;
+}
+body.auta-main .hlavnitabulka thead th.col-tisk {
+    z-index: 30;
+    background: #fffaf0;
+}
 body.auta-main .hlavnitabulka .mame-ano { color: #16732b; }
 body.auta-main .hlavnitabulka .mame-ne { color: #c00000; }
 body.auta-main .hlavnitabulka .tlacitko-mame { font-weight: bold; cursor: pointer; }
